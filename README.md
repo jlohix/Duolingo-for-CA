@@ -1,1 +1,1 @@
-# Duoling-for-CA
+# Duolingo-for-CA
