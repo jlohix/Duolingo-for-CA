@@ -3413,3 +3413,96 @@ html[data-theme="dark"] .circuit-svg .board-step {
       "tau";
   }
 }
+
+/* Section 3 transient tests */
+.practice-stage .circuit-board {
+  touch-action: pan-y;
+}
+
+.practice-shell {
+  background: var(--card);
+  border: 3px solid var(--green);
+  border-radius: 22px;
+  padding: 20px 16px 18px;
+  margin-top: 12px;
+  display: grid;
+  gap: 14px;
+}
+
+.practice-shell h2,
+.practice-prompt,
+.practice-progress {
+  margin: 0;
+}
+
+.practice-progress {
+  color: var(--muted);
+  font-weight: 650;
+  text-transform: capitalize;
+  letter-spacing: 0.04em;
+}
+
+.practice-card,
+.practice-pair {
+  display: grid;
+  gap: 14px;
+}
+
+.practice-board-wrap {
+  background: #101614;
+  border-color: #2a3830;
+}
+
+.practice-schematic {
+  padding: 12px 10px 8px;
+  color: #e8eee8;
+}
+
+.practice-pair:not(.is-single) {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.practice-schematic-caption {
+  margin: 10px 4px 0;
+  color: #c5d0c8;
+  font-weight: 650;
+  font-size: 14px;
+  line-height: 1.4;
+}
+
+.practice-prompt {
+  font-size: 1.05rem;
+  font-weight: 750;
+  line-height: 1.45;
+}
+
+.practice-option {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  gap: 10px;
+  align-items: start;
+  text-align: left;
+}
+
+.practice-option-body {
+  display: grid;
+  gap: 8px;
+}
+
+.practice-actions,
+.practice-continue {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+}
+
+.practice-mini-graph {
+  width: min(100%, 20rem);
+}
+
+@media (min-width: 820px) {
+  .practice-pair:not(.is-single) {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  }
+}

@@ -1,5 +1,10 @@
 import { useState } from "react";
 import { DIFFICULTIES, lessonKey } from "../data/topics";
+import {
+  QUESTION_BANKS,
+  bankLessonKey,
+  questionBankForId,
+} from "../data/questionBanks";
 import { LAPLACE_LABS } from "../section5";
 import { SECTION2_LABS } from "../section2/index.jsx";
 import { SECTION3_LABS } from "../section3/index.jsx";
@@ -9,7 +14,9 @@ import {
   isLessonUnlocked,
   SKIP_QUIZ_SIZE,
   SKIP_PASS_RATIO,
+  testLessonKey,
   topicInsight,
+  walkLessonKey,
 } from "../state/progress";
 import StreakChip from "../components/StreakChip";
 import TopicInsight from "../components/TopicInsight";
@@ -25,10 +32,19 @@ function DoodlePage({ children }) {
   );
 }
 
-function topicMeter(topic, progress, counts) {
-  const keys = DIFFICULTIES.map((d) => lessonKey(topic.id, d.id)).filter(
+function topicMeter(topic, progress, counts, bankCounts = {}) {
+  const topicKeys = DIFFICULTIES.map((d) => lessonKey(topic.id, d.id)).filter(
     (key) => (counts[key] || 0) > 0
   );
+  const bankKeys = QUESTION_BANKS
+    .filter((bank) => bank.topicId === topic.id)
+    .flatMap((bank) =>
+      DIFFICULTIES.map((difficulty) =>
+        bankLessonKey(bank.id, difficulty.id)
+      )
+    )
+    .filter((key) => (bankCounts[key] || 0) > 0);
+  const keys = [...topicKeys, ...bankKeys];
   const done = keys.filter((key) => progress.completed?.includes(key)).length;
   const total = keys.length || DIFFICULTIES.length;
   return {
@@ -79,11 +95,14 @@ function SectionCard({
   meter,
   current,
   skipReady,
+  comingSoon = false,
   showMeter = true,
   onOpen,
   onJump,
 }) {
-  const cta = !showMeter
+  const cta = comingSoon
+    ? "Coming soon"
+    : !showMeter
     ? "Open"
     : !unlocked
       ? `Jump to section ${index}`
@@ -111,12 +130,16 @@ function SectionCard({
           </div>
         ) : showMeter ? (
           <p className="section-lock-meta">
-            🔒 {meter.total} {meter.total === 1 ? "unit" : "units"}
+            🔒{" "}
+            {comingSoon
+              ? "Coming soon"
+              : `${meter.total} ${meter.total === 1 ? "unit" : "units"}`}
           </p>
         ) : null}
         <button
           type="button"
           className={unlocked && current ? "section-cta" : "section-cta ghost"}
+          disabled={comingSoon}
           onClick={() => {
             if (!unlocked && skipReady) onJump();
             else onOpen();
@@ -140,8 +163,67 @@ function SectionCard({
   );
 }
 
-function LawsLabs({ unlocked, labs }) {
+function BankDifficultyNodes({
+  bankId,
+  unlocked,
+  progress,
+  counts,
+  onStart,
+  allOpen,
+}) {
+  const bank = questionBankForId(bankId);
+  if (!bank) return null;
+  return DIFFICULTIES.map((difficulty) => {
+    const key = bankLessonKey(bank.id, difficulty.id);
+    const count = counts[key] || 0;
+    const done = progress.completed?.includes(key);
+    const priorOpen = DIFFICULTIES
+      .filter((item) => item.id < difficulty.id)
+      .every((item) => {
+        const priorKey = bankLessonKey(bank.id, item.id);
+        return !counts[priorKey] || progress.completed?.includes(priorKey);
+      });
+    const canPlay =
+      unlocked && count > 0 && (allOpen || done || priorOpen);
+    return (
+      <button
+        key={key}
+        type="button"
+        className={`node ${done ? "done" : ""} ${canPlay ? "" : "off"}`}
+        disabled={!canPlay}
+        onClick={() => onStart(bank.id, difficulty.id)}
+      >
+        <span className="node-icon">{done ? "✓" : difficulty.icon}</span>
+        <span className="node-name">
+          {bank.title} {difficulty.name}
+        </span>
+        <span className="node-count">
+          {!count ? "No questions" : canPlay ? `${count} Qs` : "Locked"}
+        </span>
+      </button>
+    );
+  });
+}
+
+function LawsLabs({
+  unlocked,
+  labs,
+  bankCounts,
+  progress,
+  onStartBank,
+  allOpen,
+}) {
   const off = unlocked ? "" : "off";
+  const bankNodes = (bankId) => (
+    <BankDifficultyNodes
+      bankId={bankId}
+      unlocked={unlocked}
+      progress={progress}
+      counts={bankCounts}
+      onStart={onStartBank}
+      allOpen={allOpen}
+    />
+  );
   return (
     <>
       <button type="button" className={`node ${off}`} disabled={!unlocked} onClick={labs.onLab}>
@@ -169,11 +251,18 @@ function LawsLabs({ unlocked, labs }) {
         <span className="node-name">Max power</span>
         <span className="node-count">Walkthrough</span>
       </button>
+      <button type="button" className={`node ${off}`} disabled={!unlocked} onClick={labs.onSourceTransform}>
+        <span className="node-icon">V↔I</span>
+        <span className="node-name">Source Transformation</span>
+        <span className="node-count">Walkthrough</span>
+      </button>
+      {bankNodes("source-transformation")}
       <button type="button" className={`node ${off}`} disabled={!unlocked} onClick={labs.onThevLab}>
         <span className="node-icon">≡</span>
         <span className="node-name">Thevenin</span>
         <span className="node-count">Walkthrough</span>
       </button>
+      {bankNodes("thevenin")}
       <button type="button" className={`node ${off}`} disabled={!unlocked} onClick={labs.onNortonLab}>
         <span className="node-icon">∥</span>
         <span className="node-name">Norton</span>
@@ -209,27 +298,50 @@ function LawsLabs({ unlocked, labs }) {
         <span className="node-name">Superposition</span>
         <span className="node-count">Walkthrough</span>
       </button>
+      {bankNodes("superposition")}
     </>
   );
 }
 
-function SectionWalks({ labs, unlocked, onOpen }) {
-  const off = unlocked ? "" : "off";
+function SectionWalks({
+  labs,
+  unlocked,
+  allOpen,
+  progress,
+  topicId,
+  onOpen,
+}) {
   return (
     <>
-      {labs.map((lab) => (
-        <button
-          key={lab.id}
-          type="button"
-          className={`node ${off}`}
-          disabled={!unlocked}
-          onClick={() => onOpen(lab.id)}
-        >
-          <span className="node-icon">{lab.icon}</span>
-          <span className="node-name">{lab.title}</span>
-          <span className="node-count">{lab.count}</span>
-        </button>
-      ))}
+      {labs.map((lab) => {
+        const progressId = lab.progressId || lab.id;
+        const key = lab.testOnly
+          ? testLessonKey(topicId, progressId)
+          : walkLessonKey(topicId, lab.id);
+        const done = Boolean(progress?.completed?.includes(key));
+        const walkDone = Boolean(
+          progress?.completed?.includes(walkLessonKey(topicId, progressId))
+        );
+        const canOpen =
+          unlocked && (!lab.testOnly || allOpen || walkDone);
+        return (
+          <button
+            key={lab.id}
+            type="button"
+            className={`node ${done ? "done" : ""} ${
+              canOpen ? "" : "off"
+            }`}
+            disabled={!canOpen}
+            onClick={() => onOpen(lab.id)}
+          >
+            <span className="node-icon">{done ? "✓" : lab.icon}</span>
+            <span className="node-name">{lab.title}</span>
+            <span className="node-count">
+              {lab.testOnly && !canOpen ? "Finish walkthrough first" : lab.count}
+            </span>
+          </button>
+        );
+      })}
     </>
   );
 }
@@ -268,7 +380,9 @@ function TopicLadder({
   isSkipTarget,
   progress,
   counts,
+  bankCounts,
   onStart,
+  onStartBank,
   onBack,
   onAskSkip,
   onLaplaceLab,
@@ -301,23 +415,35 @@ function TopicLadder({
       <ol className="path ladder-path">
         <li className={`unit ${unlocked ? "" : "locked"} ${isSkipTarget ? "skip-ready" : ""}`}>
           <div className="nodes">
-            {showLawsLabs ? <LawsLabs unlocked={unlocked} labs={labs} /> : null}
+            {showLawsLabs ? (
+              <LawsLabs
+                unlocked={unlocked}
+                labs={labs}
+                bankCounts={bankCounts}
+                progress={progress}
+                onStartBank={onStartBank}
+                allOpen={allOpen}
+              />
+            ) : null}
             {sectionWalks ? (
               <SectionWalks
                 labs={sectionWalks}
                 unlocked={unlocked}
+                allOpen={allOpen}
+                progress={progress}
+                topicId={topic.id}
                 onOpen={(id) => onSectionWalk(topic.id, id)}
               />
             ) : null}
             {showLaplaceWalks ? (
               <LaplaceLabs unlocked={unlocked} onLaplaceLab={onLaplaceLab} />
             ) : null}
-            {showLawsLabs || showLaplaceWalks || sectionWalks ? (
+            {showLaplaceWalks || sectionWalks ? (
               <p className="path-quiz-mark">
                 Test your knowledge for all the walkthroughs
               </p>
             ) : null}
-            {DIFFICULTIES.map((diff) => {
+            {!showLawsLabs && DIFFICULTIES.map((diff) => {
               const key = lessonKey(topic.id, diff.id);
               const n = counts[key] || 0;
               const done = progress.completed?.includes(key);
@@ -366,8 +492,10 @@ export default function Home({
   topics,
   progress,
   counts,
+  bankCounts = {},
   pastPapers = [],
   onStart,
+  onStartBank,
   onStartPaper,
   onSkip,
   onLab,
@@ -383,6 +511,7 @@ export default function Home({
   onBranchLab,
   onPowerLab,
   onMaxPowerLab,
+  onSourceTransform,
   onDcLab,
   onInvOpAmp,
   onNonInvOpAmp,
@@ -402,7 +531,7 @@ export default function Home({
   const needed = Math.ceil(SKIP_QUIZ_SIZE * SKIP_PASS_RATIO);
   const currentIndex = topics.findIndex((topic, index) => {
     if (!isTopicUnlocked(index, progress, counts)) return false;
-    return topicMeter(topic, progress, counts).pct < 100;
+    return topicMeter(topic, progress, counts, bankCounts).pct < 100;
   });
 
   const skipSheet =
@@ -522,7 +651,9 @@ export default function Home({
             isSkipTarget={!allOpen && skipTopic && index === firstLockedIndex}
             progress={progress}
             counts={counts}
+            bankCounts={bankCounts}
             onStart={onStart}
+            onStartBank={onStartBank}
             onBack={() => setSection(null)}
             onAskSkip={() => setEventOpen(true)}
             onLaplaceLab={onLaplaceLab}
@@ -533,6 +664,7 @@ export default function Home({
               onBranchLab,
               onPowerLab,
               onMaxPowerLab,
+              onSourceTransform,
               onThevLab,
               onNortonLab,
               onDepLab,
@@ -589,9 +721,16 @@ export default function Home({
           onJump={() => setSection("labs")}
         />
         {topics.map((topic, index) => {
-          const unlocked = allOpen || isTopicUnlocked(index, progress, counts);
-          const meter = topicMeter(topic, progress, counts);
-          const skipReady = !allOpen && skipTopic && index === firstLockedIndex;
+          const comingSoon = topic.id >= 5;
+          const unlocked =
+            !comingSoon &&
+            (allOpen || isTopicUnlocked(index, progress, counts));
+          const meter = topicMeter(topic, progress, counts, bankCounts);
+          const skipReady =
+            !comingSoon &&
+            !allOpen &&
+            skipTopic &&
+            index === firstLockedIndex;
           return (
             <SectionCard
               key={topic.id}
@@ -600,9 +739,10 @@ export default function Home({
               blurb={topic.blurb}
               index={index + 1}
               unlocked={unlocked}
+              comingSoon={comingSoon}
               showMeter={!allOpen}
               meter={meter}
-              current={index === currentIndex}
+              current={!comingSoon && index === currentIndex}
               skipReady={skipReady}
               onOpen={() => setSection(topic.id)}
               onJump={() => setEventOpen(true)}

@@ -1,6 +1,13 @@
 import WalkLesson, { makeCatalog } from "../components/WalkLesson";
 import Section4Schematic from "./Schematics";
+import FreeCQuizDragBoard from "./FreeCQuizDragBoard";
 import { FREEC, FREEL, STEPRC, STEPRL } from "./labs";
+import {
+  FREEC_QUIZ,
+  FREEC_QUIZ_DRAG,
+  freeCQuizDragLabel,
+  freeCQuizDragPrompt,
+} from "../data/freeCQuizLab";
 
 export const SECTION4_LABS = [
   {
@@ -13,6 +20,21 @@ export const SECTION4_LABS = [
     doneBlurb: "Reduce the network to one R if you need to.",
     steps: FREEC.steps,
     practice: FREEC.practice,
+  },
+  {
+    id: "freecq",
+    title: "Source-Free Capacitor Practice",
+    icon: "C?",
+    count: "5 quiz + 5 drag",
+    boardHint: "",
+    formula: "$v(t)=v(0)e^{-t/RC}$",
+    doneBlurb: "Use the R that C actually sees. τ is the 1/e time.",
+    practice: FREEC_QUIZ,
+    drag: FREEC_QUIZ_DRAG,
+    DragBoard: FreeCQuizDragBoard,
+    dragPrompt: freeCQuizDragPrompt,
+    dragLabel: freeCQuizDragLabel,
+    dragHint: "Hold a value and drop it on the gap, or tap it.",
   },
   {
     id: "freel",

@@ -5,7 +5,13 @@ import LabTeach from "./LabTeach";
 import ValueDragLab from "./ValueDragLab";
 import ReviewGate from "./ReviewGate";
 import { InlineKnowledgeCheck } from "./QuickCheck";
-import { finishGuidedLesson, payGuidedCheck } from "../state/progress";
+import {
+  finishGuidedLesson,
+  payGuidedCheck,
+  testLessonKey,
+  XP_CORRECT,
+} from "../state/progress";
+import PracticeStage from "../section3/PracticeStage";
 
 function resolvePracticeView(question, lab, practiceView) {
   if (!question || question.hideBoard) return null;
@@ -138,14 +144,35 @@ export default function WalkLesson({
   setProgress,
   walkKey,
   onFinished,
+  section,
 }) {
   const lab = catalog.getLab(labId);
   const next = catalog.getNext(labId);
   const part = Math.max(1, catalog.labs.findIndex((item) => item.id === lab.id) + 1);
   const progressLabel = `${catalog.label} ${part} of ${catalog.labs.length}`;
+  const hasStandalone = Boolean(lab.standalonePractice?.length);
+  const hasTeach = Boolean(lab.steps?.length);
   const hasPractice = Boolean(lab.practice?.length);
   const hasDrag = Boolean(lab.drag?.length && lab.DragBoard);
-  const [stage, setStage] = useState("teach");
+  const testKey =
+    lab.testOnly && section
+      ? testLessonKey(section, lab.progressId || lab.id)
+      : null;
+  const testAlready = Boolean(
+    testKey && progress?.completed?.includes(testKey)
+  );
+  const standaloneXp = testAlready ? 0 : XP_CORRECT;
+  const [stage, setStage] = useState(
+    lab.testOnly && hasStandalone
+      ? "standalone"
+      : hasTeach
+        ? "teach"
+        : hasPractice
+          ? "practice"
+          : hasDrag
+            ? "drag"
+            : "done"
+  );
   const [score, setScore] = useState(null);
   const paidRef = useRef(new Set());
   const xpRef = useRef(0);
@@ -192,9 +219,33 @@ export default function WalkLesson({
     finishWalk(nextScore);
   }
 
+  function finishStandalone(ok, total) {
+    const nextScore = { practiceOk: ok, practiceTotal: total };
+    setScore(nextScore);
+    if (testKey && onFinished) {
+      finishGuidedLesson({
+        preview,
+        progress,
+        setProgress,
+        key: testKey,
+        xpFromChecks: xpRef.current,
+        correct: ok,
+        total,
+        topicName: lab.title,
+        difficultyName: "Test",
+        kind: "lesson",
+        onFinished,
+      });
+      return;
+    }
+    setStage("done");
+  }
+
   if (stage === "done" && score) {
     const checks =
-      score.total != null
+      score.practiceTotal != null
+        ? `You got ${score.practiceOk}/${score.practiceTotal} first try on the test`
+        : score.total != null
         ? `You got ${score.ok}/${score.total} on the quick checks`
         : "";
     const drags =
@@ -264,6 +315,31 @@ export default function WalkLesson({
     );
   }
 
+  if (stage === "standalone" && hasStandalone) {
+    return (
+      <PracticeStage
+        title={lab.title}
+        progressLabel={progressLabel}
+        questions={lab.standalonePractice}
+        preview={preview}
+        xpEach={standaloneXp}
+        Board={lab.PracticeBoard}
+        onExit={onExit}
+        onCheck={(outcome) =>
+          payGuidedCheck(setProgress, {
+            preview,
+            xpEach: standaloneXp,
+            topicId,
+            paidRef,
+            xpRef,
+            ...outcome,
+          })
+        }
+        onDone={finishStandalone}
+      />
+    );
+  }
+
   if (stage === "practice" && hasPractice) {
     return (
       <PracticeView
@@ -281,6 +357,8 @@ export default function WalkLesson({
       />
     );
   }
+
+  if (!hasTeach) return null;
 
   return (
     <LabTeach

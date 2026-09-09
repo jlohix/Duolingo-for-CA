@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { loadQuestions, groupPastPapers, PAST_YEAR_QUESTIONS } from "./data/loadQuestions";
 import { TOPICS, lessonKey } from "./data/topics";
+import { bankLessonKey, questionBankForId } from "./data/questionBanks";
 import { THEVENIN_LAB_QUESTIONS, NODAL_LAB_QUESTIONS, MESH_LAB_QUESTIONS, SUPERMESH_LAB_QUESTIONS, SUPERNODE_LAB_QUESTIONS, SUPERPOS_LAB_QUESTIONS, DIVIDER_LAB_QUESTIONS, POWER_LAB_QUESTIONS, MAX_POWER_LAB_QUESTIONS, NORTON_LAB_QUESTIONS, DEPENDENT_LAB_QUESTIONS } from "./data/dragCircuits";
 import { THEVENIN_STEPS } from "./data/theveninLab";
 import { NODAL_STEPS } from "./data/nodalLab";
@@ -44,6 +45,7 @@ import DragCircuitLab from "./pages/DragCircuitLab";
 import DragDcLab from "./pages/DragDcLab";
 import InvertingOpAmpLesson from "./pages/InvertingOpAmpLesson";
 import NonInvertingOpAmpLesson from "./pages/NonInvertingOpAmpLesson";
+import SourceTransformationLesson from "./pages/SourceTransformationLesson";
 import LaplaceLesson from "./section5/LaplaceLesson";
 import { SECTION_WALKS } from "./walks";
 import Results from "./pages/Results";
@@ -84,7 +86,18 @@ export default function App() {
   const counts = useMemo(() => {
     const map = {};
     for (const q of questions) {
+      if (q.bankId) continue;
       const key = lessonKey(q.topicId, q.difficulty);
+      map[key] = (map[key] || 0) + 1;
+    }
+    return map;
+  }, [questions]);
+
+  const bankCounts = useMemo(() => {
+    const map = {};
+    for (const question of questions) {
+      if (!question.bankId) continue;
+      const key = bankLessonKey(question.bankId, question.difficulty);
       map[key] = (map[key] || 0) + 1;
     }
     return map;
@@ -127,6 +140,7 @@ export default function App() {
       "dragbranchlab",
       "dragpowerlab",
       "dragmptlab",
+      "sourcetransform",
       "dragdclab",
       "invopamp",
       "ninvopamp",
@@ -291,6 +305,15 @@ export default function App() {
       setScreen("results");
     },
   };
+
+  if (screen === "sourcetransform") {
+    return (
+      <SourceTransformationLesson
+        {...labXp}
+        walkKey="walk-lab-source-transformation"
+      />
+    );
+  }
 
   if (screen === "draglab") {
     return <DragCircuitLab {...labXp} walkKey="walk-lab-ohm" topicId={1} />;
@@ -565,11 +588,14 @@ export default function App() {
   }
 
   if (screen === "lesson" && lesson) {
+    const bank = lesson.bankId ? questionBankForId(lesson.bankId) : null;
     return (
       <Lesson
         allQuestions={questions}
-        topicId={lesson.topicId}
+        topicId={bank?.topicId || lesson.topicId}
         difficulty={lesson.difficulty}
+        bankId={bank?.id}
+        bankTitle={bank?.title}
         progress={progress}
         setProgress={setProgress}
         preview={isAdmin(session)}
@@ -607,9 +633,14 @@ export default function App() {
       topics={TOPICS}
       progress={progress}
       counts={counts}
+      bankCounts={bankCounts}
       pastPapers={pastPapers}
       onStart={(topicId, difficulty) => {
         setLesson({ topicId, difficulty });
+        setScreen("lesson");
+      }}
+      onStartBank={(bankId, difficulty) => {
+        setLesson({ bankId, difficulty });
         setScreen("lesson");
       }}
       onStartPaper={(pack) => {
@@ -633,6 +664,7 @@ export default function App() {
       onBranchLab={() => setScreen("dragbranchlab")}
       onPowerLab={() => setScreen("dragpowerlab")}
       onMaxPowerLab={() => setScreen("dragmptlab")}
+      onSourceTransform={() => setScreen("sourcetransform")}
       onDcLab={() => setScreen("dragdclab")}
       onInvOpAmp={() => setScreen("invopamp")}
       onNonInvOpAmp={() => setScreen("ninvopamp")}

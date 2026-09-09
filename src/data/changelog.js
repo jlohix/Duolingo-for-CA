@@ -1,5 +1,11 @@
 export const BUILT_IN_LOGS = [
   {
+    id: "built-2026-09-09-sections-coming-soon",
+    date: "2026-09-09",
+    title: "Later sections coming soon",
+    body: "Sections 5 onward are locked while their lessons are being prepared. Past year papers remain available for exam practice.",
+  },
+  {
     id: "built-2026-09-06-lab-missed-return",
     date: "2026-09-06",
     title: "Missed lab questions return",

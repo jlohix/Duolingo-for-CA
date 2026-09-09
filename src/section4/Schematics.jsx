@@ -5,6 +5,13 @@ import {
   RcStepBoard,
   RlStepBoard,
 } from "./WalkBoard";
+import {
+  QrcDecayBoard,
+  QrcParBoard,
+  QrcSeriesBoard,
+  QrcSimpleBoard,
+  QrcSwitchBoard,
+} from "./QuizBoards";
 
 const VIEWS = {
   decayc: RcDecayBoard,
@@ -12,6 +19,11 @@ const VIEWS = {
   step: UnitStepBoard,
   stepc: RcStepBoard,
   stepl: RlStepBoard,
+  "qrc-simple": QrcSimpleBoard,
+  "qrc-switch": QrcSwitchBoard,
+  "qrc-par": QrcParBoard,
+  "qrc-series": QrcSeriesBoard,
+  "qrc-decay": QrcDecayBoard,
 };
 
 export default function Section4Schematic({ view, highlight = "all" }) {

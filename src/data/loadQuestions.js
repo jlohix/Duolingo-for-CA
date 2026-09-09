@@ -1,5 +1,6 @@
 import Papa from "papaparse";
 import pastYearCsv from "./pastYearPapers.csv?raw";
+import { QUESTION_BANKS } from "./questionBanks";
 
 const LETTERS = ["a", "b", "c", "d"];
 
@@ -113,13 +114,34 @@ function parseQuestionRows(text, { withPaper = false } = {}) {
   return questions;
 }
 
+function localBankImage(image, bank) {
+  const src = clean(image);
+  if (!src) return "";
+  const file = src.split("?")[0].split("/").pop();
+  return file ? `/question-bank/${bank.assetFolder}/${file}` : "";
+}
+
+async function loadQuestionBank(bank) {
+  const res = await fetch(`/question-bank/csv/${bank.csv}`);
+  if (!res.ok) throw new Error(`Could not load ${bank.csv}`);
+  const rows = parseQuestionRows(await res.text());
+  return rows.map((question) => ({
+    ...question,
+    id: `${bank.id}-${question.id}`,
+    bankId: bank.id,
+    topicId: bank.topicId,
+    image: localBankImage(question.image, bank),
+  }));
+}
+
 export async function loadQuestions() {
   const res = await fetch("/QuestionBank.csv");
   if (!res.ok) {
     throw new Error("Could not load QuestionBank.csv");
   }
   const text = await res.text();
-  return parseQuestionRows(text);
+  const banks = await Promise.all(QUESTION_BANKS.map(loadQuestionBank));
+  return [...parseQuestionRows(text), ...banks.flat()];
 }
 
 export const PAST_YEAR_QUESTIONS = parseQuestionRows(pastYearCsv, {
@@ -167,7 +189,20 @@ export function shuffle(list) {
 
 export function questionsForLesson(all, topicId, difficulty) {
   return shuffle(
-    all.filter((q) => q.topicId === topicId && q.difficulty === difficulty)
+    all.filter(
+      (q) =>
+        !q.bankId &&
+        q.topicId === topicId &&
+        q.difficulty === difficulty
+    )
+  );
+}
+
+export function questionsForBank(all, bankId, difficulty) {
+  return shuffle(
+    all.filter(
+      (q) => q.bankId === bankId && q.difficulty === difficulty
+    )
   );
 }
 

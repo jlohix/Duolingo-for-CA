@@ -7,6 +7,7 @@ const SECTION1 = [
   ["walk-lab-power", "Power"],
   ["walk-lab-maxpower", "Max power"],
   ["walk-lab-nodal", "Nodal"],
+  ["walk-lab-source-transformation", "Source Transformation"],
 ];
 
 const SECTION2 = [
@@ -26,14 +27,19 @@ const SECTION2 = [
 
 const SECTION3 = [
   ["capacitor", "Capacitor"],
+  ["test-3-capacitor", "Capacitor test"],
   ["inductor", "Inductor"],
+  ["test-3-inductor", "Inductor test"],
   ["freec", "Source-Free Capacitor"],
+  ["test-3-freec", "Source-Free Capacitor test"],
   ["lsource", "Inductor with a Source"],
+  ["test-3-lsource", "Inductor with a Source test"],
   ["walk-lab-dc", "DC capacitors and inductors"],
 ];
 
 const SECTION4 = [
   ["freec", "Source-Free Capacitor"],
+  ["freecq", "Source-Free Capacitor Practice"],
   ["freel", "Source-Free Inductor"],
   ["stepc", "Step Response of RC"],
   ["stepl", "Step Response of RL"],
@@ -53,7 +59,7 @@ const SECTION5 = [
 
 function fromPairs(section, pairs) {
   return pairs.map(([idOrKey, title]) => {
-    const key = idOrKey.startsWith("walk-")
+    const key = idOrKey.startsWith("walk-") || idOrKey.startsWith("test-")
       ? idOrKey
       : walkLessonKey(section, idOrKey);
     return { key, title, section };

@@ -1,10 +1,12 @@
 import { useMemo, useState } from "react";
 import {
   questionsForLesson,
+  questionsForBank,
   isAnswerCorrect,
   shuffle,
 } from "../data/loadQuestions";
 import { DIFFICULTIES, TOPICS, lessonKey } from "../data/topics";
+import { bankLessonKey } from "../data/questionBanks";
 import { addXp, completeLesson, visibleStreak, wouldExtendStreak, xpForCorrect, xpForLessonBonus, recordFirstTry } from "../state/progress";
 import { useQuizQueue } from "../hooks/useQuizQueue";
 import QuestionCard from "../components/QuestionCard";
@@ -26,9 +28,16 @@ export default function Lesson({
   onFinished,
   preview = false,
   pack = null,
+  bankId = "",
+  bankTitle = "",
 }) {
   const paperMode = Boolean(pack);
-  const key = paperMode ? pack.key : lessonKey(topicId, difficulty);
+  const bankMode = Boolean(bankId);
+  const key = paperMode
+    ? pack.key
+    : bankMode
+      ? bankLessonKey(bankId, difficulty)
+      : lessonKey(topicId, difficulty);
   const alreadyDone = Boolean(progress.completed?.includes(key));
   const xpDiff = paperMode ? 2 : difficulty;
   const xpEach = preview || alreadyDone ? 0 : xpForCorrect(xpDiff);
@@ -38,16 +47,24 @@ export default function Lesson({
     () =>
       paperMode
         ? shuffle(pack.questions)
+        : bankMode
+          ? questionsForBank(allQuestions, bankId, difficulty)
         : questionsForLesson(allQuestions, topicId, difficulty),
-    [allQuestions, topicId, difficulty, paperMode, pack]
+    [allQuestions, topicId, difficulty, paperMode, bankMode, bankId, pack]
   );
   const quiz = useQuizQueue(initial, xpEach);
   const [leaveOpen, setLeaveOpen] = useState(false);
-  const [stage, setStage] = useState(paperMode ? "quiz" : "teach");
+  const [stage, setStage] = useState(
+    paperMode || bankMode ? "quiz" : "teach"
+  );
 
   const topic = TOPICS.find((t) => t.id === topicId);
   const diff = DIFFICULTIES.find((d) => d.id === difficulty);
-  const topicName = paperMode ? pack.title : topic?.name;
+  const topicName = paperMode
+    ? pack.title
+    : bankMode
+      ? bankTitle
+      : topic?.name;
   const difficultyName = paperMode ? "Past paper" : diff?.name;
 
   if (stage === "teach") {
@@ -75,6 +92,7 @@ export default function Lesson({
         streakGrew: false,
         topicName,
         difficultyName,
+        lessonKey: key,
       });
       return;
     }
@@ -95,6 +113,7 @@ export default function Lesson({
       streakGrew: grew,
       topicName,
       difficultyName,
+      lessonKey: key,
     });
   }
 

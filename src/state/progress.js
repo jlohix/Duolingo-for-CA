@@ -258,6 +258,10 @@ export function walkLessonKey(section, labId) {
   return `walk-${section}-${labId}`;
 }
 
+export function testLessonKey(section, labId) {
+  return `test-${section}-${labId}`;
+}
+
 export function payGuidedCheck(
   setProgress,
   { preview, xpEach, ok, firstTry, topicId, paidRef, xpRef, id }
