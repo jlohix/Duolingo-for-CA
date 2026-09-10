@@ -1,5 +1,9 @@
 const STEPS = [
   {
+    title: "Log in",
+    text: "First time, use your NTU email and matriculation number, then choose a password. After that, log in with that password. Circuito then asks which class you are in (EE01–EE22, or EEPT if you are part-time).",
+  },
+  {
     title: "Learn path",
     text: "Open Learn in the sidebar. You see sections as cards: Basic laws, Op-amps, Transients, First-order circuits, Laplace transforms, Network functions, and Frequency domain. Open a section to walk Easy, then Average, then Challenging. Topics unlock in order. Basic laws has Ohm through Superposition walkthroughs before Easy. Op-amps has the op-amp walkthroughs. Laplace transforms starts with walkthroughs before Easy; each walkthrough ends on its own complete screen. Past year papers sit at the bottom of Learn for exam practice.",
   },
@@ -9,7 +13,7 @@ const STEPS = [
   },
   {
     title: "XP",
-    text: "Correct first-try answers pay 10 XP on Easy, 20 on Average, and 30 on Challenging. Finishing the lesson adds 20 / 40 / 60 XP. Walkthroughs and try-it labs use Easy rates (10 per first correct check, 20 to finish). Replaying a finished lesson is practice only (no extra XP).",
+    text: "Correct first-try answers pay 10 XP on Easy, 20 on Average, and 30 on Challenging. Finishing the lesson adds 20 / 40 / 60 XP. Walkthroughs use Easy rates (10 per first correct check, 20 to finish). Replaying a finished lesson is practice only (no extra XP).",
   },
   {
     title: "Streak",
@@ -21,7 +25,7 @@ const STEPS = [
   },
   {
     title: "Profile and Progress",
-    text: "Profile lists strengths (about 80%+ first try) and weaknesses (under 60%) after at least 3 answers from lessons and walkthroughs, plus a hex chart of first-try accuracy on every topic. Progress shows the same hex for that student, every topic, and your strongest / focus area.",
+    text: "On Profile you can pick a board name for Class board and Individual. Offensive names are not anonymous — we know who you are, because your NTU email is still on the account. Profile also lists strengths (about 80%+ first try) and weaknesses (under 60%) after at least 3 answers from lessons and walkthroughs, plus a hex chart of first-try accuracy on every topic. Progress shows the same hex for that student, every topic, and your strongest / focus area.",
   },
   {
     title: "Trophy leagues",
@@ -29,7 +33,7 @@ const STEPS = [
   },
   {
     title: "Class and cohort",
-    text: "Class board ranks students in your class (EE01–EE16) by total XP. Cohort board ranks those 16 classes by combined XP. Individual shows the top 10 students in the cohort, with your place on the last row. Your class is set by a teacher, not on Profile.",
+    text: "Class board ranks students in your class by total XP. Cohort board ranks those classes by combined XP. Individual shows the top 10 students in the cohort, with your place on the last row. Classmates appear once they are added to Circuito.",
   },
   {
     title: "Theme",

@@ -1,14 +1,23 @@
-import { visibleStreak, topicInsight } from "../state/progress";
+import { visibleStreak, topicInsight, chooseDisplayName, DISPLAY_NAME_MAX } from "../state/progress";
 import { DEFAULT_CLASS, normalizeClassId } from "../data/classes";
+import { displayNameFor } from "../state/roster";
+import { isAdmin } from "../state/auth";
 import TopicInsight from "../components/TopicInsight";
 import HexStats from "../components/HexStats";
 import StreakNotice from "../components/StreakNotice";
+import { useState } from "react";
 
 const STRENGTH_KINDS = new Set(["strength", "solid"]);
 const WEAK_KINDS = new Set(["weakness", "developing"]);
 
 export default function Profile({ user, topics, progress, setProgress, onPractice }) {
   const streak = visibleStreak(progress);
+  const staff = isAdmin(user);
+  const fallbackName = displayNameFor(user.username);
+  const [nameDraft, setNameDraft] = useState(
+    progress.displayName || fallbackName
+  );
+  const boardName = progress.displayName || fallbackName;
   const rows = topics.map((topic) => ({
     topic,
     insight: topicInsight(progress, topic.id),
@@ -27,17 +36,53 @@ export default function Profile({ user, topics, progress, setProgress, onPractic
     <div className="page">
       <header className="topbar">
         <div>
-          <p className="eyebrow">Student</p>
-          <h1>{user.username}</h1>
+          <p className="eyebrow">{staff ? "Staff" : "Student"}</p>
+          <h1>{boardName}</h1>
+          <p className="login-hint">{user.username}</p>
         </div>
       </header>
+      <form
+        className="class-picker name-picker"
+        onSubmit={(event) => {
+          event.preventDefault();
+          setProgress((p) => chooseDisplayName(p, nameDraft));
+        }}
+      >
+        <label>
+          Board name
+          <input
+            value={nameDraft}
+            maxLength={DISPLAY_NAME_MAX}
+            autoComplete="nickname"
+            aria-describedby="name-disclaimer"
+            onChange={(e) => setNameDraft(e.target.value)}
+          />
+        </label>
+        <button type="submit" className="primary">
+          Save name
+        </button>
+        <p id="name-disclaimer" className="login-hint">
+          This is the name on Class board and Individual. Offensive names are
+          not anonymous — we know who you are :D
+        </p>
+      </form>
+      {staff ? (
+        <p className="class-picker">
+          Class
+          <strong>None</strong>
+          <span className="login-hint">
+            Staff accounts are not placed in a class.
+          </span>
+        </p>
+      ) : (
       <p className="class-picker">
         Your class
         <strong>{normalizeClassId(progress.classId || DEFAULT_CLASS)}</strong>
         <span className="login-hint">
-          Only a teacher can change this.
+          You chose this the first time you logged in.
         </span>
       </p>
+      )}
       <ul className="stats">
         <li>
           <strong>{progress.xp}</strong>

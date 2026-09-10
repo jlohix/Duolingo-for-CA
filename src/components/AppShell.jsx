@@ -4,6 +4,7 @@ import TrophyBadge from "./TrophyBadge";
 import StreakNotice from "./StreakNotice";
 import { visibleStreak } from "../state/progress";
 import { isAdmin } from "../state/auth";
+import { boardName } from "../state/roster";
 
 const STUDENT_LINKS = [
   { id: "home", label: "Learn", group: "Study", icon: "fa-book" },
@@ -20,6 +21,7 @@ const STUDENT_LINKS = [
 const ADMIN_LINKS = [
   { id: "home", label: "Learn", group: "Study", icon: "fa-book" },
   { id: "admin", label: "Students", group: "Staff", icon: "fa-users" },
+  { id: "profile", label: "Profile", group: "You", icon: "fa-user" },
   { id: "updates", label: "Updates", group: "Staff", icon: "fa-bullhorn" },
   { id: "guide", label: "How to use", group: "Staff", icon: "fa-question-circle" },
   { id: "leagues", label: "Trophy leagues", group: "Leagues", icon: "fa-trophy" },
@@ -77,7 +79,7 @@ export default function AppShell({
         <div className="sidebar-brand">
           <p className="eyebrow">Circuit analysis</p>
           <h1>Circuito</h1>
-          <p className="login-user">Hi, {user.username}</p>
+          <p className="login-user">Hi, {boardName(user, progress)}</p>
           {admin ? (
             <p className="sidebar-stats">Staff tools · preview, no XP</p>
           ) : (

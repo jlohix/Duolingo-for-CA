@@ -26,7 +26,7 @@ import DividerSchematic from "./components/DividerSchematic";
 import DividerBranchesLesson from "./pages/DividerBranchesLesson";
 import PowerSchematic from "./components/PowerSchematic";
 import MaxPowerSchematic from "./components/MaxPowerSchematic";
-import { loadProgress } from "./state/progress";
+import { chooseClass, loadProgress } from "./state/progress";
 import { syncLeagueSeason } from "./state/league";
 import { loadSession, logout, isAdmin } from "./state/auth";
 import AppShell from "./components/AppShell";
@@ -42,20 +42,20 @@ import Updates from "./pages/Updates";
 import Lesson from "./pages/Lesson";
 import SkipQuiz from "./pages/SkipQuiz";
 import DragCircuitLab from "./pages/DragCircuitLab";
-import DragDcLab from "./pages/DragDcLab";
 import InvertingOpAmpLesson from "./pages/InvertingOpAmpLesson";
 import NonInvertingOpAmpLesson from "./pages/NonInvertingOpAmpLesson";
 import SourceTransformationLesson from "./pages/SourceTransformationLesson";
 import LaplaceLesson from "./section5/LaplaceLesson";
 import { SECTION_WALKS } from "./walks";
 import Results from "./pages/Results";
+import ClassPicker from "./components/ClassPicker";
 
 export default function App() {
   const [questions, setQuestions] = useState([]);
   const [questionsLoaded, setQuestionsLoaded] = useState(false);
   const [error, setError] = useState("");
   const [progress, setProgress] = useState(
-    () => syncLeagueSeason(loadProgress()).progress
+    () => syncLeagueSeason(loadProgress(), loadSession()).progress
   );
   const [screen, setScreen] = useState("home");
   const [lesson, setLesson] = useState(null);
@@ -120,6 +120,32 @@ export default function App() {
     setScreen("home");
   }
 
+  if (!isAdmin(session) && !progress.classChosen) {
+    return (
+      <>
+        <AppShell
+          nav="home"
+          onNav={() => {}}
+          user={session}
+          progress={progress}
+          onLogout={handleLogout}
+        >
+          <div className="page">
+            <header className="topbar">
+              <div>
+                <p className="eyebrow">Welcome</p>
+                <h1>Learn</h1>
+              </div>
+            </header>
+          </div>
+        </AppShell>
+        <ClassPicker
+          onPick={(classId) => setProgress((p) => chooseClass(p, classId))}
+        />
+      </>
+    );
+  }
+
   const previewing =
     isAdmin(session) &&
     [
@@ -141,7 +167,6 @@ export default function App() {
       "dragpowerlab",
       "dragmptlab",
       "sourcetransform",
-      "dragdclab",
       "invopamp",
       "ninvopamp",
       "laplacelab",
@@ -155,6 +180,7 @@ export default function App() {
       "cohortboard",
       "individualboard",
       "leagues",
+      "profile",
       "guide",
       "updates",
     ].includes(screen)
@@ -176,6 +202,14 @@ export default function App() {
           <Leaderboard user={session} progress={progress} mode="individual" />
         ) : adminNav === "leagues" ? (
           <Leagues user={session} progress={progress} />
+        ) : adminNav === "profile" ? (
+          <Profile
+            user={session}
+            topics={TOPICS}
+            progress={progress}
+            setProgress={setProgress}
+            onPractice={() => setScreen("home")}
+          />
         ) : adminNav === "guide" ? (
           <Guide />
         ) : adminNav === "updates" ? (
@@ -505,10 +539,6 @@ export default function App() {
     );
   }
 
-  if (screen === "dragdclab") {
-    return <DragDcLab {...labXp} walkKey="walk-lab-dc" topicId={3} />;
-  }
-
   if (screen === "invopamp") {
     return (
       <InvertingOpAmpLesson {...labXp} walkKey="walk-lab-invopamp" topicId={2} />
@@ -665,7 +695,6 @@ export default function App() {
       onPowerLab={() => setScreen("dragpowerlab")}
       onMaxPowerLab={() => setScreen("dragmptlab")}
       onSourceTransform={() => setScreen("sourcetransform")}
-      onDcLab={() => setScreen("dragdclab")}
       onInvOpAmp={() => setScreen("invopamp")}
       onNonInvOpAmp={() => setScreen("ninvopamp")}
       onSectionWalk={(section, id) => {

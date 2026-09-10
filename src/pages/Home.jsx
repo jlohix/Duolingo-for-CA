@@ -512,7 +512,6 @@ export default function Home({
   onPowerLab,
   onMaxPowerLab,
   onSourceTransform,
-  onDcLab,
   onInvOpAmp,
   onNonInvOpAmp,
   onLaplaceLab,
@@ -602,42 +601,6 @@ export default function Home({
     );
   }
 
-  if (section === "labs") {
-    return (
-      <DoodlePage>
-        <div className="page">
-        <header className="topbar">
-          <div>
-            <button
-              type="button"
-              className="ghost back-link"
-              onClick={() => setSection(null)}
-            >
-              ← Back
-            </button>
-            <p className="eyebrow">Try it</p>
-            <h1>Try-it labs</h1>
-          </div>
-        </header>
-        <p className="login-hint">
-          No XP. DC capacitors and inductors.
-        </p>
-        <ol className="path ladder-path">
-          <li className="unit lab-unit">
-            <div className="nodes">
-              <button type="button" className="node" onClick={onDcLab}>
-                <span className="node-icon">DC</span>
-                <span className="node-name">C and L</span>
-                <span className="node-count">4 Qs</span>
-              </button>
-            </div>
-          </li>
-        </ol>
-        </div>
-      </DoodlePage>
-    );
-  }
-
   if (section != null) {
     const index = topics.findIndex((t) => t.id === section);
     const topic = topics[index];
@@ -706,20 +669,6 @@ export default function Home({
         </p>
       ) : null}
       <div className="section-list">
-        <SectionCard
-          kicker="Try it"
-          title="Try-it labs"
-          blurb="DC C and L."
-          index={0}
-          badge="★"
-          unlocked
-          showMeter={!allOpen}
-          meter={{ done: 0, total: 1, pct: 0 }}
-          current
-          skipReady={false}
-          onOpen={() => setSection("labs")}
-          onJump={() => setSection("labs")}
-        />
         {topics.map((topic, index) => {
           const comingSoon = topic.id >= 5;
           const unlocked =

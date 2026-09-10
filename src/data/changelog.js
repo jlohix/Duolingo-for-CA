@@ -1,5 +1,47 @@
 export const BUILT_IN_LOGS = [
   {
+    id: "built-2026-09-10-clear-leagues",
+    date: "2026-09-10",
+    title: "Trophy leagues start empty",
+    body: "Trophy leagues now show real Circuito students only. Demo rivals are gone, so the board fills as classmates join.",
+  },
+  {
+    id: "built-2026-09-10-board-name",
+    date: "2026-09-10",
+    title: "Pick a board name",
+    body: "On Profile you can choose the name that shows on Class board and Individual. Offensive names are not anonymous — we still know who you are.",
+  },
+  {
+    id: "built-2026-09-10-remove-try-it",
+    date: "2026-09-10",
+    title: "Try-it labs removed",
+    body: "Learn now starts at Section 1. The Try-it labs card for DC capacitors and inductors is gone.",
+  },
+  {
+    id: "built-2026-09-10-first-password",
+    date: "2026-09-10",
+    title: "Choose a password on first login",
+    body: "The first time you log in with your matriculation number, Circuito asks you to choose a password. Next time, use that password instead of your matric number.",
+  },
+  {
+    id: "built-2026-09-10-ee22-eept",
+    date: "2026-09-10",
+    title: "EE22 and part-time class",
+    body: "You can pick EE01 to EE22, or EEPT if you are a part-time student, so Class board and Cohort board can place you.",
+  },
+  {
+    id: "built-2026-09-10-clear-boards",
+    date: "2026-09-10",
+    title: "Boards start empty",
+    body: "Class board, Cohort board, and Individual now show real Circuito students only. Demo names are gone, so classmates appear once they are added.",
+  },
+  {
+    id: "built-2026-09-10-class-popup",
+    date: "2026-09-10",
+    title: "Pick your class on first login",
+    body: "The first time you log in, Circuito asks which class you are in, from EE01 to EE16, so Class board and Cohort board can place you.",
+  },
+  {
     id: "built-2026-09-09-sections-coming-soon",
     date: "2026-09-09",
     title: "Later sections coming soon",

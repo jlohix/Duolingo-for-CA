@@ -36,20 +36,16 @@ function youNameOf(user) {
 }
 
 export function studentClassId(user, progress) {
-  if (user?.role === "admin") return normalizeClassId(progress.classId);
-  const you = listStudents(progress).find(
-    (row) =>
-      row.username.toLowerCase() === String(user?.username || "").toLowerCase()
-  );
-  return normalizeClassId(you?.classId || progress.classId);
+  if (user?.role === "admin") return "";
+  return normalizeClassId(progress.classId);
 }
 
 export function buildClassLeaderboard(user, progress, classId) {
   const youName = youNameOf(user);
-  const leagues = syncLeagueSeason(progress).state.leagueIndex;
+  const leagues = syncLeagueSeason(progress, user).state.leagueIndex;
   const focus = normalizeClassId(classId || studentClassId(user, progress));
   const ranked = rankRows(
-    listStudents(progress, { includeSynthetic: true })
+    listStudents(progress, { user })
       .map((row) => decorate(row, leagues, youName))
       .filter((row) => row.classId === focus)
   );
@@ -64,15 +60,15 @@ export function buildClassLeaderboard(user, progress, classId) {
 
 export function buildCohortLeaderboard(user, progress) {
   const youName = youNameOf(user);
-  const leagues = syncLeagueSeason(progress).state.leagueIndex;
-  const people = listStudents(progress, { includeSynthetic: true }).map((row) =>
+  const leagues = syncLeagueSeason(progress, user).state.leagueIndex;
+  const people = listStudents(progress, { user }).map((row) =>
     decorate(row, leagues, youName)
   );
   const yourClass = studentClassId(user, progress);
   const buckets = Object.fromEntries(
     CLASS_IDS.map((id) => [
       id,
-      { classId: id, members: 0, xp: 0, you: id === yourClass },
+      { classId: id, members: 0, xp: 0, you: Boolean(yourClass) && id === yourClass },
     ])
   );
   for (const row of people) {
@@ -102,9 +98,9 @@ export function buildCohortLeaderboard(user, progress) {
 
 export function buildIndividualLeaderboard(user, progress) {
   const youName = youNameOf(user);
-  const leagues = syncLeagueSeason(progress).state.leagueIndex;
+  const leagues = syncLeagueSeason(progress, user).state.leagueIndex;
   const ranked = rankRows(
-    listStudents(progress, { includeSynthetic: true }).map((row) =>
+    listStudents(progress, { user }).map((row) =>
       decorate(row, leagues, youName)
     )
   );

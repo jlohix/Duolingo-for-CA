@@ -78,12 +78,15 @@ export default function Leagues({ user, progress }) {
       ) : null}
       <p className="login-hint">
         Everyone here is in {board.league.name}. Ranked by XP earned this{" "}
-        {SEASON_DAYS}-day round. Top 20% ({board.counts.promote}) promote.
-        Bottom 20% ({board.counts.demote}) demote when time runs out.{" "}
+        {SEASON_DAYS}-day round.
+        {board.rows.length
+          ? ` Top 20% (${board.counts.promote}) promote. Bottom 20% (${board.counts.demote}) demote when time runs out.`
+          : " Classmates appear here once they are in Circuito."}{" "}
         {admin
-          ? "Staff can open any league. Filler rivals fill empty boards."
+          ? "Staff can open any league."
           : `${zoneLabel} ${you ? `You are #${you.rank}.` : ""}`}
       </p>
+      {board.rows.length ? (
       <ol className="board">
         {board.rows.map((row, index) => {
           const prev = board.rows[index - 1];
@@ -119,6 +122,9 @@ export default function Leagues({ user, progress }) {
           );
         })}
       </ol>
+      ) : (
+        <p className="login-hint">No students in this league yet.</p>
+      )}
     </div>
   );
 }

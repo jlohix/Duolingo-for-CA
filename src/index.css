@@ -368,6 +368,7 @@ button {
 }
 
 .class-picker select,
+.class-picker input,
 .admin-add select,
 .admin-fields select {
   width: 100%;
@@ -378,6 +379,20 @@ button {
   color: var(--ink);
   font-weight: 800;
   padding: 8px 10px;
+}
+
+.name-picker {
+  max-width: 420px;
+  margin-bottom: 8px;
+}
+
+.name-picker label {
+  display: grid;
+  gap: 6px;
+}
+
+.name-picker .primary {
+  width: 100%;
 }
 
 .board-cut {
@@ -1216,6 +1231,10 @@ h2 {
   margin: 0;
 }
 
+.login-card .ghost {
+  width: 100%;
+}
+
 .logout-btn {
   padding: 8px 10px;
 }
@@ -1575,6 +1594,46 @@ h2 {
 .trophy-overlay {
   z-index: 80;
   place-items: center;
+}
+
+.class-pick-overlay {
+  z-index: 120;
+}
+
+.class-pick-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+  margin: 0 0 16px;
+}
+
+.class-pick-option {
+  min-height: 44px;
+  border: 2px solid var(--line);
+  border-radius: 14px;
+  background: var(--card);
+  color: var(--ink);
+  font-weight: 800;
+}
+
+.class-pick-option.pt {
+  grid-column: 1 / -1;
+}
+
+.class-pick-option.on {
+  border-color: var(--green);
+  background: var(--done-bg);
+}
+
+.class-pick-option span {
+  display: block;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--muted);
+}
+
+.class-pick-overlay .primary {
+  width: 100%;
 }
 
 .trophy-guide {

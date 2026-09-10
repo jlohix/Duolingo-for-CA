@@ -5,7 +5,7 @@ import {
   buildIndividualLeaderboard,
   studentClassId,
 } from "../data/leaderboard";
-import { CLASS_IDS } from "../data/classes";
+import { CLASS_IDS, DEFAULT_CLASS, isPartTimeClass } from "../data/classes";
 import { isAdmin } from "../state/auth";
 
 function StudentRows({ rows }) {
@@ -22,7 +22,6 @@ function StudentRows({ rows }) {
             <span className="board-name">
               {row.display}
               {row.isYou ? " (you)" : ""}
-              {row.live ? <span className="login-hint">live</span> : null}
               <span className="class-chip">{row.classId}</span>
               <span
                 className="trophy-badge compact"
@@ -51,9 +50,9 @@ function StudentRows({ rows }) {
 
 export default function Leaderboard({ user, progress, mode = "class" }) {
   const yourClass = studentClassId(user, progress);
-  const [classId, setClassId] = useState(yourClass);
+  const [classId, setClassId] = useState(yourClass || DEFAULT_CLASS);
   const admin = isAdmin(user);
-  const focusClass = admin ? classId : yourClass;
+  const focusClass = admin ? classId : yourClass || DEFAULT_CLASS;
   const classBoard = buildClassLeaderboard(user, progress, focusClass);
   const cohort = buildCohortLeaderboard(user, progress);
   const individuals = buildIndividualLeaderboard(user, progress);
@@ -66,7 +65,7 @@ export default function Leaderboard({ user, progress, mode = "class" }) {
         <div>
           <p className="eyebrow">
             {cohortMode
-              ? "EE01–EE16"
+              ? "EE01–EE22 · EEPT"
               : individualMode
                 ? "All classes"
                 : classBoard.classId}
@@ -83,8 +82,13 @@ export default function Leaderboard({ user, progress, mode = "class" }) {
       {cohortMode ? (
         <>
           <p className="login-hint">
-            Classes ranked by total XP. You are in {cohort.yourClass}
-            {cohort.youRank ? `, currently #${cohort.youRank}.` : "."}
+            Classes ranked by total XP. Classmates will show here once they are
+            in Circuito.
+            {admin
+              ? " Staff are not in a class."
+              : cohort.youRank
+                ? ` You are in ${cohort.yourClass}, currently #${cohort.youRank}.`
+                : ` You are in ${cohort.yourClass}.`}
           </p>
           <ol className="board">
             {cohort.rows.map((row) => (
@@ -107,13 +111,22 @@ export default function Leaderboard({ user, progress, mode = "class" }) {
       ) : individualMode ? (
         <>
           <p className="login-hint">
-            Top 10 students in the cohort by total XP.
-            {individuals.youRank
-              ? ` You are #${individuals.youRank} of ${individuals.total}.`
-              : ` ${individuals.total} students.`}
+            Top 10 students in the cohort by total XP. Classmates appear as they
+            join Circuito.
+            {admin
+              ? ""
+              : individuals.youRank
+                ? ` You are #${individuals.youRank} of ${individuals.total}.`
+                : individuals.total
+                  ? ` ${individuals.total} students.`
+                  : ""}
           </p>
-          <StudentRows rows={individuals.top} />
-          {individuals.you ? (
+          {individuals.top.length ? (
+            <StudentRows rows={individuals.top} />
+          ) : (
+            <p className="login-hint">No students on this board yet.</p>
+          )}
+          {individuals.you && !individuals.youInTop ? (
             <>
               <p className="board-cut">Your place in the cohort</p>
               <StudentRows rows={[individuals.you]} />
@@ -126,9 +139,11 @@ export default function Leaderboard({ user, progress, mode = "class" }) {
             Students in {classBoard.classId}, ranked by total XP.
             {classBoard.youRank
               ? ` You are #${classBoard.youRank} of ${classBoard.total}.`
-              : admin
-                ? ` ${classBoard.total} students.`
-                : ""}
+              : classBoard.total
+                ? ` ${classBoard.total} student${classBoard.total === 1 ? "" : "s"}.`
+                : admin
+                  ? " Staff are not in a class."
+                  : " Classmates will show here once they are in Circuito."}
           </p>
           {admin ? (
             <label className="class-picker">
@@ -139,13 +154,17 @@ export default function Leaderboard({ user, progress, mode = "class" }) {
               >
                 {CLASS_IDS.map((id) => (
                   <option key={id} value={id}>
-                    {id}
+                    {isPartTimeClass(id) ? "EEPT (part-time)" : id}
                   </option>
                 ))}
               </select>
             </label>
           ) : null}
-          <StudentRows rows={classBoard.rows} />
+          {classBoard.rows.length ? (
+            <StudentRows rows={classBoard.rows} />
+          ) : (
+            <p className="login-hint">No students in this class yet.</p>
+          )}
         </>
       )}
     </div>

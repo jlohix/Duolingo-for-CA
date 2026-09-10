@@ -9,7 +9,7 @@ import {
 } from "../state/roster";
 import TopicInsight from "../components/TopicInsight";
 import ProgressPage from "./Progress";
-import { CLASS_IDS, DEFAULT_CLASS } from "../data/classes";
+import { CLASS_IDS, DEFAULT_CLASS, isPartTimeClass } from "../data/classes";
 import { trophyFromIndex } from "../data/trophies";
 import { syncLeagueSeason } from "../state/league";
 import { summarizeWalkFeedback } from "../data/walkTitles";
@@ -56,14 +56,14 @@ function studentSummary(student, counts, leagues) {
 export default function Admin({ progress, setProgress, counts }) {
   const [added, setAdded] = useState(0);
   const students = useMemo(
-    () => listStudents(progress),
+    () => listStudents(progress, { includeExtras: true }),
     [progress, added]
   );
   const leagues = useMemo(
     () => syncLeagueSeason(progress).state.leagueIndex,
     [progress, added]
   );
-  const [selected, setSelected] = useState(students[0]?.username || "student1");
+  const [selected, setSelected] = useState(students[0]?.username || "live");
   const [newName, setNewName] = useState("");
   const [newClass, setNewClass] = useState(DEFAULT_CLASS);
   const [addError, setAddError] = useState("");
@@ -93,9 +93,10 @@ export default function Admin({ progress, setProgress, counts }) {
       </header>
       <p className="login-hint">
         Class overview, then pick a student to view progress or adjust XP,
-        streak, lessons, and first-try stats. student1 is the live learner on
-        this device. Walkthrough thumbs from this device show under Walkthrough
-        feedback. Use Add student to put a new name on the roster.
+        streak, lessons, and first-try stats. This device is the live learner
+        on this browser. Walkthrough thumbs from this device show under
+        Walkthrough feedback. Names you add here are local until the class
+        roster comes from the database.
       </p>
       <form className="admin-add" onSubmit={handleAdd}>
         <label>
@@ -115,7 +116,7 @@ export default function Admin({ progress, setProgress, counts }) {
           >
             {CLASS_IDS.map((id) => (
               <option key={id} value={id}>
-                {id}
+                {isPartTimeClass(id) ? "EEPT (part-time)" : id}
               </option>
             ))}
           </select>
@@ -215,8 +216,8 @@ function WalkFeedbackTable({ students }) {
     <section className="admin-walk-feedback">
       <h2>Walkthrough feedback</h2>
       <p className="login-hint">
-        Thumbs from this device's live learner (student1). Other roster names
-        do not vote here.
+        Thumbs from this device's live learner. Other roster names do not vote
+        here.
       </p>
       <p className="login-hint">
         {up} thumbs up · {down} thumbs down
@@ -386,7 +387,7 @@ function StudentEditor({ student, counts, onSave }) {
               >
                 {CLASS_IDS.map((id) => (
                   <option key={id} value={id}>
-                    {id}
+                    {isPartTimeClass(id) ? "EEPT (part-time)" : id}
                   </option>
                 ))}
               </select>

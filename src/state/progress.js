@@ -28,6 +28,8 @@ function emptyState() {
     topicStats: {},
     leagueIndex: 0,
     classId: DEFAULT_CLASS,
+    classChosen: false,
+    displayName: "",
     walkFeedback: {},
   };
 }
@@ -144,6 +146,8 @@ export function loadProgress() {
         ? Number(data.leagueIndex)
         : 0,
       classId: normalizeClassId(data.classId),
+      classChosen: Boolean(data.classChosen),
+      displayName: normalizeDisplayName(data.displayName),
       walkFeedback: parseWalkFeedback(data.walkFeedback),
     };
   } catch {
@@ -250,6 +254,35 @@ export function topicInsight(progress, topicId) {
 
 export function addXp(state, amount) {
   const next = { ...state, xp: state.xp + amount };
+  saveProgress(next);
+  return next;
+}
+
+export function chooseClass(state, classId) {
+  const next = {
+    ...state,
+    classId: normalizeClassId(classId),
+    classChosen: true,
+  };
+  saveProgress(next);
+  return next;
+}
+
+export const DISPLAY_NAME_MAX = 24;
+
+export function normalizeDisplayName(value) {
+  return String(value || "")
+    .replace(/[\u0000-\u001f]/g, "")
+    .replace(/\s+/g, " ")
+    .trim()
+    .slice(0, DISPLAY_NAME_MAX);
+}
+
+export function chooseDisplayName(state, displayName) {
+  const next = {
+    ...state,
+    displayName: normalizeDisplayName(displayName),
+  };
   saveProgress(next);
   return next;
 }

@@ -1,73 +1,27 @@
 import { todayKey, visibleStreak } from "./progress";
-import {
-  DEFAULT_CLASS,
-  normalizeClassId,
-  syntheticStudents,
-} from "../data/classes";
+import { DEFAULT_CLASS, normalizeClassId } from "../data/classes";
+import { loadRemoteStudents, normalizeRemoteStudent } from "./remoteRoster";
 
 const STORAGE_KEY = "circuito-roster-v1";
+export const LIVE_USERNAME = "live";
 
-export const CLASSMATES = [
-  {
-    username: "aisha",
-    display: "Aisha",
-    classId: "EE01",
-    xp: 340,
-    streak: 6,
-    topicStats: {
-      1: { correct: 28, attempts: 32 },
-      2: { correct: 9, attempts: 12 },
-      3: { correct: 4, attempts: 8 },
-    },
-    completed: ["1-1", "1-2", "1-3", "2-1"],
-  },
-  {
-    username: "leo",
-    display: "Leo",
-    classId: "EE01",
-    xp: 210,
-    streak: 3,
-    topicStats: {
-      1: { correct: 14, attempts: 22 },
-      2: { correct: 2, attempts: 7 },
-    },
-    completed: ["1-1", "1-2", "2-1"],
-  },
-  {
-    username: "nina",
-    display: "Nina",
-    classId: "EE02",
-    xp: 150,
-    streak: 12,
-    topicStats: {
-      1: { correct: 18, attempts: 20 },
-      3: { correct: 6, attempts: 6 },
-    },
-    completed: ["1-1", "1-2", "3-1"],
-  },
-  {
-    username: "omar",
-    display: "Omar",
-    classId: "EE03",
-    xp: 80,
-    streak: 4,
-    topicStats: {
-      1: { correct: 5, attempts: 11 },
-    },
-    completed: ["1-1"],
-  },
-  {
-    username: "priya",
-    display: "Priya",
-    classId: "EE04",
-    xp: 40,
-    streak: 1,
-    topicStats: {
-      1: { correct: 2, attempts: 4 },
-    },
-    completed: [],
-  },
-];
+export function displayNameFor(username) {
+  const raw = String(username || "").trim();
+  if (!raw || raw === LIVE_USERNAME) return "You";
+  if (raw.includes("@")) return raw.split("@")[0];
+  return raw;
+}
+
+export function boardName(user, progress) {
+  const custom = String(progress?.displayName || "").trim();
+  if (custom) return custom;
+  return displayNameFor(user?.username);
+}
+
+export function liveUsernameOf(user) {
+  if (user?.role === "admin" || !user?.username) return LIVE_USERNAME;
+  return String(user.username).trim().toLowerCase();
+}
 
 function loadStore() {
   try {
@@ -118,10 +72,11 @@ function slugName(display) {
 
 function takenNames(store) {
   return new Set([
+    LIVE_USERNAME,
     "student1",
     "admin",
-    ...CLASSMATES.map((row) => row.username.toLowerCase()),
     ...store.extras.map((row) => String(row.username).toLowerCase()),
+    ...loadRemoteStudents().map((row) => String(row.username).toLowerCase()),
   ]);
 }
 
@@ -190,11 +145,15 @@ function applyOverlay(base, overlay) {
 }
 
 export function listStudents(liveProgress, options = {}) {
-  const includeSynthetic = Boolean(options.includeSynthetic);
   const store = loadStore();
-  const student1 = {
-    username: "student1",
-    display: "student1",
+  const liveUsername = liveUsernameOf(options.user);
+  const live = {
+    username: liveUsername,
+    display:
+      liveUsername === LIVE_USERNAME
+        ? "This device"
+        : String(liveProgress.displayName || "").trim() ||
+          displayNameFor(liveUsername),
     classId: normalizeClassId(liveProgress.classId),
     xp: Number(liveProgress.xp) || 0,
     streak: visibleStreak(liveProgress),
@@ -204,40 +163,51 @@ export function listStudents(liveProgress, options = {}) {
     live: true,
   };
 
-  const others = CLASSMATES.map((row) => ({
-    ...applyOverlay(row, store.overlays[row.username]),
-    live: false,
-  }));
+  const extras = options.includeExtras
+    ? store.extras.map((row) => ({
+        ...applyOverlay(
+          {
+            username: row.username,
+            display: row.display || row.username,
+            classId: row.classId || DEFAULT_CLASS,
+            xp: Number(row.xp) || 0,
+            streak: Number(row.streak) || 0,
+            topicStats: row.topicStats || {},
+            completed: Array.isArray(row.completed) ? row.completed : [],
+          },
+          store.overlays[row.username]
+        ),
+        live: false,
+        custom: true,
+      }))
+    : [];
 
-  const extras = store.extras.map((row) => ({
-    ...applyOverlay(
-      {
-        username: row.username,
-        display: row.display || row.username,
-        classId: row.classId || DEFAULT_CLASS,
-        xp: Number(row.xp) || 0,
-        streak: Number(row.streak) || 0,
-        topicStats: row.topicStats || {},
-        completed: Array.isArray(row.completed) ? row.completed : [],
-      },
-      store.overlays[row.username]
-    ),
-    live: false,
-    custom: true,
-  }));
+  const remote = loadRemoteStudents()
+    .map((row) => {
+      const base = normalizeRemoteStudent(row);
+      if (!base) return null;
+      return {
+        ...applyOverlay(base, store.overlays[base.username]),
+        remote: true,
+        live: false,
+      };
+    })
+    .filter(Boolean);
 
-  const roster = [student1, ...others, ...extras].map((row) => ({
-    ...row,
-    classId: normalizeClassId(row.classId),
-  }));
-
-  if (!includeSynthetic) return roster;
-
-  const taken = new Set(roster.map((row) => row.username.toLowerCase()));
-  const extra = syntheticStudents().filter(
-    (row) => !taken.has(row.username.toLowerCase())
-  );
-  return [...roster, ...extra];
+  const roster = [];
+  const taken = new Set();
+  const staffView = options.user?.role === "admin";
+  const seed = staffView ? [...remote, ...extras] : [live, ...remote, ...extras];
+  for (const row of seed) {
+    const key = String(row.username || "").toLowerCase();
+    if (!key || taken.has(key)) continue;
+    taken.add(key);
+    roster.push({
+      ...row,
+      classId: normalizeClassId(row.classId),
+    });
+  }
+  return roster;
 }
 
 export function studentToProgress(student) {
@@ -286,7 +256,11 @@ export function saveStudentRecord(username, edits, liveProgress) {
     saveStore(store);
   }
 
-  if (username === "student1") {
+  const liveRow = listStudents(liveProgress).find((row) => row.live);
+  const isLive =
+    liveRow &&
+    String(username).toLowerCase() === liveRow.username.toLowerCase();
+  if (isLive) {
     const next = {
       ...liveProgress,
       xp,

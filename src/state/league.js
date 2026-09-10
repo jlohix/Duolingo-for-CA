@@ -4,32 +4,11 @@ import { clampLeagueIndex, trophyFromIndex } from "../data/trophies";
 
 const STORAGE_KEY = "circuito-league-v2";
 export const SEASON_DAYS = 3;
-export const LEAGUE_SIZE = 8;
 const DURATION_MS = SEASON_DAYS * 24 * 60 * 60 * 1000;
 
-const RIVALS = [
-  ["kai", "Kai"],
-  ["noor", "Noor"],
-  ["tess", "Tess"],
-  ["rio", "Rio"],
-  ["hana", "Hana"],
-  ["vik", "Vik"],
-  ["suki", "Suki"],
-  ["elias", "Elias"],
-  ["mira", "Mira"],
-  ["jon", "Jon"],
-];
-
-function hashString(seed) {
-  let hash = 0;
-  for (let i = 0; i < seed.length; i += 1) {
-    hash = (hash * 33 + seed.charCodeAt(i)) >>> 0;
-  }
-  return hash;
-}
-
 export function zoneCounts(total) {
-  const n = Math.max(1, total);
+  const n = Math.max(0, Number(total) || 0);
+  if (n <= 1) return { promote: 0, demote: 0 };
   let promote = Math.max(1, Math.round(n * 0.2));
   let demote = Math.max(1, Math.round(n * 0.2));
   if (promote + demote >= n) {
@@ -69,21 +48,10 @@ function saveState(state) {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
 }
 
-function demoSeasonXp(username, seasonStart, now) {
-  const hash = hashString(`${username}:${seasonStart}`);
-  const target = 35 + (hash % 140);
-  const elapsed = Math.min(1, Math.max(0, (now - seasonStart) / DURATION_MS));
-  const early = 8 + (hash % 40);
-  return Math.round(early + (target - early) * elapsed);
-}
-
-function seasonXpFor(student, state, now) {
-  if (student.live) {
-    const start = Number(state.startXp[student.username]);
-    const base = Number.isFinite(start) ? start : student.xp;
-    return Math.max(0, (Number(student.xp) || 0) - base);
-  }
-  return demoSeasonXp(student.username, state.seasonStart, now);
+function seasonXpFor(student, state) {
+  const start = Number(state.startXp[student.username]);
+  const base = Number.isFinite(start) ? start : Number(student.xp) || 0;
+  return Math.max(0, (Number(student.xp) || 0) - base);
 }
 
 function snapshot(students, leagueIndex) {
@@ -97,35 +65,13 @@ function snapshot(students, leagueIndex) {
   return { startXp, leagueIndex: nextIndex };
 }
 
-function withLeagueMeta(students, state, now) {
+function withLeagueMeta(students, state) {
   return students.map((row) => ({
     ...row,
     filler: false,
-    seasonXp: seasonXpFor(row, state, now),
+    seasonXp: seasonXpFor(row, state),
     leagueIndex: clampLeagueIndex(state.leagueIndex[row.username] ?? 0),
   }));
-}
-
-function padLeague(members, leagueIndex, state, now) {
-  const used = new Set(members.map((row) => row.username.toLowerCase()));
-  const out = [...members];
-  for (const [name, display] of RIVALS) {
-    if (out.length >= LEAGUE_SIZE) break;
-    if (used.has(name)) continue;
-    const username = `league-${leagueIndex}-${name}`;
-    const hash = hashString(`${username}:${state.seasonStart}`);
-    out.push({
-      username,
-      display,
-      xp: 0,
-      streak: 1 + (hash % 18),
-      live: false,
-      filler: true,
-      seasonXp: demoSeasonXp(username, state.seasonStart, now),
-      leagueIndex,
-    });
-  }
-  return out;
 }
 
 function sortZone(rows) {
@@ -143,11 +89,11 @@ function sortZone(rows) {
     });
 }
 
-function fieldForLeague(students, state, now, leagueIndex) {
-  const members = withLeagueMeta(students, state, now).filter(
+function fieldForLeague(students, state, leagueIndex) {
+  const members = withLeagueMeta(students, state).filter(
     (row) => row.leagueIndex === leagueIndex
   );
-  return sortZone(padLeague(members, leagueIndex, state, now));
+  return sortZone(members);
 }
 
 function applySeasonResults(ranked, leagueIndex) {
@@ -162,20 +108,21 @@ function applySeasonResults(ranked, leagueIndex) {
   return next;
 }
 
-function settleSeason(students, seasonStart, startXp, leagueIndex, atTime) {
+function settleSeason(students, seasonStart, startXp, leagueIndex) {
   const state = { seasonStart, startXp, leagueIndex };
-  const meta = withLeagueMeta(students, state, atTime);
+  const meta = withLeagueMeta(students, state);
   const indices = [...new Set(meta.map((row) => row.leagueIndex))];
   let next = { ...leagueIndex };
   for (const index of indices) {
-    const ranked = fieldForLeague(students, state, atTime, index);
+    const ranked = fieldForLeague(students, state, index);
     next = applySeasonResults(ranked, next);
   }
   return next;
 }
 
-export function syncLeagueSeason(liveProgress) {
-  const students = listStudents(liveProgress);
+export function syncLeagueSeason(liveProgress, user) {
+  const students = listStudents(liveProgress, { user });
+  const liveName = students.find((row) => row.live)?.username;
   const now = Date.now();
   let state = loadState();
   if (!state) {
@@ -184,7 +131,7 @@ export function syncLeagueSeason(liveProgress) {
     saveState(state);
     const progress = {
       ...liveProgress,
-      leagueIndex: state.leagueIndex.student1,
+      leagueIndex: liveName != null ? state.leagueIndex[liveName] : 0,
     };
     if (progress.leagueIndex !== liveProgress.leagueIndex) saveProgress(progress);
     return { progress, state };
@@ -199,8 +146,7 @@ export function syncLeagueSeason(liveProgress) {
       students,
       seasonStart,
       startXp,
-      leagueIndex,
-      seasonStart + DURATION_MS - 1
+      leagueIndex
     );
     seasonStart += DURATION_MS;
     const snap = snapshot(students, leagueIndex);
@@ -218,7 +164,7 @@ export function syncLeagueSeason(liveProgress) {
   saveState(state);
   const progress = {
     ...liveProgress,
-    leagueIndex: leagueIndex.student1,
+    leagueIndex: liveName != null ? leagueIndex[liveName] : liveProgress.leagueIndex,
   };
   if (progress.leagueIndex !== liveProgress.leagueIndex) saveProgress(progress);
   return { progress, state };
@@ -235,21 +181,21 @@ export function formatRemain(ms) {
 }
 
 export function buildLeagueBoard(user, progress, leagueIndexOverride) {
-  const { state } = syncLeagueSeason(progress);
-  const students = listStudents(progress);
+  const { state } = syncLeagueSeason(progress, user);
+  const students = listStudents(progress, { user });
   const now = Date.now();
   const youName = user?.role === "admin" ? "" : user?.username || "";
-  const focusName = youName || "student1";
+  const focusName = youName || students.find((row) => row.live)?.username;
   const focus =
     students.find(
-      (row) => row.username.toLowerCase() === focusName.toLowerCase()
+      (row) => row.username.toLowerCase() === String(focusName || "").toLowerCase()
     ) || students[0];
   const leagueIndex = clampLeagueIndex(
     leagueIndexOverride != null
       ? leagueIndexOverride
       : state.leagueIndex[focus?.username] ?? 0
   );
-  const ranked = fieldForLeague(students, state, now, leagueIndex);
+  const ranked = fieldForLeague(students, state, leagueIndex);
   const total = ranked.length;
   const counts = zoneCounts(total);
   const league = trophyFromIndex(leagueIndex).current;
