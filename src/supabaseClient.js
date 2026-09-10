@@ -1,10 +1,15 @@
-const SUPABASE_URL =
-  import.meta.env.VITE_SUPABASE_URL ||
-  "https://qucqtavvoabgxlvlpobp.supabase.co";
+const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
+const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
-const SUPABASE_ANON_KEY =
-  import.meta.env.VITE_SUPABASE_ANON_KEY ||
-  "sb_publishable_65cJaPpvDhrCdABzLcrADg_FCHY3nZl";
+if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
+  // These come from your local .env file (see .env.example).
+  // If you see this error, create a .env file in the project root with
+  // VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY, then restart `npm run dev`.
+  throw new Error(
+    "Missing Supabase config. Copy .env.example to .env and fill in " +
+      "VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY."
+  );
+}
 
 function rpcHeaders() {
   return {
