@@ -1,4 +1,9 @@
-import { authenticateStudent, setInitialPassword } from "../supabaseClient";
+import {
+  authenticateStudent,
+  setInitialPassword,
+  verifyStudentMatric,
+  resetPasswordWithMatric,
+} from "../supabaseClient";
 
 const ADMIN_USER = {
   username: "admin",
@@ -111,6 +116,27 @@ export async function finishFirstPassword(email, matricNumber, newPassword) {
   const ok = await setInitialPassword(email, matricNumber, newPassword);
   if (!ok) return null;
   const username = String(email).trim().toLowerCase();
+  const session = {
+    username,
+    role: roleFor(username),
+  };
+  saveSession(session);
+  return session;
+}
+
+export async function verifyForgotMatric(email, matricNumber) {
+  const username = String(email || "").trim().toLowerCase();
+  const matric = String(matricNumber || "").trim();
+  if (!username.endsWith("@e.ntu.edu.sg") || !matric) return false;
+  return verifyStudentMatric(username, matric);
+}
+
+export async function finishForgotPassword(email, matricNumber, newPassword) {
+  const username = String(email || "").trim().toLowerCase();
+  const matric = String(matricNumber || "").trim();
+  if (!username.endsWith("@e.ntu.edu.sg")) return null;
+  const ok = await resetPasswordWithMatric(username, matric, newPassword);
+  if (!ok) return null;
   const session = {
     username,
     role: roleFor(username),

@@ -1235,6 +1235,18 @@ h2 {
   width: 100%;
 }
 
+.login-card .login-forgot {
+  width: auto;
+  justify-self: start;
+  padding: 4px 0;
+  border: none;
+  background: transparent;
+  color: var(--muted);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  font-weight: 700;
+}
+
 .logout-btn {
   padding: 8px 10px;
 }
@@ -3564,4 +3576,112 @@ html[data-theme="dark"] .circuit-svg .board-step {
   .practice-pair:not(.is-single) {
     grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
   }
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.question-report {
+  margin-top: 14px;
+}
+
+.question-report-toggle,
+.question-report-cancel {
+  background: transparent;
+  border: none;
+  color: var(--muted);
+  font-weight: 650;
+  font-size: 0.92rem;
+  padding: 0;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+
+.question-report-form {
+  display: grid;
+  gap: 12px;
+  padding: 14px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: var(--card);
+}
+
+.question-report-prompt {
+  margin: 0;
+  font-weight: 700;
+}
+
+.question-report-reasons {
+  border: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 8px;
+}
+
+.question-report-reason {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.question-report-note {
+  display: grid;
+  gap: 6px;
+  font-weight: 650;
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+.question-report-note textarea {
+  width: 100%;
+  resize: vertical;
+  min-height: 64px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 10px 12px;
+  font: inherit;
+  background: var(--bg, #fff);
+  color: inherit;
+}
+
+.question-report-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 14px;
+}
+
+.question-report-send {
+  background: var(--card);
+  border: 2px solid var(--line);
+  border-bottom-width: 4px;
+  border-radius: 12px;
+  padding: 10px 14px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.question-report-error {
+  margin: 0;
+  color: var(--red);
+  font-weight: 650;
+}
+
+.question-report-thanks {
+  margin: 0;
+  color: var(--muted);
+  font-weight: 650;
 }

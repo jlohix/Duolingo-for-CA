@@ -13,6 +13,11 @@ import { CLASS_IDS, DEFAULT_CLASS, isPartTimeClass } from "../data/classes";
 import { trophyFromIndex } from "../data/trophies";
 import { syncLeagueSeason } from "../state/league";
 import { summarizeWalkFeedback } from "../data/walkTitles";
+import { useRemoteRosterTick } from "../hooks/useRemoteRosterTick";
+import {
+  listQuestionReports,
+  reasonLabel,
+} from "../state/questionReports";
 
 function lessonTotal(counts) {
   return TOPICS.reduce(
@@ -54,6 +59,7 @@ function studentSummary(student, counts, leagues) {
 }
 
 export default function Admin({ progress, setProgress, counts }) {
+  useRemoteRosterTick();
   const [added, setAdded] = useState(0);
   const students = useMemo(
     () => listStudents(progress, { includeExtras: true }),
@@ -186,6 +192,7 @@ export default function Admin({ progress, setProgress, counts }) {
         </table>
       </div>
       <WalkFeedbackTable students={students} />
+      <QuestionReportsTable />
       {student ? (
         <StudentEditor
           key={student.username}
@@ -204,6 +211,64 @@ export default function Admin({ progress, setProgress, counts }) {
         />
       ) : null}
     </div>
+  );
+}
+
+function QuestionReportsTable() {
+  const rows = listQuestionReports();
+  return (
+    <section className="admin-walk-feedback">
+      <h2>Question reports</h2>
+      <p className="login-hint">
+        Reports from this browser. Students tap Report question on a quiz item
+        and pick a reason.
+      </p>
+      <div className="admin-table-wrap">
+        <table className="admin-table">
+          <thead>
+            <tr>
+              <th>When</th>
+              <th>Question</th>
+              <th>Reason</th>
+              <th>Details</th>
+              <th>From</th>
+            </tr>
+          </thead>
+          <tbody>
+            {rows.length ? (
+              rows.map((row) => (
+                <tr key={row.id}>
+                  <td>{String(row.at || "").replace("T", " ").slice(0, 16)}</td>
+                  <td>
+                    <code>{row.questionId}</code>
+                    {row.questionText ? (
+                      <>
+                        <br />
+                        <span className="login-hint">
+                          {row.questionText.slice(0, 80)}
+                          {row.questionText.length > 80 ? "…" : ""}
+                        </span>
+                      </>
+                    ) : null}
+                  </td>
+                  <td>{reasonLabel(row.reason)}</td>
+                  <td>{row.note || "—"}</td>
+                  <td>
+                    {row.reporter?.includes("@")
+                      ? row.reporter.split("@")[0]
+                      : row.reporter || "—"}
+                  </td>
+                </tr>
+              ))
+            ) : (
+              <tr>
+                <td colSpan={5}>No question reports yet.</td>
+              </tr>
+            )}
+          </tbody>
+        </table>
+      </div>
+    </section>
   );
 }
 

@@ -2,6 +2,7 @@ import { visibleStreak, topicInsight, chooseDisplayName, DISPLAY_NAME_MAX } from
 import { DEFAULT_CLASS, normalizeClassId } from "../data/classes";
 import { displayNameFor } from "../state/roster";
 import { isAdmin } from "../state/auth";
+import { flushProgressPush } from "../state/progressSync";
 import TopicInsight from "../components/TopicInsight";
 import HexStats from "../components/HexStats";
 import StreakNotice from "../components/StreakNotice";
@@ -17,6 +18,8 @@ export default function Profile({ user, topics, progress, setProgress, onPractic
   const [nameDraft, setNameDraft] = useState(
     progress.displayName || fallbackName
   );
+  const [nameStatus, setNameStatus] = useState("");
+  const [nameBusy, setNameBusy] = useState(false);
   const boardName = progress.displayName || fallbackName;
   const rows = topics.map((topic) => ({
     topic,
@@ -32,6 +35,30 @@ export default function Profile({ user, topics, progress, setProgress, onPractic
   const starting = rows.filter((row) => row.insight.kind === "starting");
   const empty = rows.filter((row) => row.insight.kind === "empty");
 
+  async function saveName(event) {
+    event.preventDefault();
+    setNameBusy(true);
+    setNameStatus("");
+    let next = progress;
+    setProgress((p) => {
+      next = chooseDisplayName(p, nameDraft);
+      return next;
+    });
+    setNameDraft(next.displayName || fallbackName);
+    if (staff) {
+      setNameStatus("Saved on this device.");
+      setNameBusy(false);
+      return;
+    }
+    const ok = await flushProgressPush(user, next);
+    setNameStatus(
+      ok
+        ? "Saved to your account. It will show on other devices when you log in."
+        : "Saved on this device. Cloud sync is unavailable right now."
+    );
+    setNameBusy(false);
+  }
+
   return (
     <div className="page">
       <header className="topbar">
@@ -41,13 +68,7 @@ export default function Profile({ user, topics, progress, setProgress, onPractic
           <p className="login-hint">{user.username}</p>
         </div>
       </header>
-      <form
-        className="class-picker name-picker"
-        onSubmit={(event) => {
-          event.preventDefault();
-          setProgress((p) => chooseDisplayName(p, nameDraft));
-        }}
-      >
+      <form className="class-picker name-picker" onSubmit={saveName}>
         <label>
           Board name
           <input
@@ -55,16 +76,21 @@ export default function Profile({ user, topics, progress, setProgress, onPractic
             maxLength={DISPLAY_NAME_MAX}
             autoComplete="nickname"
             aria-describedby="name-disclaimer"
-            onChange={(e) => setNameDraft(e.target.value)}
+            disabled={nameBusy}
+            onChange={(e) => {
+              setNameDraft(e.target.value);
+              setNameStatus("");
+            }}
           />
         </label>
-        <button type="submit" className="primary">
-          Save name
+        <button type="submit" className="primary" disabled={nameBusy}>
+          {nameBusy ? "Saving…" : "Save name"}
         </button>
         <p id="name-disclaimer" className="login-hint">
           This is the name on Class board and Individual. Offensive names are
           not anonymous — we know who you are :D
         </p>
+        {nameStatus ? <p className="login-hint">{nameStatus}</p> : null}
       </form>
       {staff ? (
         <p className="class-picker">

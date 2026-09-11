@@ -7,6 +7,7 @@ import {
 } from "../data/leaderboard";
 import { CLASS_IDS, DEFAULT_CLASS, isPartTimeClass } from "../data/classes";
 import { isAdmin } from "../state/auth";
+import { useRemoteRosterTick } from "../hooks/useRemoteRosterTick";
 
 function StudentRows({ rows }) {
   return (
@@ -49,6 +50,7 @@ function StudentRows({ rows }) {
 }
 
 export default function Leaderboard({ user, progress, mode = "class" }) {
+  useRemoteRosterTick();
   const yourClass = studentClassId(user, progress);
   const [classId, setClassId] = useState(yourClass || DEFAULT_CLASS);
   const admin = isAdmin(user);

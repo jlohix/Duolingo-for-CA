@@ -1,5 +1,35 @@
 export const BUILT_IN_LOGS = [
   {
+    id: "built-2026-09-11-bank-families",
+    date: "2026-09-11",
+    title: "Multi-step bank questions",
+    body: "Question banks after walkthroughs now group steps like 201-1 and 201-2 into one Question 201. Easy, Average, and Challenging sit right after each matching walkthrough, including Norton, Max power, and Op-amp.",
+  },
+  {
+    id: "built-2026-09-11-forgot-password",
+    date: "2026-09-11",
+    title: "Forgot password",
+    body: "On the login screen you can tap Forgot password, verify with your matriculation number, and choose a new password.",
+  },
+  {
+    id: "built-2026-09-11-section4-practices",
+    date: "2026-09-11",
+    title: "More Section 4 practice",
+    body: "After each first-order walkthrough you can now do a Source-Free Inductor, RC step, and RL step practice — five quiz questions plus five value drags, like the capacitor practice.",
+  },
+  {
+    id: "built-2026-09-11-report-question",
+    date: "2026-09-11",
+    title: "Report a question",
+    body: "On any quiz question you can tap Report question and say why — for example if the question looks wrong — so staff can fix it.",
+  },
+  {
+    id: "built-2026-09-10-cloud-progress",
+    date: "2026-09-10",
+    title: "Progress saved to your account",
+    body: "Your XP, streak, class, and topic strengths now sync with your Circuito login, so they follow you on another device and show on the boards.",
+  },
+  {
     id: "built-2026-09-10-clear-leagues",
     date: "2026-09-10",
     title: "Trophy leagues start empty",

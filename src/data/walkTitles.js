@@ -41,8 +41,11 @@ const SECTION4 = [
   ["freec", "Source-Free Capacitor"],
   ["freecq", "Source-Free Capacitor Practice"],
   ["freel", "Source-Free Inductor"],
+  ["freelq", "Source-Free Inductor Practice"],
   ["stepc", "Step Response of RC"],
+  ["stepcq", "Step Response of RC Practice"],
   ["stepl", "Step Response of RL"],
+  ["steplq", "Step Response of RL Practice"],
 ];
 
 const SECTION5 = [

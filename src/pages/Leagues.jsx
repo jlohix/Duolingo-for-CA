@@ -3,6 +3,7 @@ import { buildLeagueBoard, formatRemain, SEASON_DAYS } from "../state/league";
 import { TROPHY_TIERS } from "../data/trophies";
 import { isAdmin } from "../state/auth";
 import TrophyCard from "../components/TrophyCard";
+import { useRemoteRosterTick } from "../hooks/useRemoteRosterTick";
 
 function StreakCell({ streak }) {
   const days = Number(streak) || 0;
@@ -18,6 +19,7 @@ function StreakCell({ streak }) {
 }
 
 export default function Leagues({ user, progress }) {
+  useRemoteRosterTick();
   const admin = isAdmin(user);
   const [now, setNow] = useState(Date.now());
   const [viewIndex, setViewIndex] = useState(

@@ -52,7 +52,16 @@ export default function Lesson({
         : questionsForLesson(allQuestions, topicId, difficulty),
     [allQuestions, topicId, difficulty, paperMode, bankMode, bankId, pack]
   );
-  const quiz = useQuizQueue(initial, xpEach);
+  const familyTotal = useMemo(() => {
+    if (!bankMode) return initial.length;
+    return new Set(
+      initial.map((q) => q.questionFamilyId || q.id).filter(Boolean)
+    ).size;
+  }, [bankMode, initial]);
+  const quiz = useQuizQueue(initial, xpEach, {
+    requireCorrectWithinFamily: bankMode,
+    familyTotal,
+  });
   const [leaveOpen, setLeaveOpen] = useState(false);
   const [stage, setStage] = useState(
     paperMode || bankMode ? "quiz" : "teach"
@@ -73,7 +82,7 @@ export default function Lesson({
         topic={topic}
         difficulty={difficulty}
         difficultyName={diff?.name}
-        bankCount={initial.length}
+        bankCount={bankMode ? familyTotal : initial.length}
         onReady={() => setStage("quiz")}
         onExit={onExit}
       />
@@ -85,7 +94,7 @@ export default function Lesson({
       onFinished({
         status: "complete",
         correct: quiz.firstPassCorrect,
-        total: quiz.originalTotal,
+        total: bankMode ? familyTotal : quiz.originalTotal,
         xpGained: 0,
         streak: visibleStreak(progress),
         streakFrom: visibleStreak(progress),
@@ -106,7 +115,7 @@ export default function Lesson({
     onFinished({
       status: "complete",
       correct: quiz.firstPassCorrect,
-      total: quiz.originalTotal,
+      total: bankMode ? familyTotal : quiz.originalTotal,
       xpGained: quiz.xpGained + xpBonus,
       streak: visibleStreak(next),
       streakFrom,
@@ -133,9 +142,26 @@ export default function Lesson({
     );
   }
 
-  const meter = quiz.originalTotal
-    ? (quiz.solvedCount / quiz.originalTotal) * 100
-    : 0;
+  const q = quiz.question;
+  const multiStep = (Number(q.stepCount) || 1) > 1;
+  const meter = bankMode
+    ? familyTotal
+      ? (quiz.completedFamilyCount / familyTotal) * 100
+      : 0
+    : quiz.originalTotal
+      ? (quiz.solvedCount / quiz.originalTotal) * 100
+      : 0;
+
+  const metaBits = [topicName, difficultyName];
+  if (bankMode && q.questionFamilyId) {
+    metaBits.push(`Question ${q.questionFamilyId}`);
+    if (multiStep) {
+      metaBits.push(`step ${q.stepIndex}/${q.stepCount}`);
+    }
+    metaBits.push(`${q.familyIndex}/${q.familyTotal}`);
+  } else {
+    metaBits.push(`${quiz.index + 1}/${quiz.queueLength}`);
+  }
 
   return (
     <div className="page lesson">
@@ -150,7 +176,7 @@ export default function Lesson({
         <ThemeSwitch compact />
       </header>
       <p className="lesson-meta">
-        {topicName} · {difficultyName} · {quiz.index + 1}/{quiz.queueLength}
+        {metaBits.join(" · ")}
         {preview ? " · staff preview · no XP" : xpEach ? ` · +${xpEach} XP` : " · practice"}
       </p>
       {quiz.reviewOpen ? (
@@ -192,6 +218,7 @@ export default function Lesson({
               explanation={quiz.question.explanation}
               willRepeat={
                 !isAnswerCorrect(quiz.question, quiz.selected) &&
+                !bankMode &&
                 quiz.index < quiz.originalTotal
               }
               onContinue={continueLesson}

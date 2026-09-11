@@ -4,6 +4,28 @@ const STORAGE_KEY = "circuito-progress-v1";
 const XP_CORRECT = 10;
 const XP_LESSON_BONUS = 20;
 
+/** Active student email for scoped localStorage + remote sync. */
+let progressOwner = null;
+
+export function setProgressOwner(email) {
+  const next = String(email || "")
+    .trim()
+    .toLowerCase();
+  progressOwner = next && next !== "admin" ? next : null;
+}
+
+export function getProgressOwner() {
+  return progressOwner;
+}
+
+function storageKeyFor(email) {
+  const owner = String(email || progressOwner || "")
+    .trim()
+    .toLowerCase();
+  if (!owner || owner === "admin") return STORAGE_KEY;
+  return `${STORAGE_KEY}:${owner}`;
+}
+
 const XP_BY_DIFFICULTY = {
   1: { correct: 10, bonus: 20 },
   2: { correct: 20, bonus: 40 },
@@ -128,38 +150,95 @@ function parseWalkFeedback(raw) {
   return out;
 }
 
-export function loadProgress() {
+function normalizeProgressData(data) {
+  return {
+    xp: Number(data.xp) || 0,
+    completed: Array.isArray(data.completed) ? data.completed : [],
+    streak: Number(data.streak) || 0,
+    lastPracticeDate: data.lastPracticeDate || "",
+    unlockedBySkip: Array.isArray(data.unlockedBySkip)
+      ? data.unlockedBySkip
+      : [],
+    topicStats: parseTopicStats(data.topicStats),
+    leagueIndex: Number.isFinite(Number(data.leagueIndex))
+      ? Number(data.leagueIndex)
+      : 0,
+    classId: normalizeClassId(data.classId),
+    classChosen: Boolean(data.classChosen),
+    displayName: normalizeDisplayName(data.displayName),
+    walkFeedback: parseWalkFeedback(data.walkFeedback),
+  };
+}
+
+function readProgressRaw(key) {
   try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    if (!raw) return emptyState();
-    const data = JSON.parse(raw);
-    return {
-      xp: Number(data.xp) || 0,
-      completed: Array.isArray(data.completed) ? data.completed : [],
-      streak: Number(data.streak) || 0,
-      lastPracticeDate: data.lastPracticeDate || "",
-      unlockedBySkip: Array.isArray(data.unlockedBySkip)
-        ? data.unlockedBySkip
-        : [],
-      topicStats: parseTopicStats(data.topicStats),
-      leagueIndex: Number.isFinite(Number(data.leagueIndex))
-        ? Number(data.leagueIndex)
-        : 0,
-      classId: normalizeClassId(data.classId),
-      classChosen: Boolean(data.classChosen),
-      displayName: normalizeDisplayName(data.displayName),
-      walkFeedback: parseWalkFeedback(data.walkFeedback),
-    };
+    const raw = localStorage.getItem(key);
+    if (!raw) return null;
+    return normalizeProgressData(JSON.parse(raw));
   } catch {
-    return emptyState();
+    return null;
   }
 }
 
-function saveProgress(state) {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+export function loadProgress(email) {
+  const key = storageKeyFor(email);
+  const scoped = readProgressRaw(key);
+  if (scoped) return scoped;
+
+  // One-time migrate unscoped browser progress into this student's key.
+  if (key !== STORAGE_KEY) {
+    const legacy = readProgressRaw(STORAGE_KEY);
+    if (legacy) {
+      localStorage.setItem(key, JSON.stringify(legacy));
+      return legacy;
+    }
+  }
+
+  return emptyState();
+}
+
+function saveProgress(state, email) {
+  localStorage.setItem(storageKeyFor(email), JSON.stringify(state));
 }
 
 export { saveProgress };
+
+export function progressToRemotePayload(state) {
+  return {
+    classId: normalizeClassId(state.classId),
+    classChosen: Boolean(state.classChosen),
+    xp: Number(state.xp) || 0,
+    streak: Number(state.streak) || 0,
+    lastPracticeDate: state.lastPracticeDate || "",
+    completed: Array.isArray(state.completed) ? state.completed : [],
+    unlockedBySkip: Array.isArray(state.unlockedBySkip)
+      ? state.unlockedBySkip
+      : [],
+    topicStats: parseTopicStats(state.topicStats),
+    leagueIndex: Number.isFinite(Number(state.leagueIndex))
+      ? Number(state.leagueIndex)
+      : 0,
+    displayName: normalizeDisplayName(state.displayName),
+    walkFeedback: parseWalkFeedback(state.walkFeedback),
+  };
+}
+
+export function remotePayloadToProgress(data) {
+  if (!data || typeof data !== "object") return emptyState();
+  return normalizeProgressData({
+    xp: data.xp,
+    completed: data.completed,
+    streak: data.streak,
+    lastPracticeDate: data.lastPracticeDate || data.last_practice_date,
+    unlockedBySkip: data.unlockedBySkip || data.unlocked_by_skip,
+    topicStats: data.topicStats || data.topic_stats,
+    leagueIndex: data.leagueIndex ?? data.league_index,
+    classId: data.classId || data.class_id,
+    classChosen: data.classChosen ?? data.class_chosen,
+    displayName: data.displayName || data.display_name,
+    walkFeedback: data.walkFeedback || data.walk_feedback,
+  });
+}
 
 export function recordWalkFeedback(state, lessonKey, vote) {
   if (!lessonKey || (vote !== "up" && vote !== "down")) return state;

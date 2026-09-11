@@ -1,4 +1,5 @@
 import MathText from "./MathText";
+import QuestionReport from "./QuestionReport";
 
 const LABELS = ["A", "B", "C", "D"];
 
@@ -45,6 +46,7 @@ export default function QuestionCard({
           );
         })}
       </div>
+      <QuestionReport question={question} />
     </article>
   );
 }

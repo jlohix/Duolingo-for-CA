@@ -26,7 +26,12 @@ import DividerSchematic from "./components/DividerSchematic";
 import DividerBranchesLesson from "./pages/DividerBranchesLesson";
 import PowerSchematic from "./components/PowerSchematic";
 import MaxPowerSchematic from "./components/MaxPowerSchematic";
-import { chooseClass, loadProgress } from "./state/progress";
+import { chooseClass, loadProgress, setProgressOwner } from "./state/progress";
+import {
+  bootstrapRemoteRoster,
+  hydrateProgressForUser,
+  scheduleProgressPush,
+} from "./state/progressSync";
 import { syncLeagueSeason } from "./state/league";
 import { loadSession, logout, isAdmin } from "./state/auth";
 import AppShell from "./components/AppShell";
@@ -54,9 +59,17 @@ export default function App() {
   const [questions, setQuestions] = useState([]);
   const [questionsLoaded, setQuestionsLoaded] = useState(false);
   const [error, setError] = useState("");
-  const [progress, setProgress] = useState(
-    () => syncLeagueSeason(loadProgress(), loadSession()).progress
-  );
+  const [session, setSession] = useState(() => loadSession());
+  const [progress, setProgress] = useState(() => {
+    const existing = loadSession();
+    if (existing?.username && existing.role !== "admin") {
+      setProgressOwner(existing.username);
+      return syncLeagueSeason(loadProgress(existing.username), existing)
+        .progress;
+    }
+    return syncLeagueSeason(loadProgress(), existing).progress;
+  });
+  const [progressReady, setProgressReady] = useState(() => !loadSession());
   const [screen, setScreen] = useState("home");
   const [lesson, setLesson] = useState(null);
   const [paperPack, setPaperPack] = useState(null);
@@ -64,7 +77,6 @@ export default function App() {
   const [secWalk, setSecWalk] = useState(null);
   const [skipTarget, setSkipTarget] = useState(null);
   const [summary, setSummary] = useState(null);
-  const [session, setSession] = useState(() => loadSession());
 
   useEffect(() => {
     loadQuestions()
@@ -77,6 +89,46 @@ export default function App() {
         setQuestionsLoaded(true);
       });
   }, []);
+
+  useEffect(() => {
+    let cancelled = false;
+    async function syncCloud() {
+      if (!session) {
+        setProgressOwner(null);
+        setProgressReady(true);
+        return;
+      }
+      setProgressReady(false);
+      try {
+        const hydrated = await hydrateProgressForUser(session);
+        if (cancelled) return;
+        const synced = syncLeagueSeason(hydrated, session).progress;
+        setProgress(synced);
+        await bootstrapRemoteRoster();
+      } catch {
+        if (!cancelled) {
+          setProgress(
+            syncLeagueSeason(
+              loadProgress(session.username),
+              session
+            ).progress
+          );
+        }
+      } finally {
+        if (!cancelled) setProgressReady(true);
+      }
+    }
+    syncCloud();
+    return () => {
+      cancelled = true;
+    };
+  }, [session?.username, session?.role]);
+
+  useEffect(() => {
+    if (!session || !progressReady) return;
+    if (isAdmin(session)) return;
+    scheduleProgressPush(session, progress);
+  }, [session, progress, progressReady]);
 
   const pastPapers = useMemo(
     () => groupPastPapers(PAST_YEAR_QUESTIONS),
@@ -95,9 +147,15 @@ export default function App() {
 
   const bankCounts = useMemo(() => {
     const map = {};
+    const seen = new Set();
     for (const question of questions) {
       if (!question.bankId) continue;
       const key = bankLessonKey(question.bankId, question.difficulty);
+      const fam = `${question.bankId}::${question.difficulty}::${
+        question.questionFamilyId || question.id
+      }`;
+      if (seen.has(fam)) continue;
+      seen.add(fam);
       map[key] = (map[key] || 0) + 1;
     }
     return map;
@@ -116,8 +174,32 @@ export default function App() {
 
   function handleLogout() {
     logout();
+    setProgressOwner(null);
+    setProgress(loadProgress());
+    setProgressReady(true);
     setSession(null);
     setScreen("home");
+  }
+
+  if (!isAdmin(session) && !progressReady) {
+    return (
+      <AppShell
+        nav="home"
+        onNav={() => {}}
+        user={session}
+        progress={progress}
+        onLogout={handleLogout}
+      >
+        <div className="page">
+          <header className="topbar">
+            <div>
+              <p className="eyebrow">Welcome</p>
+              <h1>Loading your progress…</h1>
+            </div>
+          </header>
+        </div>
+      </AppShell>
+    );
   }
 
   if (!isAdmin(session) && !progress.classChosen) {

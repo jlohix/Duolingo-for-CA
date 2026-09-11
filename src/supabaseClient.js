@@ -1,15 +1,10 @@
-const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
-const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY;
+const SUPABASE_URL =
+  import.meta.env.VITE_SUPABASE_URL ||
+  "https://qucqtavvoabgxlvlpobp.supabase.co";
 
-if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
-  // These come from your local .env file (see .env.example).
-  // If you see this error, create a .env file in the project root with
-  // VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY, then restart `npm run dev`.
-  throw new Error(
-    "Missing Supabase config. Copy .env.example to .env and fill in " +
-      "VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY."
-  );
-}
+const SUPABASE_ANON_KEY =
+  import.meta.env.VITE_SUPABASE_ANON_KEY ||
+  "sb_publishable_65cJaPpvDhrCdABzLcrADg_FCHY3nZl";
 
 function rpcHeaders() {
   return {
@@ -60,4 +55,41 @@ export async function setInitialPassword(email, matricNumber, newPassword) {
     p_new_password: newPassword,
   });
   return data === true;
+}
+
+export async function verifyStudentMatric(email, matricNumber) {
+  const data = await rpc("verify_student_matric", {
+    p_email: String(email || "").trim().toLowerCase(),
+    p_matric_number: String(matricNumber || "").trim(),
+  });
+  return data === true;
+}
+
+export async function resetPasswordWithMatric(email, matricNumber, newPassword) {
+  const data = await rpc("reset_password_with_matric", {
+    p_email: String(email || "").trim().toLowerCase(),
+    p_matric_number: String(matricNumber || "").trim(),
+    p_new_password: String(newPassword || "").trim(),
+  });
+  return data === true;
+}
+
+export async function getStudentProgress(email) {
+  const data = await rpc("get_student_progress", {
+    p_email: String(email || "").trim().toLowerCase(),
+  });
+  return data && typeof data === "object" ? data : null;
+}
+
+export async function upsertStudentProgress(email, progressPayload) {
+  const data = await rpc("upsert_student_progress", {
+    p_email: String(email || "").trim().toLowerCase(),
+    p_data: progressPayload,
+  });
+  return data === true;
+}
+
+export async function listStudentProgress() {
+  const data = await rpc("list_student_progress", {});
+  return Array.isArray(data) ? data : [];
 }

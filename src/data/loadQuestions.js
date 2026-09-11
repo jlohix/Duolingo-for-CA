@@ -1,6 +1,6 @@
 import Papa from "papaparse";
 import pastYearCsv from "./pastYearPapers.csv?raw";
-import { QUESTION_BANKS } from "./questionBanks";
+import { LOCAL_BANK_FOLDERS, QUESTION_BANKS } from "./questionBanks";
 
 const LETTERS = ["a", "b", "c", "d"];
 
@@ -24,6 +24,27 @@ function parseDifficulty(value) {
   const n = Number(value);
   if (n === 1 || n === 2 || n === 3) return n;
   return 2;
+}
+
+/** Split CSV ids like 201-1 into family + numeric step. */
+export function parseFamilyStep(rawId) {
+  const id = clean(rawId);
+  const match = id.match(/^(.*)-(\d+)$/);
+  if (!match) {
+    return { csvId: id, questionFamilyId: id || "q", stepNumber: 1 };
+  }
+  return {
+    csvId: id,
+    questionFamilyId: match[1],
+    stepNumber: Number(match[2]),
+  };
+}
+
+function compareFamilyIds(a, b) {
+  const na = Number(a);
+  const nb = Number(b);
+  if (Number.isFinite(na) && Number.isFinite(nb)) return na - nb;
+  return String(a).localeCompare(String(b), undefined, { numeric: true });
 }
 
 export function isAnswerCorrect(question, choice) {
@@ -93,8 +114,14 @@ function parseQuestionRows(text, { withPaper = false } = {}) {
 
     const image = normalizeImage(cell(row, "image"));
     const topicRaw = cell(row, "topicId", "topicid");
+    const rawId =
+      clean(cell(row, "id")) || `${topicRaw || "p"}-${questions.length}`;
+    const { csvId, questionFamilyId, stepNumber } = parseFamilyStep(rawId);
     const item = {
-      id: clean(cell(row, "id")) || `${topicRaw || "p"}-${questions.length}`,
+      id: csvId,
+      csvId,
+      questionFamilyId,
+      stepNumber,
       topicId: Number(topicRaw) || 0,
       question,
       options,
@@ -121,16 +148,24 @@ function localBankImage(image, bank) {
   return file ? `/question-bank/${bank.assetFolder}/${file}` : "";
 }
 
+function resolveBankImage(image, bank) {
+  const remote = normalizeImage(image);
+  if (LOCAL_BANK_FOLDERS.has(bank.assetFolder)) {
+    return localBankImage(remote, bank) || remote;
+  }
+  return remote;
+}
+
 async function loadQuestionBank(bank) {
   const res = await fetch(`/question-bank/csv/${bank.csv}`);
   if (!res.ok) throw new Error(`Could not load ${bank.csv}`);
   const rows = parseQuestionRows(await res.text());
   return rows.map((question) => ({
     ...question,
-    id: `${bank.id}-${question.id}`,
+    id: `${bank.id}-${question.csvId}`,
     bankId: bank.id,
     topicId: bank.topicId,
-    image: localBankImage(question.image, bank),
+    image: resolveBankImage(question.image, bank),
   }));
 }
 
@@ -198,12 +233,59 @@ export function questionsForLesson(all, topicId, difficulty) {
   );
 }
 
+/**
+ * Bank lessons: group CSV rows by questionFamilyId, sort steps numerically,
+ * keep families in numeric order. Flat list of steps for the quiz queue.
+ */
 export function questionsForBank(all, bankId, difficulty) {
-  return shuffle(
-    all.filter(
-      (q) => q.bankId === bankId && q.difficulty === difficulty
-    )
+  const rows = all.filter(
+    (q) => q.bankId === bankId && q.difficulty === difficulty
   );
+  const byFamily = new Map();
+  for (const question of rows) {
+    const familyId = String(
+      question.questionFamilyId || question.csvId || question.id
+    );
+    if (!byFamily.has(familyId)) byFamily.set(familyId, []);
+    byFamily.get(familyId).push(question);
+  }
+
+  for (const steps of byFamily.values()) {
+    steps.sort(
+      (a, b) =>
+        (Number(a.stepNumber) || 0) - (Number(b.stepNumber) || 0) ||
+        String(a.id).localeCompare(String(b.id))
+    );
+  }
+
+  const familyIds = [...byFamily.keys()].sort(compareFamilyIds);
+  const out = [];
+  familyIds.forEach((familyId, familyIndex) => {
+    const steps = byFamily.get(familyId);
+    steps.forEach((step, stepIndex) => {
+      out.push({
+        ...step,
+        questionFamilyId: familyId,
+        familyIndex: familyIndex + 1,
+        familyTotal: familyIds.length,
+        stepIndex: stepIndex + 1,
+        stepCount: steps.length,
+        isFamilyFinal: stepIndex === steps.length - 1,
+      });
+    });
+  });
+  return out;
+}
+
+export function countBankFamilies(all, bankId, difficulty) {
+  const seen = new Set();
+  for (const question of all) {
+    if (question.bankId !== bankId || question.difficulty !== difficulty) {
+      continue;
+    }
+    seen.add(String(question.questionFamilyId || question.id));
+  }
+  return seen.size;
 }
 
 export function questionsForSkip(all, targetTopicId, count = 5) {

@@ -176,6 +176,7 @@ function BankDifficultyNodes({
   return DIFFICULTIES.map((difficulty) => {
     const key = bankLessonKey(bank.id, difficulty.id);
     const count = counts[key] || 0;
+    if (!count && !allOpen) return null;
     const done = progress.completed?.includes(key);
     const priorOpen = DIFFICULTIES
       .filter((item) => item.id < difficulty.id)
@@ -251,6 +252,7 @@ function LawsLabs({
         <span className="node-name">Max power</span>
         <span className="node-count">Walkthrough</span>
       </button>
+      {bankNodes("max-power")}
       <button type="button" className={`node ${off}`} disabled={!unlocked} onClick={labs.onSourceTransform}>
         <span className="node-icon">V↔I</span>
         <span className="node-name">Source Transformation</span>
@@ -268,6 +270,7 @@ function LawsLabs({
         <span className="node-name">Norton</span>
         <span className="node-count">Walkthrough</span>
       </button>
+      {bankNodes("norton")}
       <button type="button" className={`node ${off}`} disabled={!unlocked} onClick={labs.onDepLab}>
         <span className="node-icon">◇</span>
         <span className="node-name">Dependent</span>
@@ -433,6 +436,16 @@ function TopicLadder({
                 progress={progress}
                 topicId={topic.id}
                 onOpen={(id) => onSectionWalk(topic.id, id)}
+              />
+            ) : null}
+            {topic.id === 2 ? (
+              <BankDifficultyNodes
+                bankId="opamp"
+                unlocked={unlocked}
+                progress={progress}
+                counts={bankCounts}
+                onStart={onStartBank}
+                allOpen={allOpen}
               />
             ) : null}
             {showLaplaceWalks ? (

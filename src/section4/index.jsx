@@ -1,6 +1,9 @@
 import WalkLesson, { makeCatalog } from "../components/WalkLesson";
 import Section4Schematic from "./Schematics";
 import FreeCQuizDragBoard from "./FreeCQuizDragBoard";
+import FreeLQuizDragBoard from "./FreeLQuizDragBoard";
+import StepCQuizDragBoard from "./StepCQuizDragBoard";
+import StepLQuizDragBoard from "./StepLQuizDragBoard";
 import { FREEC, FREEL, STEPRC, STEPRL } from "./labs";
 import {
   FREEC_QUIZ,
@@ -8,6 +11,24 @@ import {
   freeCQuizDragLabel,
   freeCQuizDragPrompt,
 } from "../data/freeCQuizLab";
+import {
+  FREEL_QUIZ,
+  FREEL_QUIZ_DRAG,
+  freeLQuizDragLabel,
+  freeLQuizDragPrompt,
+} from "../data/freeLQuizLab";
+import {
+  STEPC_QUIZ,
+  STEPC_QUIZ_DRAG,
+  stepCQuizDragLabel,
+  stepCQuizDragPrompt,
+} from "../data/stepCQuizLab";
+import {
+  STEPL_QUIZ,
+  STEPL_QUIZ_DRAG,
+  stepLQuizDragLabel,
+  stepLQuizDragPrompt,
+} from "../data/stepLQuizLab";
 
 export const SECTION4_LABS = [
   {
@@ -48,6 +69,21 @@ export const SECTION4_LABS = [
     practice: FREEL.practice,
   },
   {
+    id: "freelq",
+    title: "Source-Free Inductor Practice",
+    icon: "L?",
+    count: "5 quiz + 5 drag",
+    boardHint: "",
+    formula: "$i(t)=i(0)e^{-(R/L)t}$",
+    doneBlurb: "Use the R that L actually sees. τ = L/R is the 1/e time.",
+    practice: FREEL_QUIZ,
+    drag: FREEL_QUIZ_DRAG,
+    DragBoard: FreeLQuizDragBoard,
+    dragPrompt: freeLQuizDragPrompt,
+    dragLabel: freeLQuizDragLabel,
+    dragHint: "Hold a value and drop it on the gap, or tap it.",
+  },
+  {
     id: "stepc",
     title: "Step Response of RC",
     icon: "uC",
@@ -59,6 +95,21 @@ export const SECTION4_LABS = [
     practice: STEPRC.practice,
   },
   {
+    id: "stepcq",
+    title: "Step Response of RC Practice",
+    icon: "RC?",
+    count: "5 quiz + 5 drag",
+    boardHint: "",
+    formula: "$v=V_s+(V_0-V_s)e^{-t/\\tau}$",
+    doneBlurb: "v cannot jump. Forced value is Vs. From rest, climb 63% by τ.",
+    practice: STEPC_QUIZ,
+    drag: STEPC_QUIZ_DRAG,
+    DragBoard: StepCQuizDragBoard,
+    dragPrompt: stepCQuizDragPrompt,
+    dragLabel: stepCQuizDragLabel,
+    dragHint: "Hold a value and drop it on the gap, or tap it.",
+  },
+  {
     id: "stepl",
     title: "Step Response of RL",
     icon: "uL",
@@ -68,6 +119,21 @@ export const SECTION4_LABS = [
     doneBlurb: "Same DE as inductor-with-source.",
     steps: STEPRL.steps,
     practice: STEPRL.practice,
+  },
+  {
+    id: "steplq",
+    title: "Step Response of RL Practice",
+    icon: "RL?",
+    count: "5 quiz + 5 drag",
+    boardHint: "",
+    formula: "$i=V_s/R+(I_0-V_s/R)e^{-t/\\tau}$",
+    doneBlurb: "i cannot jump. Forced value is Vs/R. From rest, climb 63% by τ.",
+    practice: STEPL_QUIZ,
+    drag: STEPL_QUIZ_DRAG,
+    DragBoard: StepLQuizDragBoard,
+    dragPrompt: stepLQuizDragPrompt,
+    dragLabel: stepLQuizDragLabel,
+    dragHint: "Hold a value and drop it on the gap, or tap it.",
   },
 ];
 
