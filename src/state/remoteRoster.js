@@ -42,6 +42,7 @@ export function normalizeRemoteStudent(row) {
           ? row.topic_stats
           : {},
     completed: Array.isArray(row.completed) ? row.completed : [],
+    avatarUrl: String(row.avatarUrl || row.avatar_url || "").trim(),
     remote: true,
     live: false,
   };

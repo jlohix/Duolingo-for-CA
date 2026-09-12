@@ -6,6 +6,7 @@ import {
   studentClassId,
 } from "../data/leaderboard";
 import { CLASS_IDS, DEFAULT_CLASS, isPartTimeClass } from "../data/classes";
+import { avatarSrc, isDefaultAvatar } from "../data/avatars";
 import { isAdmin } from "../state/auth";
 import { useRemoteRosterTick } from "../hooks/useRemoteRosterTick";
 
@@ -20,6 +21,16 @@ function StudentRows({ rows }) {
             className={`board-row ${row.isYou ? "you" : ""}`}
           >
             <span className="board-rank">{row.rank}</span>
+            <img
+              className={`board-avatar${
+                isDefaultAvatar(row.avatarUrl) ? " is-default" : ""
+              }`}
+              src={avatarSrc(row.avatarUrl)}
+              alt=""
+              aria-hidden="true"
+              width={32}
+              height={32}
+            />
             <span className="board-name">
               {row.display}
               {row.isYou ? " (you)" : ""}

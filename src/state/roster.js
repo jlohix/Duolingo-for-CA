@@ -160,6 +160,7 @@ export function listStudents(liveProgress, options = {}) {
     topicStats: cloneStats(liveProgress.topicStats),
     completed: liveProgress.completed || [],
     walkFeedback: liveProgress.walkFeedback || {},
+    avatarUrl: String(liveProgress.avatarUrl || "").trim(),
     live: true,
   };
 
