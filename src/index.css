@@ -3743,3 +3743,9 @@ html[data-theme="dark"] .circuit-svg .board-step {
   object-fit: contain;
   padding: 3px;
 }
+
+
+/* Resolved question reports appear dimmed in the admin table */
+.admin-table tr.report-resolved td {
+  opacity: 0.5;
+}
