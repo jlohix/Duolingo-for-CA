@@ -108,3 +108,35 @@ export async function listStudentProgress() {
   const data = await rpc("list_student_progress", {});
   return Array.isArray(data) ? data : [];
 }
+
+// ---------- Question reports ----------
+
+export async function submitQuestionReportRemote({
+  questionId,
+  questionText,
+  reason,
+  note,
+  reporter,
+}) {
+  const data = await rpc("submit_question_report", {
+    p_question_id: String(questionId || "").trim(),
+    p_question_text: String(questionText || ""),
+    p_reason: String(reason || "").trim(),
+    p_note: String(note || "").trim(),
+    p_reporter: String(reporter || "").trim().toLowerCase(),
+  });
+  return data === true;
+}
+
+export async function listQuestionReportsRemote() {
+  const data = await rpc("list_question_reports", {});
+  return Array.isArray(data) ? data : [];
+}
+
+export async function resolveQuestionReportRemote(id, resolved) {
+  const data = await rpc("resolve_question_report", {
+    p_id: id,
+    p_resolved: Boolean(resolved),
+  });
+  return data === true;
+}

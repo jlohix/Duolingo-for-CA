@@ -218,13 +218,30 @@ export default function Admin({ progress, setProgress, counts, bankCounts = {} }
 }
 
 function QuestionReportsTable() {
-  const rows = listQuestionReports();
+  const [rows, setRows] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    let active = true;
+    setLoading(true);
+    listQuestionReports()
+      .then((data) => {
+        if (active) setRows(Array.isArray(data) ? data : []);
+      })
+      .finally(() => {
+        if (active) setLoading(false);
+      });
+    return () => {
+      active = false;
+    };
+  }, []);
+
   return (
     <section className="admin-walk-feedback">
       <h2>Question reports</h2>
       <p className="login-hint">
-        Reports from this browser. Students tap Report question on a quiz item
-        and pick a reason.
+        Reports submitted by students across all devices. Students tap Report
+        question on a quiz item and pick a reason.
       </p>
       <div className="admin-table-wrap">
         <table className="admin-table">
@@ -265,7 +282,9 @@ function QuestionReportsTable() {
               ))
             ) : (
               <tr>
-                <td colSpan={5}>No question reports yet.</td>
+                <td colSpan={5}>
+                  {loading ? "Loading reports…" : "No question reports yet."}
+                </td>
               </tr>
             )}
           </tbody>
