@@ -22,11 +22,11 @@ export default function QuestionReport({ question }) {
 
   if (!question?.id) return null;
 
-  function send(event) {
+  async function send(event) {
     event.preventDefault();
     setError("");
     const session = loadSession();
-    const result = submitQuestionReport({
+    const result = await submitQuestionReport({
       questionId: question.id,
       questionText: question.question,
       reason,
