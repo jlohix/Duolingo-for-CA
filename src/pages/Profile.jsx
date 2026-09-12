@@ -105,7 +105,7 @@ export default function Profile({ user, topics, progress, setProgress, onPractic
         Your class
         <strong>{normalizeClassId(progress.classId || DEFAULT_CLASS)}</strong>
         <span className="login-hint">
-          You chose this the first time you logged in.
+          Your class is set by staff. Contact your tutor if it looks wrong.
         </span>
       </p>
       )}

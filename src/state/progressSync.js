@@ -49,6 +49,19 @@ export async function hydrateProgressForUser(session) {
 
   const remoteState = remote ? remotePayloadToProgress(remote) : null;
 
+  // The class is ASSIGNED by staff (authorised_users) and returned by the
+  // backend. It is authoritative: whichever progress state we end up using
+  // (local or remote), the assigned class must win over any old local value.
+  // remoteState carries the assigned class + classChosen from get_student_progress.
+  function withAssignedClass(state) {
+    if (!state || !remoteState) return state;
+    return {
+      ...state,
+      classId: remoteState.classId,
+      classChosen: remoteState.classChosen,
+    };
+  }
+
   if (remoteState && hasMeaningfulProgress(remoteState)) {
     const localAhead =
       hasMeaningfulProgress(local) &&
@@ -57,25 +70,28 @@ export async function hydrateProgressForUser(session) {
           (local.completed || []).length >
             (remoteState.completed || []).length));
     if (localAhead) {
+      const merged = withAssignedClass(local);
       try {
-        await upsertStudentProgress(email, progressToRemotePayload(local));
+        await upsertStudentProgress(email, progressToRemotePayload(merged));
       } catch {
         /* keep local */
       }
-      saveProgress(local, email);
-      return local;
+      saveProgress(merged, email);
+      return merged;
     }
     saveProgress(remoteState, email);
     return remoteState;
   }
 
   if (hasMeaningfulProgress(local)) {
+    const merged = withAssignedClass(local);
     try {
-      await upsertStudentProgress(email, progressToRemotePayload(local));
+      await upsertStudentProgress(email, progressToRemotePayload(merged));
     } catch {
       /* keep local; retry on later saves */
     }
-    return local;
+    saveProgress(merged, email);
+    return merged;
   }
 
   if (remoteState) {
