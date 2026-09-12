@@ -16,6 +16,7 @@ import { summarizeWalkFeedback, WALK_TITLES } from "../data/walkTitles";
 import { useRemoteRosterTick } from "../hooks/useRemoteRosterTick";
 import {
   listQuestionReports,
+  resolveQuestionReport,
   reasonLabel,
 } from "../state/questionReports";
 
@@ -220,29 +221,60 @@ export default function Admin({ progress, setProgress, counts, bankCounts = {} }
 function QuestionReportsTable() {
   const [rows, setRows] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [showResolved, setShowResolved] = useState(false);
+  const [busyId, setBusyId] = useState(null);
 
-  useEffect(() => {
-    let active = true;
+  function reload(active = { current: true }) {
     setLoading(true);
     listQuestionReports()
       .then((data) => {
-        if (active) setRows(Array.isArray(data) ? data : []);
+        if (active.current !== false) setRows(Array.isArray(data) ? data : []);
       })
       .finally(() => {
-        if (active) setLoading(false);
+        if (active.current !== false) setLoading(false);
       });
+  }
+
+  useEffect(() => {
+    const active = { current: true };
+    reload(active);
     return () => {
-      active = false;
+      active.current = false;
     };
   }, []);
+
+  async function toggleResolved(row) {
+    setBusyId(row.id);
+    const ok = await resolveQuestionReport(row.id, !row.resolved);
+    if (ok) {
+      // Update locally so the change shows immediately.
+      setRows((prev) =>
+        prev.map((r) =>
+          r.id === row.id ? { ...r, resolved: !row.resolved } : r
+        )
+      );
+    }
+    setBusyId(null);
+  }
+
+  const openCount = rows.filter((r) => !r.resolved).length;
+  const visible = showResolved ? rows : rows.filter((r) => !r.resolved);
 
   return (
     <section className="admin-walk-feedback">
       <h2>Question reports</h2>
       <p className="login-hint">
-        Reports submitted by students across all devices. Students tap Report
-        question on a quiz item and pick a reason.
+        Reports submitted by students across all devices. {openCount} open.
+        Mark a report resolved once you have fixed the question.
       </p>
+      <label className="login-hint" style={{ display: "inline-block", marginBottom: 8 }}>
+        <input
+          type="checkbox"
+          checked={showResolved}
+          onChange={(e) => setShowResolved(e.target.checked)}
+        />{" "}
+        Show resolved reports
+      </label>
       <div className="admin-table-wrap">
         <table className="admin-table">
           <thead>
@@ -252,12 +284,14 @@ function QuestionReportsTable() {
               <th>Reason</th>
               <th>Details</th>
               <th>From</th>
+              <th>Status</th>
+              <th>Action</th>
             </tr>
           </thead>
           <tbody>
-            {rows.length ? (
-              rows.map((row) => (
-                <tr key={row.id}>
+            {visible.length ? (
+              visible.map((row) => (
+                <tr key={row.id} className={row.resolved ? "report-resolved" : ""}>
                   <td>{String(row.at || "").replace("T", " ").slice(0, 16)}</td>
                   <td>
                     <code>{row.questionId}</code>
@@ -278,12 +312,31 @@ function QuestionReportsTable() {
                       ? row.reporter.split("@")[0]
                       : row.reporter || "—"}
                   </td>
+                  <td>{row.resolved ? "Resolved" : "Open"}</td>
+                  <td>
+                    <button
+                      type="button"
+                      className="admin-name-btn"
+                      disabled={busyId === row.id}
+                      onClick={() => toggleResolved(row)}
+                    >
+                      {busyId === row.id
+                        ? "…"
+                        : row.resolved
+                          ? "Reopen"
+                          : "Resolve"}
+                    </button>
+                  </td>
                 </tr>
               ))
             ) : (
               <tr>
-                <td colSpan={5}>
-                  {loading ? "Loading reports…" : "No question reports yet."}
+                <td colSpan={7}>
+                  {loading
+                    ? "Loading reports…"
+                    : showResolved
+                      ? "No question reports yet."
+                      : "No open reports. 🎉"}
                 </td>
               </tr>
             )}
