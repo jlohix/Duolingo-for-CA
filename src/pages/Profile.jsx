@@ -1,6 +1,6 @@
 import { visibleStreak, topicInsight, chooseDisplayName, DISPLAY_NAME_MAX, setAvatarUrl } from "../state/progress";
 import { DEFAULT_CLASS, normalizeClassId } from "../data/classes";
-import { avatarSrc } from "../data/avatars";
+import { avatarSrc, isDefaultAvatar } from "../data/avatars";
 import { displayNameFor } from "../state/roster";
 import { isAdmin } from "../state/auth";
 import { flushProgressPush } from "../state/progressSync";
@@ -135,7 +135,9 @@ export default function Profile({ user, topics, progress, setProgress, onPractic
           {!staff ? (
             <div className="profile-avatar-wrap">
               <img
-                className="profile-avatar"
+                className={`profile-avatar${
+                  isDefaultAvatar(progress.avatarUrl) ? " is-default" : ""
+                }`}
                 src={avatarSrc(progress.avatarUrl)}
                 alt="Your profile picture"
                 width={72}

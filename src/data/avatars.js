@@ -14,3 +14,9 @@ export function avatarSrc(url) {
   const clean = String(url || "").trim();
   return clean || DEFAULT_AVATAR;
 }
+
+// True when the user has no uploaded avatar (i.e. we're showing the default).
+// Used to style the default differently (fit whole image, no crop).
+export function isDefaultAvatar(url) {
+  return !String(url || "").trim();
+}
