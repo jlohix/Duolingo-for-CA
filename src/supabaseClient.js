@@ -21,9 +21,24 @@ async function rpc(name, body) {
     body: JSON.stringify(body),
   });
   if (!response.ok) {
-    throw new Error("The student login service is unavailable.");
+    let detail = "";
+    try {
+      detail = await response.text();
+    } catch {
+      /* ignore */
+    }
+    const err = new Error(
+      detail
+        ? `The student login service is unavailable. (${detail})`
+        : "The student login service is unavailable."
+    );
+    err.status = response.status;
+    throw err;
   }
-  return response.json();
+  // empty body
+  const text = await response.text();
+  if (!text) return null;
+  return JSON.parse(text);
 }
 
 export function parseAuthResult(data) {

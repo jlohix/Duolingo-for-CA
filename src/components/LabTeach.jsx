@@ -123,7 +123,7 @@ export default function LabTeach({
           {skipLabel}
         </button>
       ) : null}
-      {step.view && step.view !== "map" && !step.hideBoard ? (
+      {Schematic && step.view !== "map" && !step.hideBoard ? (
         <div className="circuit-board">
           <Schematic highlight={step.highlight} view={step.view} />
           {(step.boardHint !== undefined ? step.boardHint : boardHint) ? (

@@ -5,7 +5,7 @@ const STEPS = [
   },
   {
     title: "Learn path",
-    text: "Open Learn in the sidebar. You see sections as cards: Basic laws, Op-amps, Transients, First-order circuits, Laplace transforms, Network functions, and Frequency domain. Open a section to walk Easy, then Average, then Challenging. Topics unlock in order. Basic laws has Ohm through Superposition walkthroughs before Easy. Op-amps has the op-amp walkthroughs. Laplace transforms starts with walkthroughs before Easy; each walkthrough ends on its own complete screen. Past year papers sit at the bottom of Learn for exam practice.",
+    text: "Open Learn in the sidebar. You see sections as cards: Basic laws, Op-amps, Transients, First-order circuits, Laplace transforms, Network functions, and Frequency domain. Finish a section’s practice units (or pass the skip quiz) before the next section opens. Basic laws has Ohm through Superposition walkthroughs and banks. Op-amps has the op-amp walkthroughs. Laplace transforms starts with walkthroughs before Easy; each walkthrough ends on its own complete screen. Past year papers sit at the bottom of Learn for exam practice.",
   },
   {
     title: "Lessons",
@@ -21,7 +21,7 @@ const STEPS = [
   },
   {
     title: "Skip a locked topic",
-    text: "The next locked unit can be unlocked with a 5-question quiz. You need 4 out of 5 correct on the first try. A second miss ends that attempt; missed questions are not retried.",
+    text: "The next locked section can be unlocked with a 5-question quiz. You need 4 out of 5 correct on the first try. A second miss ends that attempt; missed questions are not retried.",
   },
   {
     title: "Profile and Progress",

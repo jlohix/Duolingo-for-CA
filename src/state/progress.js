@@ -1,4 +1,5 @@
 import { DEFAULT_CLASS, normalizeClassId } from "../data/classes";
+import { QUESTION_BANKS, bankLessonKey } from "../data/questionBanks";
 
 const STORAGE_KEY = "circuito-progress-v1";
 const XP_CORRECT = 10;
@@ -470,15 +471,39 @@ export function unlockTopicBySkip(state, topicId) {
   return next;
 }
 
-export function isTopicUnlocked(topicIndex, progress, counts = {}) {
+/** Quiz + bank lesson keys that count toward finishing a section. */
+export function sectionProgressKeys(topicId, counts = {}, bankCounts = {}) {
+  const topicKeys = [1, 2, 3]
+    .map((d) => `${topicId}-${d}`)
+    .filter((key) => (counts[key] || 0) > 0);
+  const bankKeys = QUESTION_BANKS.filter((bank) => bank.topicId === topicId)
+    .flatMap((bank) =>
+      [1, 2, 3]
+        .map((d) => bankLessonKey(bank.id, d))
+        .filter((key) => (bankCounts[key] || 0) > 0)
+    );
+  return [...topicKeys, ...bankKeys];
+}
+
+export function isSectionComplete(topicId, progress, counts = {}, bankCounts = {}) {
+  const keys = sectionProgressKeys(topicId, counts, bankCounts);
+  if (!keys.length) return false;
+  const completed = progress.completed || [];
+  return keys.every((key) => completed.includes(key));
+}
+
+export function isTopicUnlocked(
+  topicIndex,
+  progress,
+  counts = {},
+  bankCounts = {}
+) {
   if (topicIndex === 0) return true;
   const topicId = topicIndex + 1;
   if ((progress.unlockedBySkip || []).includes(topicId)) return true;
-  const completed = progress.completed || [];
-  const prevId = topicIndex;
-  const required = [1, 2, 3].find((d) => (counts[`${prevId}-${d}`] || 0) > 0);
-  if (!required) return true;
-  return completed.includes(`${prevId}-${required}`);
+  // Previous section must be finished (its quiz/bank units). Topic index
+  // matches the previous topic id (0-based index → prior 1-based id).
+  return isSectionComplete(topicIndex, progress, counts, bankCounts);
 }
 
 export function isLessonUnlocked(topicId, difficulty, progress, counts = {}) {

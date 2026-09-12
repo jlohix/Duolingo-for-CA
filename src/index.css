@@ -2886,6 +2886,11 @@ html[data-theme="dark"] .labs-egg-b {
   fill: #58cc02;
 }
 
+.circuit-svg.lab-teach .circuit-source-fill {
+  fill: var(--card);
+  stroke: none;
+}
+
 .circuit-svg.lab-teach .slide-math.board-formula,
 .circuit-svg.lab-teach .slide-math.board-formula-near,
 .circuit-svg.lab-teach .slide-math.box-math-lg {

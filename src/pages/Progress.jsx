@@ -1,23 +1,43 @@
 import { DIFFICULTIES, lessonKey } from "../data/topics";
-import { visibleStreak, topicInsight } from "../state/progress";
+import { QUESTION_BANKS, bankLessonKey } from "../data/questionBanks";
+import { WALK_TITLES } from "../data/walkTitles";
+import {
+  visibleStreak,
+  topicInsight,
+  sectionProgressKeys,
+} from "../state/progress";
 import TopicInsight from "../components/TopicInsight";
 import HexStats from "../components/HexStats";
+
+function lessonCompletionStats(progress, topics, counts, bankCounts) {
+  const keys = [];
+  for (const topic of topics || []) {
+    keys.push(...sectionProgressKeys(topic.id, counts, bankCounts));
+  }
+  for (const walk of WALK_TITLES) {
+    if (!keys.includes(walk.key)) keys.push(walk.key);
+  }
+  const completed = progress?.completed || [];
+  const done = keys.filter((key) => completed.includes(key)).length;
+  return { done, total: keys.length };
+}
 
 export default function ProgressPage({
   topics,
   progress,
   counts,
+  bankCounts = {},
   eyebrow = "Your stats",
   title = "Progress",
 }) {
   const streak = visibleStreak(progress);
   const completed = progress.completed || [];
-  const totalLessons = topics.reduce((sum, topic) => {
-    return (
-      sum +
-      DIFFICULTIES.filter((diff) => counts[lessonKey(topic.id, diff.id)]).length
-    );
-  }, 0);
+  const { done, total } = lessonCompletionStats(
+    progress,
+    topics,
+    counts,
+    bankCounts
+  );
   const insights = topics.map((topic) => ({
     topic,
     insight: topicInsight(progress, topic.id),
@@ -53,7 +73,7 @@ export default function ProgressPage({
         </li>
         <li>
           <strong>
-            {completed.length}/{totalLessons || 0}
+            {done}/{total}
           </strong>
           <span>lessons done</span>
         </li>
@@ -89,37 +109,63 @@ export default function ProgressPage({
         <HexStats topics={topics} progress={progress} />
       </section>
       <ol className="progress-topics">
-        {insights.map(({ topic, insight }) => (
-          <li key={topic.id} className="progress-topic">
-            <h2>{topic.name}</h2>
-            <p>{topic.blurb}</p>
-            <TopicInsight insight={insight} />
-            {insight.attempts ? (
-              <div className="insight-meter" aria-hidden="true">
-                <div
-                  className={`insight-fill ${insight.kind}`}
-                  style={{ width: `${insight.pct}%` }}
-                />
-              </div>
-            ) : null}
-            <ul className="progress-diffs">
-              {DIFFICULTIES.map((diff) => {
-                const key = lessonKey(topic.id, diff.id);
-                const n = counts[key] || 0;
-                const done = completed.includes(key);
-                return (
+        {insights.map(({ topic, insight }) => {
+          const bankRows = QUESTION_BANKS.filter(
+            (bank) => bank.topicId === topic.id
+          ).flatMap((bank) =>
+            DIFFICULTIES.map((diff) => {
+              const key = bankLessonKey(bank.id, diff.id);
+              const n = bankCounts[key] || 0;
+              if (!n) return null;
+              return {
+                key,
+                label: `${bank.title} ${diff.name}`,
+                n,
+                done: completed.includes(key),
+              };
+            }).filter(Boolean)
+          );
+          return (
+            <li key={topic.id} className="progress-topic">
+              <h2>{topic.name}</h2>
+              <p>{topic.blurb}</p>
+              <TopicInsight insight={insight} />
+              {insight.attempts ? (
+                <div className="insight-meter" aria-hidden="true">
+                  <div
+                    className={`insight-fill ${insight.kind}`}
+                    style={{ width: `${insight.pct}%` }}
+                  />
+                </div>
+              ) : null}
+              <ul className="progress-diffs">
+                {DIFFICULTIES.map((diff) => {
+                  const key = lessonKey(topic.id, diff.id);
+                  const n = counts[key] || 0;
+                  const isDone = completed.includes(key);
+                  return (
+                    <li
+                      key={key}
+                      className={`progress-pill ${isDone ? "done" : ""} ${n ? "" : "empty"}`}
+                    >
+                      {diff.name}
+                      {n ? (isDone ? " · done" : ` · ${n} Qs`) : " · none"}
+                    </li>
+                  );
+                })}
+                {bankRows.map((row) => (
                   <li
-                    key={key}
-                    className={`progress-pill ${done ? "done" : ""} ${n ? "" : "empty"}`}
+                    key={row.key}
+                    className={`progress-pill ${row.done ? "done" : ""}`}
                   >
-                    {diff.name}
-                    {n ? (done ? " · done" : ` · ${n} Qs`) : " · none"}
+                    {row.label}
+                    {row.done ? " · done" : " · step-by-step"}
                   </li>
-                );
-              })}
-            </ul>
-          </li>
-        ))}
+                ))}
+              </ul>
+            </li>
+          );
+        })}
       </ol>
     </div>
   );

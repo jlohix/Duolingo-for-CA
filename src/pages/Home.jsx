@@ -105,7 +105,9 @@ function SectionCard({
     : !showMeter
     ? "Open"
     : !unlocked
-      ? `Jump to section ${index}`
+      ? skipReady
+        ? `Jump to section ${index}`
+        : "Locked"
       : meter.pct >= 100
         ? "Review"
         : meter.pct > 0
@@ -139,10 +141,13 @@ function SectionCard({
         <button
           type="button"
           className={unlocked && current ? "section-cta" : "section-cta ghost"}
-          disabled={comingSoon}
+          disabled={comingSoon || (!unlocked && !skipReady)}
           onClick={() => {
-            if (!unlocked && skipReady) onJump();
-            else onOpen();
+            if (!unlocked) {
+              if (skipReady) onJump();
+              return;
+            }
+            onOpen();
           }}
         >
           {cta}
@@ -199,7 +204,11 @@ function BankDifficultyNodes({
           {bank.title} {difficulty.name}
         </span>
         <span className="node-count">
-          {!count ? "No questions" : canPlay ? `${count} Qs` : "Locked"}
+          {!count
+            ? "No questions"
+            : canPlay
+              ? "Step-by-step question"
+              : "Locked"}
         </span>
       </button>
     );
@@ -279,12 +288,12 @@ function LawsLabs({
       <button type="button" className={`node ${off}`} disabled={!unlocked} onClick={labs.onNodalLab}>
         <span className="node-icon">N</span>
         <span className="node-name">Nodal</span>
-        <span className="node-count">2 + 3 hard</span>
+        <span className="node-count">Walkthrough</span>
       </button>
       <button type="button" className={`node ${off}`} disabled={!unlocked} onClick={labs.onMeshLab}>
         <span className="node-icon">M</span>
         <span className="node-name">Mesh</span>
-        <span className="node-count">I1 and I2</span>
+        <span className="node-count">Walkthrough</span>
       </button>
       <button type="button" className={`node ${off}`} disabled={!unlocked} onClick={labs.onSuperMeshLab}>
         <span className="node-icon">SM</span>
@@ -536,13 +545,13 @@ export default function Home({
   const firstLockedIndex = allOpen
     ? -1
     : topics.findIndex(
-        (_, index) => !isTopicUnlocked(index, progress, counts)
+        (_, index) => !isTopicUnlocked(index, progress, counts, bankCounts)
       );
   const skipTopic =
     firstLockedIndex >= 0 ? topics[firstLockedIndex] : null;
   const needed = Math.ceil(SKIP_QUIZ_SIZE * SKIP_PASS_RATIO);
   const currentIndex = topics.findIndex((topic, index) => {
-    if (!isTopicUnlocked(index, progress, counts)) return false;
+    if (!isTopicUnlocked(index, progress, counts, bankCounts)) return false;
     return topicMeter(topic, progress, counts, bankCounts).pct < 100;
   });
 
@@ -623,7 +632,9 @@ export default function Home({
           <TopicLadder
             topic={topic}
             index={index + 1}
-            unlocked={allOpen || isTopicUnlocked(index, progress, counts)}
+            unlocked={
+              allOpen || isTopicUnlocked(index, progress, counts, bankCounts)
+            }
             isSkipTarget={!allOpen && skipTopic && index === firstLockedIndex}
             progress={progress}
             counts={counts}
@@ -686,7 +697,8 @@ export default function Home({
           const comingSoon = topic.id >= 5;
           const unlocked =
             !comingSoon &&
-            (allOpen || isTopicUnlocked(index, progress, counts));
+            (allOpen ||
+              isTopicUnlocked(index, progress, counts, bankCounts));
           const meter = topicMeter(topic, progress, counts, bankCounts);
           const skipReady =
             !comingSoon &&

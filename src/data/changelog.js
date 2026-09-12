@@ -1,5 +1,47 @@
 export const BUILT_IN_LOGS = [
   {
+    id: "built-2026-09-12-nodal-mesh-walk-label",
+    date: "2026-09-12",
+    title: "Nodal and Mesh labels",
+    body: "Nodal and Mesh on the Learn path now say Walkthrough, like the other Basic laws labs.",
+  },
+  {
+    id: "built-2026-09-12-lessons-done-count",
+    date: "2026-09-12",
+    title: "Lessons done count",
+    body: "Progress now counts walkthroughs and question banks in lessons done, so the total is no longer stuck at 0 when Basic laws has no Easy/Average/Challenging quiz rows.",
+  },
+  {
+    id: "built-2026-09-12-mesh-schematic-show",
+    date: "2026-09-12",
+    title: "Mesh walkthrough sketch",
+    body: "The Mesh walkthrough (and other labs that already had a sketch) now shows the circuit board on every step again.",
+  },
+  {
+    id: "built-2026-09-12-step-by-step-label",
+    date: "2026-09-12",
+    title: "Step-by-step bank label",
+    body: "Easy, Average, and Challenging question-bank nodes now say Step-by-step question instead of a question count.",
+  },
+  {
+    id: "built-2026-09-12-source-transform-two-r",
+    date: "2026-09-12",
+    title: "Clearer source transform sketch",
+    body: "Source Transformation now shows the shared source R and a load R_L at terminals a–b on both the voltage and current forms, so the swap is easier to see.",
+  },
+  {
+    id: "built-2026-09-12-source-transform-schematic",
+    date: "2026-09-12",
+    title: "Clearer source transform diagram",
+    body: "On the Source Transformation walkthrough, Vs and Is sit beside their circles, and the parallel resistor now connects to the wires.",
+  },
+  {
+    id: "built-2026-09-12-section-locks",
+    date: "2026-09-12",
+    title: "Sections unlock in order",
+    body: "Op-amps, Transients, and First-order circuits stay locked until you finish Basic laws practice, or pass the skip quiz for the next section.",
+  },
+  {
     id: "built-2026-09-11-bank-families",
     date: "2026-09-11",
     title: "Multi-step bank questions",

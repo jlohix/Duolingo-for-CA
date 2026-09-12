@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { TOPICS, DIFFICULTIES, lessonKey } from "../data/topics";
-import { topicInsight, saveProgress } from "../state/progress";
+import { topicInsight, saveProgress, sectionProgressKeys } from "../state/progress";
 import {
   listStudents,
   saveStudentRecord,
@@ -12,23 +12,25 @@ import ProgressPage from "./Progress";
 import { CLASS_IDS, DEFAULT_CLASS, isPartTimeClass } from "../data/classes";
 import { trophyFromIndex } from "../data/trophies";
 import { syncLeagueSeason } from "../state/league";
-import { summarizeWalkFeedback } from "../data/walkTitles";
+import { summarizeWalkFeedback, WALK_TITLES } from "../data/walkTitles";
 import { useRemoteRosterTick } from "../hooks/useRemoteRosterTick";
 import {
   listQuestionReports,
   reasonLabel,
 } from "../state/questionReports";
 
-function lessonTotal(counts) {
-  return TOPICS.reduce(
-    (sum, topic) =>
-      sum +
-      DIFFICULTIES.filter((diff) => counts[lessonKey(topic.id, diff.id)]).length,
-    0
-  );
+function lessonKeysForCounts(counts, bankCounts = {}) {
+  const keys = [];
+  for (const topic of TOPICS) {
+    keys.push(...sectionProgressKeys(topic.id, counts, bankCounts));
+  }
+  for (const walk of WALK_TITLES) {
+    if (!keys.includes(walk.key)) keys.push(walk.key);
+  }
+  return keys;
 }
 
-function studentSummary(student, counts, leagues) {
+function studentSummary(student, counts, leagues, bankCounts = {}) {
   const preview = studentToProgress(student);
   const insights = TOPICS.map((topic) => ({
     topic,
@@ -45,20 +47,20 @@ function studentSummary(student, counts, leagues) {
       !best || row.insight.pct > best.insight.pct ? row : best,
     null
   );
-  const done = (student.completed || []).filter(
-    (key) => (counts[key] || 0) > 0
-  ).length;
+  const keys = lessonKeysForCounts(counts, bankCounts);
+  const completed = student.completed || [];
+  const done = keys.filter((key) => completed.includes(key)).length;
   return {
     league: trophyFromIndex(leagues?.[student.username] ?? 0).current,
     done,
-    total: lessonTotal(counts),
+    total: keys.length,
     weakest,
     strongest,
     preview,
   };
 }
 
-export default function Admin({ progress, setProgress, counts }) {
+export default function Admin({ progress, setProgress, counts, bankCounts = {} }) {
   useRemoteRosterTick();
   const [added, setAdded] = useState(0);
   const students = useMemo(
@@ -147,7 +149,7 @@ export default function Admin({ progress, setProgress, counts }) {
           </thead>
           <tbody>
             {students.map((row) => {
-              const sum = studentSummary(row, counts, leagues);
+              const sum = studentSummary(row, counts, leagues, bankCounts);
               return (
                 <tr
                   key={row.username}
@@ -198,6 +200,7 @@ export default function Admin({ progress, setProgress, counts }) {
           key={student.username}
           student={student}
           counts={counts}
+          bankCounts={bankCounts}
           onSave={(edits) => {
             const nextLive = saveStudentRecord(
               student.username,
@@ -329,7 +332,7 @@ function WalkFeedbackTable({ students }) {
   );
 }
 
-function StudentEditor({ student, counts, onSave }) {
+function StudentEditor({ student, counts, bankCounts = {}, onSave }) {
   const [tab, setTab] = useState("progress");
   const [classId, setClassId] = useState(
     student.classId || DEFAULT_CLASS
@@ -428,6 +431,7 @@ function StudentEditor({ student, counts, onSave }) {
             topics={TOPICS}
             progress={preview}
             counts={counts}
+            bankCounts={bankCounts}
             eyebrow="Student progress"
             title={student.display}
           />

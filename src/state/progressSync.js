@@ -97,10 +97,21 @@ export function scheduleProgressPush(session, state) {
     pushTimer = null;
     const owner = pushOwner;
     try {
-      await upsertStudentProgress(owner, progressToRemotePayload(state));
+      const ok = await upsertStudentProgress(
+        owner,
+        progressToRemotePayload(state)
+      );
+      if (!ok) {
+        console.warn(
+          "[circuito] progress sync returned false for",
+          owner,
+          "(email must exist in authorised_users)"
+        );
+        return;
+      }
       await refreshRemoteStudents();
-    } catch {
-      /* offline / RPC not installed yet */
+    } catch (err) {
+      console.warn("[circuito] progress sync failed", err);
     }
   }, PUSH_DEBOUNCE_MS);
 }
@@ -117,9 +128,18 @@ export async function flushProgressPush(session, state) {
       email,
       progressToRemotePayload(state)
     );
-    if (ok) await refreshRemoteStudents();
-    return ok;
-  } catch {
+    if (!ok) {
+      console.warn(
+        "[circuito] progress flush returned false for",
+        email,
+        "(email must exist in authorised_users)"
+      );
+      return false;
+    }
+    await refreshRemoteStudents();
+    return true;
+  } catch (err) {
+    console.warn("[circuito] progress flush failed", err);
     return false;
   }
 }

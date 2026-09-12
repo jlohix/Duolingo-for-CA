@@ -29,6 +29,7 @@ import MaxPowerSchematic from "./components/MaxPowerSchematic";
 import { chooseClass, loadProgress, setProgressOwner } from "./state/progress";
 import {
   bootstrapRemoteRoster,
+  flushProgressPush,
   hydrateProgressForUser,
   scheduleProgressPush,
 } from "./state/progressSync";
@@ -222,7 +223,11 @@ export default function App() {
           </div>
         </AppShell>
         <ClassPicker
-          onPick={(classId) => setProgress((p) => chooseClass(p, classId))}
+          onPick={(classId) => {
+            const next = chooseClass(progress, classId);
+            setProgress(next);
+            void flushProgressPush(session, next);
+          }}
         />
       </>
     );
@@ -301,6 +306,7 @@ export default function App() {
             progress={progress}
             setProgress={setProgress}
             counts={counts}
+            bankCounts={bankCounts}
           />
         )}
       </AppShell>
@@ -811,7 +817,12 @@ export default function App() {
     );
   } else if (screen === "progress") {
     main = (
-      <ProgressPage topics={TOPICS} progress={progress} counts={counts} />
+      <ProgressPage
+        topics={TOPICS}
+        progress={progress}
+        counts={counts}
+        bankCounts={bankCounts}
+      />
     );
   } else if (screen === "guide") {
     main = <Guide />;
