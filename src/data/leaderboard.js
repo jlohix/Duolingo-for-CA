@@ -10,6 +10,7 @@ function decorate(row, leagues, youName) {
     classId: normalizeClassId(row.classId),
     xp: Number(row.xp) || 0,
     streak: Number(row.streak) || 0,
+    avatarUrl: String(row.avatarUrl || "").trim(),
     live: Boolean(row.live),
     custom: Boolean(row.custom),
     synthetic: Boolean(row.synthetic),

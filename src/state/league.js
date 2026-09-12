@@ -208,6 +208,7 @@ export function buildLeagueBoard(user, progress, leagueIndexOverride) {
     rank: row.rank,
     zone: row.zone,
     league,
+    avatarUrl: row.avatarUrl || "",
     isYou: youName
       ? row.username.toLowerCase() === youName.toLowerCase()
       : false,

@@ -3727,3 +3727,19 @@ html[data-theme="dark"] .circuit-svg .board-step {
 .profile-avatar-edit:hover {
   color: var(--text-primary, #fff);
 }
+
+
+/* Leaderboard row avatar */
+.board-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  object-fit: cover;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  flex-shrink: 0;
+}
+.board-avatar.is-default {
+  object-fit: contain;
+  padding: 3px;
+}
