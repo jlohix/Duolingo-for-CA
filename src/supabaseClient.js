@@ -140,3 +140,50 @@ export async function resolveQuestionReportRemote(id, resolved) {
   });
   return data === true;
 }
+
+// ---------- Avatar uploads (Supabase Storage: public "avatars" bucket) ----------
+
+const AVATAR_BUCKET = "avatars";
+
+// Turn an email into a safe storage filename (ownership by convention:
+// the app always uploads under the logged-in user's own email).
+function avatarPathForEmail(email) {
+  const safe = String(email || "")
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "_")
+    .replace(/^_+|_+$/g, "");
+  return `${safe || "user"}.png`;
+}
+
+// Upload a Blob to the avatars bucket and return the public URL.
+// Uses upsert so re-uploading replaces the user's previous avatar.
+export async function uploadAvatar(email, blob) {
+  const path = avatarPathForEmail(email);
+  const res = await fetch(
+    `${SUPABASE_URL}/storage/v1/object/${AVATAR_BUCKET}/${path}`,
+    {
+      method: "POST",
+      headers: {
+        apikey: SUPABASE_ANON_KEY,
+        Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
+        "Content-Type": blob.type || "image/png",
+        "x-upsert": "true",
+      },
+      body: blob,
+    }
+  );
+  if (!res.ok) {
+    let detail = "";
+    try {
+      detail = await res.text();
+    } catch {
+      /* ignore */
+    }
+    throw new Error(
+      detail ? `Avatar upload failed. (${detail})` : "Avatar upload failed."
+    );
+  }
+  // Public URL for a public bucket. Cache-bust so the new image shows immediately.
+  return `${SUPABASE_URL}/storage/v1/object/public/${AVATAR_BUCKET}/${path}?v=${Date.now()}`;
+}
