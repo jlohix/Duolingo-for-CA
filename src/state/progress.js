@@ -338,16 +338,6 @@ export function addXp(state, amount) {
   return next;
 }
 
-export function chooseClass(state, classId) {
-  const next = {
-    ...state,
-    classId: normalizeClassId(classId),
-    classChosen: true,
-  };
-  saveProgress(next);
-  return next;
-}
-
 export const DISPLAY_NAME_MAX = 24;
 
 export function normalizeDisplayName(value) {

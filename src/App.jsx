@@ -26,10 +26,9 @@ import DividerSchematic from "./components/DividerSchematic";
 import DividerBranchesLesson from "./pages/DividerBranchesLesson";
 import PowerSchematic from "./components/PowerSchematic";
 import MaxPowerSchematic from "./components/MaxPowerSchematic";
-import { chooseClass, loadProgress, setProgressOwner } from "./state/progress";
+import { loadProgress, setProgressOwner } from "./state/progress";
 import {
   bootstrapRemoteRoster,
-  flushProgressPush,
   hydrateProgressForUser,
   scheduleProgressPush,
 } from "./state/progressSync";
@@ -54,7 +53,6 @@ import SourceTransformationLesson from "./pages/SourceTransformationLesson";
 import LaplaceLesson from "./section5/LaplaceLesson";
 import { SECTION_WALKS } from "./walks";
 import Results from "./pages/Results";
-import ClassPicker from "./components/ClassPicker";
 
 export default function App() {
   const [questions, setQuestions] = useState([]);
@@ -200,36 +198,6 @@ export default function App() {
           </header>
         </div>
       </AppShell>
-    );
-  }
-
-  if (!isAdmin(session) && !progress.classChosen) {
-    return (
-      <>
-        <AppShell
-          nav="home"
-          onNav={() => {}}
-          user={session}
-          progress={progress}
-          onLogout={handleLogout}
-        >
-          <div className="page">
-            <header className="topbar">
-              <div>
-                <p className="eyebrow">Welcome</p>
-                <h1>Learn</h1>
-              </div>
-            </header>
-          </div>
-        </AppShell>
-        <ClassPicker
-          onPick={(classId) => {
-            const next = chooseClass(progress, classId);
-            setProgress(next);
-            void flushProgressPush(session, next);
-          }}
-        />
-      </>
     );
   }
 
