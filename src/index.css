@@ -3690,3 +3690,40 @@ html[data-theme="dark"] .circuit-svg .board-step {
   color: var(--muted);
   font-weight: 650;
 }
+
+
+/* Profile avatar */
+.profile-identity {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+.profile-avatar-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+.profile-avatar {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  object-fit: cover;
+  background: rgba(255, 255, 255, 0.06);
+  border: 2px solid rgba(255, 255, 255, 0.15);
+}
+/* Default mascot: show the whole image (no crop), with a little padding
+   so it sits nicely inside the circle. Uploaded photos keep 'cover'. */
+.profile-avatar.is-default {
+  object-fit: contain;
+  padding: 6px;
+}
+.profile-avatar-edit {
+  font-size: 0.72rem;
+  cursor: pointer;
+  color: var(--text-secondary, #9aa);
+  text-decoration: underline;
+}
+.profile-avatar-edit:hover {
+  color: var(--text-primary, #fff);
+}

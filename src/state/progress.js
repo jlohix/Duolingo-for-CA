@@ -53,6 +53,7 @@ function emptyState() {
     classId: DEFAULT_CLASS,
     classChosen: false,
     displayName: "",
+    avatarUrl: "",
     walkFeedback: {},
   };
 }
@@ -167,8 +168,16 @@ function normalizeProgressData(data) {
     classId: normalizeClassId(data.classId),
     classChosen: Boolean(data.classChosen),
     displayName: normalizeDisplayName(data.displayName),
+    avatarUrl: normalizeAvatarUrl(data.avatarUrl),
     walkFeedback: parseWalkFeedback(data.walkFeedback),
   };
+}
+
+function normalizeAvatarUrl(value) {
+  const url = String(value ?? "").trim();
+  // Only allow http(s) URLs (e.g. Supabase Storage public URLs).
+  if (/^https?:\/\//i.test(url)) return url.slice(0, 500);
+  return "";
 }
 
 function readProgressRaw(key) {
@@ -220,6 +229,7 @@ export function progressToRemotePayload(state) {
       ? Number(state.leagueIndex)
       : 0,
     displayName: normalizeDisplayName(state.displayName),
+    avatarUrl: normalizeAvatarUrl(state.avatarUrl),
     walkFeedback: parseWalkFeedback(state.walkFeedback),
   };
 }
@@ -237,8 +247,16 @@ export function remotePayloadToProgress(data) {
     classId: data.classId || data.class_id,
     classChosen: data.classChosen ?? data.class_chosen,
     displayName: data.displayName || data.display_name,
+    avatarUrl: data.avatarUrl || data.avatar_url,
     walkFeedback: data.walkFeedback || data.walk_feedback,
   });
+}
+
+// Update just the avatar URL and persist locally.
+export function setAvatarUrl(state, url) {
+  const next = { ...state, avatarUrl: normalizeAvatarUrl(url) };
+  saveProgress(next);
+  return next;
 }
 
 export function recordWalkFeedback(state, lessonKey, vote) {

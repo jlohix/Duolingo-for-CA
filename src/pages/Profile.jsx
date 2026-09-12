@@ -1,12 +1,44 @@
-import { visibleStreak, topicInsight, chooseDisplayName, DISPLAY_NAME_MAX } from "../state/progress";
+import { visibleStreak, topicInsight, chooseDisplayName, DISPLAY_NAME_MAX, setAvatarUrl } from "../state/progress";
 import { DEFAULT_CLASS, normalizeClassId } from "../data/classes";
+import { avatarSrc, isDefaultAvatar } from "../data/avatars";
 import { displayNameFor } from "../state/roster";
 import { isAdmin } from "../state/auth";
 import { flushProgressPush } from "../state/progressSync";
+import { uploadAvatar } from "../supabaseClient";
 import TopicInsight from "../components/TopicInsight";
 import HexStats from "../components/HexStats";
 import StreakNotice from "../components/StreakNotice";
 import { useState } from "react";
+
+// Resize/compress an image file to a small square PNG blob for the avatar.
+function compressAvatar(file, size = 256) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement("canvas");
+        canvas.width = size;
+        canvas.height = size;
+        const ctx = canvas.getContext("2d");
+        // Center-crop to a square, then draw scaled into the canvas.
+        const min = Math.min(img.width, img.height);
+        const sx = (img.width - min) / 2;
+        const sy = (img.height - min) / 2;
+        ctx.drawImage(img, sx, sy, min, min, 0, 0, size, size);
+        canvas.toBlob(
+          (blob) => (blob ? resolve(blob) : reject(new Error("Compress failed"))),
+          "image/png",
+          0.85
+        );
+      };
+      img.onerror = () => reject(new Error("Could not read image"));
+      img.src = e.target.result;
+    };
+    reader.onerror = () => reject(new Error("Could not read file"));
+    reader.readAsDataURL(file);
+  });
+}
 
 const STRENGTH_KINDS = new Set(["strength", "solid"]);
 const WEAK_KINDS = new Set(["weakness", "developing"]);
@@ -20,7 +52,44 @@ export default function Profile({ user, topics, progress, setProgress, onPractic
   );
   const [nameStatus, setNameStatus] = useState("");
   const [nameBusy, setNameBusy] = useState(false);
+  const [avatarBusy, setAvatarBusy] = useState(false);
+  const [avatarStatus, setAvatarStatus] = useState("");
   const boardName = progress.displayName || fallbackName;
+
+  async function handleAvatarPick(event) {
+    const file = event.target.files?.[0];
+    event.target.value = ""; // allow re-selecting the same file later
+    if (!file) return;
+    if (!file.type.startsWith("image/")) {
+      setAvatarStatus("Please choose an image file.");
+      return;
+    }
+    if (file.size > 10 * 1024 * 1024) {
+      setAvatarStatus("Image must be under 10MB.");
+      return;
+    }
+    setAvatarBusy(true);
+    setAvatarStatus("");
+    try {
+      const blob = await compressAvatar(file);
+      const url = await uploadAvatar(user.username, blob);
+      let next = progress;
+      setProgress((p) => {
+        next = setAvatarUrl(p, url);
+        return next;
+      });
+      const ok = await flushProgressPush(user, next);
+      setAvatarStatus(
+        ok
+          ? "Picture updated."
+          : "Picture uploaded, but cloud sync is unavailable right now."
+      );
+    } catch (err) {
+      setAvatarStatus(err.message || "Could not update picture.");
+    } finally {
+      setAvatarBusy(false);
+    }
+  }
   const rows = topics.map((topic) => ({
     topic,
     insight: topicInsight(progress, topic.id),
@@ -61,11 +130,39 @@ export default function Profile({ user, topics, progress, setProgress, onPractic
 
   return (
     <div className="page">
-      <header className="topbar">
-        <div>
-          <p className="eyebrow">{staff ? "Staff" : "Student"}</p>
-          <h1>{boardName}</h1>
-          <p className="login-hint">{user.username}</p>
+      <header className="topbar profile-topbar">
+        <div className="profile-identity">
+          {!staff ? (
+            <div className="profile-avatar-wrap">
+              <img
+                className={`profile-avatar${
+                  isDefaultAvatar(progress.avatarUrl) ? " is-default" : ""
+                }`}
+                src={avatarSrc(progress.avatarUrl)}
+                alt="Your profile picture"
+                width={72}
+                height={72}
+              />
+              <label className="profile-avatar-edit">
+                {avatarBusy ? "Uploading…" : "Change"}
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={handleAvatarPick}
+                  disabled={avatarBusy}
+                  style={{ display: "none" }}
+                />
+              </label>
+            </div>
+          ) : null}
+          <div>
+            <p className="eyebrow">{staff ? "Staff" : "Student"}</p>
+            <h1>{boardName}</h1>
+            <p className="login-hint">{user.username}</p>
+            {!staff && avatarStatus ? (
+              <p className="login-hint">{avatarStatus}</p>
+            ) : null}
+          </div>
         </div>
       </header>
       <form className="class-picker name-picker" onSubmit={saveName}>
