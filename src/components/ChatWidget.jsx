@@ -102,8 +102,7 @@ export default function ChatWidget() {
             {messages.length === 0 && !loading && !error && (
               <p className="chat-hint">
                 Ask a circuit-analysis question, e.g.{" "}
-                <em>“What is Kirchhoff's voltage law?”</em> You can ask
-                follow-ups — I'll remember this conversation.
+                <em>“What is Kirchhoff's voltage law?”</em>
               </p>
             )}
 

@@ -13,10 +13,28 @@ export const CHATBOT_AUDIENCE = "ee22";
 // class is easy to change without hunting through the logic below.
 export const CHATBOT_TEST_CLASS = "EE22";
 
-// Decide whether the current user should see the chatbot.
+// Screens where the tutor is deliberately HIDDEN, even for eligible users.
+// These are graded / test-out assessments: showing a tutor here would let a
+// student get help clearing a gate that is meant to measure what they already
+// know. Teaching screens (labs, guided lessons, home, boards) still show it.
+//   - "skip"   -> Skip Quiz (test-out gate that unlocks a topic)
+//   - "lesson" -> standard graded topic / question-bank lessons
+//   - "paper"  -> past-year exam paper packs
+export const CHATBOT_HIDDEN_SCREENS = new Set(["skip", "lesson", "paper"]);
+
+// Whether the current screen is one where the tutor should stay hidden.
+export function isChatbotHiddenScreen(screen) {
+  return CHATBOT_HIDDEN_SCREENS.has(String(screen || ""));
+}
+
+// Decide whether the current user should see the chatbot right now.
 //   classId  -> the student's assigned class (e.g. progress.classId)
 //   isAdmin  -> whether the current session is a staff/admin account
-export function canUseChatbot({ classId, isAdmin = false } = {}) {
+//   screen   -> the active screen id (so we can hide it on assessment gates)
+export function canUseChatbot({ classId, isAdmin = false, screen } = {}) {
+  // Never show on assessment screens, regardless of audience.
+  if (isChatbotHiddenScreen(screen)) return false;
+
   switch (CHATBOT_AUDIENCE) {
     case "off":
       return false;
