@@ -97,7 +97,7 @@ export const QUESTION_BANKS = [
   },
 ];
 
-/** Asset folders we ship under public/question-bank/ */
+/** Local fallbacks only when a CSV image is a filename, not a GitHub URL. */
 export const LOCAL_BANK_FOLDERS = new Set([
   "st",
   "thevenin",

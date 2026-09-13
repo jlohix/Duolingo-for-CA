@@ -1,5 +1,17 @@
 export const BUILT_IN_LOGS = [
   {
+    id: "built-2026-09-14-ohm-kcl-csvs",
+    date: "2026-09-14",
+    title: "Ohm’s law and KCL/KVL banks",
+    body: "Ohm’s law and KCL/KVL practice now use the latest step-by-step questions. Multi-part problems still count as one question, with steps shown one after another.",
+  },
+  {
+    id: "built-2026-09-14-bank-sketches",
+    date: "2026-09-14",
+    title: "Circuit sketches load",
+    body: "Ohm’s law, KCL/KVL, power, nodal and mesh, supernode, max power, Norton, and Thevenin practice now show their circuit sketches instead of a broken picture.",
+  },
+  {
     id: "built-2026-09-14-dc-law-banks",
     date: "2026-09-14",
     title: "New Basic laws banks",

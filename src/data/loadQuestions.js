@@ -150,6 +150,9 @@ function localBankImage(image, bank) {
 
 function resolveBankImage(image, bank) {
   const remote = normalizeImage(image);
+  if (!remote) return "";
+  // Keep GitHub (or any http) links as-is. Do not rewrite them to local copies.
+  if (/^https?:\/\//i.test(remote)) return remote;
   if (LOCAL_BANK_FOLDERS.has(bank.assetFolder)) {
     return localBankImage(remote, bank) || remote;
   }
