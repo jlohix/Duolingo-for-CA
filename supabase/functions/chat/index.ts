@@ -94,19 +94,38 @@ async function generateAnswer(question: string, context: string): Promise<string
     "Use clear explanations and LaTeX ($...$) for any math.\n\n" +
     `Lecture context:\n${context}`;
 
-  const res = await fetch(
-    `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${GEMINI_API_KEY}`,
-    {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        contents: [
-          { role: "user", parts: [{ text: `${systemPrompt}\n\nStudent question: ${question}` }] },
-        ],
-      }),
-    },
-  );
-  if (!res.ok) throw new Error(`Generate failed: ${await res.text()}`);
+  const url =
+    `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${GEMINI_API_KEY}`;
+  const requestInit = {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      contents: [
+        { role: "user", parts: [{ text: `${systemPrompt}\n\nStudent question: ${question}` }] },
+      ],
+    }),
+  };
+
+  // Retry on transient overload (503) / rate-limit (429) with backoff.
+  let res: Response | null = null;
+  let lastErr = "";
+  for (let attempt = 0; attempt < 4; attempt++) {
+    res = await fetch(url, requestInit);
+    if (res.ok) break;
+    if (res.status === 503 || res.status === 429) {
+      lastErr = await res.text();
+      await new Promise((r) => setTimeout(r, 800 * (attempt + 1))); // 0.8s, 1.6s, 2.4s
+      continue;
+    }
+    throw new Error(`Generate failed: ${await res.text()}`);
+  }
+  if (!res || !res.ok) {
+    throw new Error(
+      "The tutor is busy right now (the AI model is overloaded). " +
+        "Please try again in a moment." +
+        (lastErr ? ` (${lastErr})` : ""),
+    );
+  }
   const data = await res.json();
   return (
     data.candidates?.[0]?.content?.parts?.[0]?.text ||
