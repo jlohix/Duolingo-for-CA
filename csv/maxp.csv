@@ -6,7 +6,25 @@
 201-5,2,What is the maximum power delivered to $R_L$?,13.44 W,15.00 W,18.20 W,10.44 W,optionA,https://raw.githubusercontent.com/jlohix/Duolingo-for-CA/main/question-bank/maxp/maxpq1.png,The maximum power is given by $P_{max} = \frac{V_{th}^2}{4R_{th}}$. Substituting the values: $P_{max} = \frac{22^2}{4 \times 9} = \frac{484}{36} \approx 13.44$ W.,1,walk-lab-power
 202-1,2,What concepts do we apply to simplify the circuit?,Superposition theorem only,Thevenin's Theorem and source transformations,Nodal analysis only,Mesh analysis only,optionB,https://raw.githubusercontent.com/jlohix/Duolingo-for-CA/main/question-bank/maxp/maxpq2.png,"To find the maximum power delivered to the load resistor $R_L$, we simplify the linear bilateral network connected to terminals A and B into its Thevenin equivalent circuit using network reduction techniques and source transformations.",2,walk-lab-power
 202-2,2,What is the condition for a load resistor $R_L$ to receive maximum power from a Thevenin equivalent circuit?,$R_L = \infty$,$R_L = R_{th}$,$R_L = 0$,$R_L = 2 R_{th}$,optionB,https://raw.githubusercontent.com/jlohix/Duolingo-for-CA/main/question-bank/maxp/maxpq2.png,"According to the Maximum Power Transfer Theorem, the maximum power is transferred from a source to a load when the load resistance is equal to the internal resistance (Thevenin resistance) of the source, i.e., $R_L = R_{th}$.",2,walk-lab-power
-202-3,2,Find $R_{th}$ looking into terminals A and B.,$\frac{10}{3} \ \Omega$,$\frac{20}{3} \ \Omega$,$\frac{40}{3} \ \Omega$,$20 \ \Omega$,optionC,https://raw.githubusercontent.com/jlohix/Duolingo-for-CA/main/question-bank/maxp/maxpq2.png,"To find $R_{th}$, we deactivate all independent sources (independent voltage sources are shorted, independent current sources are opened). Looking from terminals A and B: $R_{th} = 10 \ || \ (10 + 5) = 10 \ || \ 15 = \frac{10 \times 15}{10 + 15} = \frac{150}{25} = 6 \ \Omega$ plus the series $10 \ \Omega$ resistor attached to terminal A... Wait, re-evaluating from the diagram: terminals A and B have a $10 \ \Omega$ resistor in series with the parallel combination of $(5 + 10)$ and $10$, which gives $R_{th} = \frac{40}{3} \ \Omega$ as stated in the reference solution.",2,walk-lab-power
+202-3,2,Find $R_{th}$ looking into terminals A and B.,$\frac{10}{3} \ \Omega$,$\frac{20}{3} \ \Omega$,$\frac{40}{3} \ \Omega$,$20 \ \Omega$,optionC,https://raw.githubusercontent.com/jlohix/Duolingo-for-CA/main/question-bank/maxp/maxpq2.png,"To find $R_{th}$, deactivate all independent sources: the $20\,V$ voltage source is shorted and the $4\,A$ current source is opened.
+
+Looking from terminals A and B, the $5\,\Omega$ resistor is in parallel with the vertical $10\,\Omega$ resistor:
+
+$$
+5 \parallel 10
+= \frac{5 \times 10}{5+10}
+= \frac{10}{3}\,\Omega
+$$
+
+This parallel combination is in series with the $10\,\Omega$ resistor connected to terminal A. Therefore,
+
+$$
+R_{th}
+= 10 + (5 \parallel 10)
+= 10 + \frac{10}{3}
+= \frac{40}{3}\,\Omega
+\approx 13.33\,\Omega
+$$",2,walk-lab-power
 202-4,2,Find $V_{th}$ across terminals A and B.,$50 \ \text{V}$,$\frac{100}{3} \ \text{V}$,$\frac{200}{3} \ \text{V}$,$100 \ \text{V}$,optionC,https://raw.githubusercontent.com/jlohix/Duolingo-for-CA/main/question-bank/maxp/maxpq2.png,Using nodal analysis or source transformations to find the open-circuit voltage at terminals A and B gives $V_{th} = \frac{200}{3} \ \text{V}$.,2,walk-lab-power
 202-5,2,Substitute the given values of $V_{th}$ and $R_{th}$ into your power expression to calculate the final result.,$\frac{500}{3} \ \text{W}$,$250 \ \text{W}$,$\frac{100}{3} \ \text{W}$,$\frac{250}{3} \ \text{W}$,optionD,https://raw.githubusercontent.com/jlohix/Duolingo-for-CA/main/question-bank/maxp/maxpq2.png,The maximum power is given by $P_{max} = \frac{V_{th}^2}{4 R_{th}}$. Substituting $V_{th} = \frac{200}{3} \ \text{V}$ and $R_{th} = \frac{40}{3} \ \Omega$: $P_{max} = \frac{(200/3)^2}{4(40/3)} = \frac{40000 / 9}{160 / 3} = \frac{40000}{9} \times \frac{3}{160} = \frac{250}{3} \ \text{W}$.,2,walk-lab-power
 203-1,2,"To find the maximum power transfer to resistor $R$, what is the first step in simplifying the circuit?",Calculate the equivalent resistance of the entire circuit including R.,Short the terminals where R was connected.,Remove resistor R and identify the two nodes to which it was connected as open-circuit terminals.,Replace all independent sources with short circuits.,optionC,https://raw.githubusercontent.com/jlohix/Duolingo-for-CA/main/question-bank/maxp/maxpq3.png,"To apply the maximum power transfer theorem, we isolate the load resistor $R$ by removing it, leaving two open-circuit terminals. The remainder of the circuit is then simplified into its Thevenin equivalent (voltage source $V_{TH}$ in series with resistance $R_{TH}$).",3,walk-lab-power
