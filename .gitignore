@@ -10,3 +10,7 @@ dist
 .env
 .env.local
 .env.*.local
+
+# RAG ingestion (Step 2): local PDFs + resume state - not committed
+scripts/lectures/
+scripts/.ingest-progress.json
