@@ -72,14 +72,16 @@ async function pickChatModel(): Promise<string> {
         .filter((m: any) =>
           m.supportedGenerationMethods?.includes("generateContent")
         )
-        .map((m: any) => m.name.replace("models/", ""));
-      // Prefer a "flash" model (fast + cheap), else the first usable one.
+        .map((m: any) => m.name.replace("models/", ""))
+        // Exclude deprecated 1.x/2.x flash models blocked for new users.
+        .filter((n: string) => !/gemini-[12]\./.test(n));
+      // Prefer a newer "flash" model (fast + cheap), else first usable.
       const flash = usable.find((n: string) => n.includes("flash"));
       if (flash) return flash;
       if (usable.length) return usable[0];
     }
   } catch (_) { /* fall through */ }
-  return "gemini-2.5-flash"; // sensible fallback
+  return "gemini-3.6-flash"; // current recommended fallback
 }
 
 async function generateAnswer(question: string, context: string): Promise<string> {
