@@ -1,5 +1,11 @@
 export const BUILT_IN_LOGS = [
   {
+    id: "built-2026-09-14-opamp-csv",
+    date: "2026-09-14",
+    title: "Updated op-amp bank",
+    body: "Op-amp Easy, Average, and Challenging practice now uses the latest step-by-step questions.",
+  },
+  {
     id: "built-2026-09-14-ohm-kcl-csvs",
     date: "2026-09-14",
     title: "Ohm’s law and KCL/KVL banks",
