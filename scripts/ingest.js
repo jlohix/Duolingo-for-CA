@@ -21,9 +21,13 @@
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import pdf from "pdf-parse";
+import { createRequire } from "node:module";
 import { createClient } from "@supabase/supabase-js";
 import "dotenv/config";
+
+// pdf-parse is a CommonJS package; load it via require so it works in ESM.
+const require = createRequire(import.meta.url);
+const pdf = require("pdf-parse");
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
