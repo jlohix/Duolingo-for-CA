@@ -192,3 +192,52 @@ export async function uploadAvatar(email, blob) {
   // Public URL for a public bucket. Cache-bust so the new image shows immediately.
   return `${SUPABASE_URL}/storage/v1/object/public/${AVATAR_BUCKET}/${path}?v=${Date.now()}`;
 }
+
+
+// ---------- RAG tutor chatbot (Supabase Edge Function: "chat") ----------
+
+// Send a question to the deployed `chat` Edge Function and return the
+// grounded answer plus the lecture weeks it drew from.
+// Resolves to { answer, sources }. Throws with a friendly message on failure.
+export async function askChatbot(question) {
+  const trimmed = String(question || "").trim();
+  if (!trimmed) {
+    throw new Error("Please type a question first.");
+  }
+
+  let response;
+  try {
+    response = await fetch(`${SUPABASE_URL}/functions/v1/chat`, {
+      method: "POST",
+      headers: {
+        apikey: SUPABASE_ANON_KEY,
+        Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ question: trimmed }),
+    });
+  } catch {
+    throw new Error("Couldn't reach the tutor. Check your connection and try again.");
+  }
+
+  let data = null;
+  try {
+    data = await response.json();
+  } catch {
+    /* non-JSON body */
+  }
+
+  if (!response.ok) {
+    const detail = data && data.error ? data.error : `HTTP ${response.status}`;
+    throw new Error(`The tutor is unavailable right now. (${detail})`);
+  }
+
+  if (data && data.error) {
+    throw new Error(data.error);
+  }
+
+  return {
+    answer: (data && data.answer) || "",
+    sources: Array.isArray(data && data.sources) ? data.sources : [],
+  };
+}

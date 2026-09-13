@@ -35,6 +35,8 @@ import {
 import { pullLeagueSeason, syncLeagueSeason } from "./state/league";
 import { loadSession, logout, isAdmin } from "./state/auth";
 import AppShell from "./components/AppShell";
+import ChatWidget from "./components/ChatWidget";
+import { canUseChatbot } from "./data/chatbot";
 import Login from "./pages/Login";
 import Home from "./pages/Home";
 import Leaderboard from "./pages/Leaderboard";
@@ -288,6 +290,10 @@ export default function App() {
             bankCounts={bankCounts}
           />
         )}
+        {canUseChatbot({
+          classId: progress?.classId,
+          isAdmin: isAdmin(session),
+        }) && <ChatWidget />}
       </AppShell>
     );
   }
@@ -837,6 +843,10 @@ export default function App() {
       onLogout={handleLogout}
     >
       {main}
+      {canUseChatbot({
+        classId: progress?.classId,
+        isAdmin: isAdmin(session),
+      }) && <ChatWidget />}
     </AppShell>
   );
 }
