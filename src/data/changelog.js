@@ -1,5 +1,35 @@
 export const BUILT_IN_LOGS = [
   {
+    id: "built-2026-09-14-dc-law-banks",
+    date: "2026-09-14",
+    title: "New Basic laws banks",
+    body: "Basic laws now has step-by-step Easy, Average, and Challenging practice after Ohm’s law, KCL/KVL, power, nodal and mesh, and supernode.",
+  },
+  {
+    id: "built-2026-09-14-tyk-gone",
+    date: "2026-09-14",
+    title: "No more test-your-knowledge",
+    body: "Learn no longer shows a Test your knowledge block after walkthroughs. Step-by-step Easy, Average, and Challenging banks stay where a topic has them.",
+  },
+  {
+    id: "built-2026-09-14-transients-bank",
+    date: "2026-09-14",
+    title: "Transients question bank",
+    body: "Transients now has a step-by-step question bank after the walkthroughs, with Average and Challenging problems on capacitors and inductors.",
+  },
+  {
+    id: "built-2026-09-14-opamp-tyk-gone",
+    date: "2026-09-14",
+    title: "Op-amp path is shorter",
+    body: "Op-amps no longer shows a Test your knowledge block after the walkthroughs. The step-by-step Easy, Average, and Challenging banks are still there.",
+  },
+  {
+    id: "built-2026-09-13-bank-csvs",
+    date: "2026-09-13",
+    title: "Updated question banks",
+    body: "Thevenin, Norton, max power, superposition, source transformation, and op-amp banks now use the latest question set, including extra op-amp circuits and clearer explanations.",
+  },
+  {
     id: "built-2026-09-13-profile-units",
     date: "2026-09-13",
     title: "Profile lists real lessons",

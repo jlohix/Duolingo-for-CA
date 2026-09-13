@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { DIFFICULTIES, lessonKey } from "../data/topics";
+import { DIFFICULTIES, hasTopicQuiz, lessonKey } from "../data/topics";
 import {
   QUESTION_BANKS,
   bankLessonKey,
@@ -11,7 +11,6 @@ import { SECTION3_LABS } from "../section3/index.jsx";
 import { SECTION4_LABS } from "../section4/index.jsx";
 import {
   isTopicUnlocked,
-  isLessonUnlocked,
   SKIP_QUIZ_SIZE,
   SKIP_PASS_RATIO,
   testLessonKey,
@@ -33,9 +32,11 @@ function DoodlePage({ children }) {
 }
 
 function topicMeter(topic, progress, counts, bankCounts = {}) {
-  const topicKeys = DIFFICULTIES.map((d) => lessonKey(topic.id, d.id)).filter(
-    (key) => (counts[key] || 0) > 0
-  );
+  const topicKeys = hasTopicQuiz(topic.id)
+    ? DIFFICULTIES.map((d) => lessonKey(topic.id, d.id)).filter(
+        (key) => (counts[key] || 0) > 0
+      )
+    : [];
   const bankKeys = QUESTION_BANKS
     .filter((bank) => bank.topicId === topic.id)
     .flatMap((bank) =>
@@ -241,6 +242,8 @@ function LawsLabs({
         <span className="node-name">R = V/I</span>
         <span className="node-count">6 Qs</span>
       </button>
+      {bankNodes("ohms-law")}
+      {bankNodes("kcl-kvl")}
       <button type="button" className={`node ${off}`} disabled={!unlocked} onClick={labs.onDividerLab}>
         <span className="node-icon">÷</span>
         <span className="node-name">Dividers</span>
@@ -256,6 +259,7 @@ function LawsLabs({
         <span className="node-name">Power</span>
         <span className="node-count">Walkthrough</span>
       </button>
+      {bankNodes("power")}
       <button type="button" className={`node ${off}`} disabled={!unlocked} onClick={labs.onMaxPowerLab}>
         <span className="node-icon">P↑</span>
         <span className="node-name">Max power</span>
@@ -295,6 +299,7 @@ function LawsLabs({
         <span className="node-name">Mesh</span>
         <span className="node-count">Walkthrough</span>
       </button>
+      {bankNodes("nodal-mesh")}
       <button type="button" className={`node ${off}`} disabled={!unlocked} onClick={labs.onSuperMeshLab}>
         <span className="node-icon">SM</span>
         <span className="node-name">Supermesh</span>
@@ -305,6 +310,7 @@ function LawsLabs({
         <span className="node-name">Supernode</span>
         <span className="node-count">Walkthrough</span>
       </button>
+      {bankNodes("supernode")}
       <button type="button" className={`node ${off}`} disabled={!unlocked} onClick={labs.onSuperposLab}>
         <span className="node-icon">Σ</span>
         <span className="node-name">Superposition</span>
@@ -391,20 +397,14 @@ function TopicLadder({
   unlocked,
   isSkipTarget,
   progress,
-  counts,
   bankCounts,
-  onStart,
   onStartBank,
   onBack,
-  onAskSkip,
   onLaplaceLab,
   onSectionWalk,
   labs,
   allOpen = false,
 }) {
-  const firstAvailable = DIFFICULTIES.find(
-    (d) => (counts[lessonKey(topic.id, d.id)] || 0) > 0
-  );
   const showLawsLabs = topic.id === 1;
   const showLaplaceWalks = topic.id === 5;
   const sectionWalks = SECTION_LAB_LISTS[topic.id];
@@ -457,51 +457,19 @@ function TopicLadder({
                 allOpen={allOpen}
               />
             ) : null}
+            {topic.id === 3 ? (
+              <BankDifficultyNodes
+                bankId="transients"
+                unlocked={unlocked}
+                progress={progress}
+                counts={bankCounts}
+                onStart={onStartBank}
+                allOpen={allOpen}
+              />
+            ) : null}
             {showLaplaceWalks ? (
               <LaplaceLabs unlocked={unlocked} onLaplaceLab={onLaplaceLab} />
             ) : null}
-            {showLaplaceWalks || sectionWalks ? (
-              <p className="path-quiz-mark">
-                Test your knowledge for all the walkthroughs
-              </p>
-            ) : null}
-            {!showLawsLabs && DIFFICULTIES.map((diff) => {
-              const key = lessonKey(topic.id, diff.id);
-              const n = counts[key] || 0;
-              const done = progress.completed?.includes(key);
-              const lessonOpen =
-                unlocked &&
-                (allOpen ||
-                  done ||
-                  isLessonUnlocked(topic.id, diff.id, progress, counts));
-              const canPlay = lessonOpen && n > 0;
-              const skipClick =
-                isSkipTarget && !unlocked && firstAvailable?.id === diff.id;
-              return (
-                <button
-                  key={key}
-                  type="button"
-                  className={`node ${done ? "done" : ""} ${canPlay ? "" : "off"} ${skipClick ? "opens-skip" : ""}`}
-                  disabled={!canPlay && !skipClick}
-                  onClick={() => {
-                    if (canPlay) onStart(topic.id, diff.id);
-                    else if (skipClick) onAskSkip();
-                  }}
-                >
-                  <span className="node-icon">{done ? "✓" : diff.icon}</span>
-                  <span className="node-name">{diff.name}</span>
-                  <span className="node-count">
-                    {!n
-                      ? "No questions"
-                      : canPlay
-                        ? `${n} Qs`
-                        : skipClick
-                          ? `${n} Qs`
-                          : "Locked"}
-                  </span>
-                </button>
-              );
-            })}
           </div>
         </li>
       </ol>
@@ -637,12 +605,9 @@ export default function Home({
             }
             isSkipTarget={!allOpen && skipTopic && index === firstLockedIndex}
             progress={progress}
-            counts={counts}
             bankCounts={bankCounts}
-            onStart={onStart}
             onStartBank={onStartBank}
             onBack={() => setSection(null)}
-            onAskSkip={() => setEventOpen(true)}
             onLaplaceLab={onLaplaceLab}
             onSectionWalk={onSectionWalk}
             labs={{

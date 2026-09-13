@@ -1,4 +1,4 @@
-import { TOPICS, DIFFICULTIES } from "./topics";
+import { TOPICS, DIFFICULTIES, hasTopicQuiz } from "./topics";
 import { QUESTION_BANKS } from "./questionBanks";
 import { PAST_YEAR_QUESTIONS, groupPastPapers } from "./loadQuestions";
 import {
@@ -213,6 +213,7 @@ function csvSections(questions) {
   const sections = [];
   const topicRows = questions.filter((question) => !question.bankId);
   for (const topic of TOPICS) {
+    if (!hasTopicQuiz(topic.id)) continue;
     const rows = topicRows.filter((question) => question.topicId === topic.id);
     if (!rows.length) continue;
     for (const level of DIFFICULTIES) {

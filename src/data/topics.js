@@ -17,3 +17,8 @@ export const DIFFICULTIES = [
 export function lessonKey(topicId, difficulty) {
   return `${topicId}-${difficulty}`;
 }
+
+/** Topic-level Easy/Average/Challenging "test your knowledge" quizzes are no longer used. */
+export function hasTopicQuiz() {
+  return false;
+}

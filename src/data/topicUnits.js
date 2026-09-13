@@ -1,4 +1,4 @@
-import { DIFFICULTIES, lessonKey, TOPICS } from "./topics";
+import { DIFFICULTIES, hasTopicQuiz, lessonKey, TOPICS } from "./topics";
 import { QUESTION_BANKS, bankLessonKey } from "./questionBanks";
 import { WALK_TITLES } from "./walkTitles";
 
@@ -42,23 +42,25 @@ export function unitsForTopic(topicId, counts = {}, bankCounts = {}) {
       label: walk.title,
       kind: walkKind(walk),
     });
-    const bank = QUESTION_BANKS.find((row) => row.walkthroughKey === walk.key);
-    if (bank) {
+    const banks = QUESTION_BANKS.filter((row) => row.walkthroughKey === walk.key);
+    for (const bank of banks) {
       placedBanks.add(bank.id);
       pushBankUnits(units, bank, bankCounts);
     }
   }
 
-  for (const diff of DIFFICULTIES) {
-    const key = lessonKey(topicId, diff.id);
-    const n = counts[key] || 0;
-    if (!n) continue;
-    units.push({
-      key,
-      label: diff.name,
-      kind: "quiz",
-      n,
-    });
+  if (hasTopicQuiz(topicId)) {
+    for (const diff of DIFFICULTIES) {
+      const key = lessonKey(topicId, diff.id);
+      const n = counts[key] || 0;
+      if (!n) continue;
+      units.push({
+        key,
+        label: diff.name,
+        kind: "quiz",
+        n,
+      });
+    }
   }
 
   for (const bank of QUESTION_BANKS) {

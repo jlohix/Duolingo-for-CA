@@ -8,6 +8,10 @@ const SECTION1 = [
   ["walk-lab-maxpower", "Max power"],
   ["walk-lab-nodal", "Nodal"],
   ["walk-lab-source-transformation", "Source Transformation"],
+  ["walk-lab-mesh", "Mesh"],
+  ["walk-lab-supermesh", "Supermesh"],
+  ["walk-lab-supernode", "Supernode"],
+  ["walk-lab-superposition", "Superposition"],
 ];
 
 const SECTION2 = [
@@ -17,10 +21,6 @@ const SECTION2 = [
   ["walk-lab-thevenin", "Thevenin"],
   ["walk-lab-norton", "Norton"],
   ["walk-lab-dependent", "Dependent sources"],
-  ["walk-lab-mesh", "Mesh"],
-  ["walk-lab-supermesh", "Supermesh"],
-  ["walk-lab-supernode", "Supernode"],
-  ["walk-lab-superposition", "Superposition"],
   ["walk-lab-invopamp", "Inverting Amp lab"],
   ["walk-lab-ninvopamp", "Non-inverting Amp lab"],
 ];

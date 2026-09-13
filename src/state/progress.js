@@ -1,5 +1,6 @@
 import { DEFAULT_CLASS, normalizeClassId } from "../data/classes";
 import { QUESTION_BANKS, bankLessonKey } from "../data/questionBanks";
+import { hasTopicQuiz } from "../data/topics";
 import { trophyFromIndex } from "../data/trophies";
 
 const STORAGE_KEY = "circuito-progress-v1";
@@ -483,9 +484,11 @@ export function unlockTopicBySkip(state, topicId) {
 
 /** Quiz + bank lesson keys that count toward finishing a section. */
 export function sectionProgressKeys(topicId, counts = {}, bankCounts = {}) {
-  const topicKeys = [1, 2, 3]
-    .map((d) => `${topicId}-${d}`)
-    .filter((key) => (counts[key] || 0) > 0);
+  const topicKeys = hasTopicQuiz(topicId)
+    ? [1, 2, 3]
+        .map((d) => `${topicId}-${d}`)
+        .filter((key) => (counts[key] || 0) > 0)
+    : [];
   const bankKeys = QUESTION_BANKS.filter((bank) => bank.topicId === topicId)
     .flatMap((bank) =>
       [1, 2, 3]
