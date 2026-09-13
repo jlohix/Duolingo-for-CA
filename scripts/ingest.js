@@ -26,8 +26,23 @@ import { createClient } from "@supabase/supabase-js";
 import "dotenv/config";
 
 // pdf-parse is a CommonJS package; load it via require so it works in ESM.
+// Different versions export the parser differently, so normalise it.
 const require = createRequire(import.meta.url);
-const pdf = require("pdf-parse");
+const pdfModule = require("pdf-parse");
+const pdf =
+  typeof pdfModule === "function"
+    ? pdfModule
+    : typeof pdfModule?.default === "function"
+      ? pdfModule.default
+      : typeof pdfModule?.pdf === "function"
+        ? pdfModule.pdf
+        : null;
+if (!pdf) {
+  throw new Error(
+    "Could not load pdf-parse as a function. Installed shape: " +
+      JSON.stringify(Object.keys(pdfModule || {}))
+  );
+}
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
