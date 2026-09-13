@@ -161,6 +161,9 @@ export function listStudents(liveProgress, options = {}) {
     completed: liveProgress.completed || [],
     walkFeedback: liveProgress.walkFeedback || {},
     avatarUrl: String(liveProgress.avatarUrl || "").trim(),
+    leagueIndex: Number.isFinite(Number(liveProgress.leagueIndex))
+      ? Number(liveProgress.leagueIndex)
+      : 0,
     live: true,
   };
 

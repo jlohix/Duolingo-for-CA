@@ -6,12 +6,15 @@
 -- expose it through the existing progress functions.
 --
 -- RUN in Supabase SQL Editor after student_progress.sql exists.
--- Re-running is safe.
+-- Re-running is safe. If trophy_leagues.sql was already applied, run
+-- that file again afterwards so league tier fields stay on the RPCs.
 -- ============================================================
 
--- 1. Add the column (safe if it already exists).
+-- 1. Add the columns (safe if they already exist).
 alter table public.student_progress
   add column if not exists avatar_url text not null default '';
+alter table public.student_progress
+  add column if not exists trophy_tier text not null default 'bronze';
 
 -- 2. get_student_progress: include avatarUrl in the returned JSON.
 create or replace function public.get_student_progress(p_email text)
@@ -51,6 +54,7 @@ begin
         'unlockedBySkip', '[]'::jsonb,
         'topicStats', '{}'::jsonb,
         'leagueIndex', 0,
+        'trophyTier', 'bronze',
         'displayName', '',
         'avatarUrl', '',
         'walkFeedback', '{}'::jsonb,
@@ -72,6 +76,7 @@ begin
     'unlockedBySkip', v_row.unlocked_by_skip,
     'topicStats', v_row.topic_stats,
     'leagueIndex', v_row.league_index,
+    'trophyTier', v_row.trophy_tier,
     'displayName', v_row.display_name,
     'avatarUrl', v_row.avatar_url,
     'walkFeedback', v_row.walk_feedback,
@@ -103,7 +108,7 @@ begin
 
   insert into public.student_progress as sp (
     email, class_id, class_chosen, xp, streak, last_practice_date,
-    completed, unlocked_by_skip, topic_stats, league_index,
+    completed, unlocked_by_skip, topic_stats, league_index, trophy_tier,
     display_name, avatar_url, walk_feedback, updated_at
   )
   values (
@@ -117,6 +122,7 @@ begin
     coalesce(p_data->'unlockedBySkip', '[]'::jsonb),
     coalesce(p_data->'topicStats', '{}'::jsonb),
     greatest(coalesce((p_data->>'leagueIndex')::integer, 0), 0),
+    coalesce(nullif(trim(p_data->>'trophyTier'), ''), 'bronze'),
     coalesce(p_data->>'displayName', ''),
     coalesce(p_data->>'avatarUrl', ''),
     coalesce(p_data->'walkFeedback', '{}'::jsonb),
@@ -132,6 +138,7 @@ begin
     unlocked_by_skip = excluded.unlocked_by_skip,
     topic_stats = excluded.topic_stats,
     league_index = excluded.league_index,
+    trophy_tier = excluded.trophy_tier,
     display_name = excluded.display_name,
     avatar_url = excluded.avatar_url,
     walk_feedback = excluded.walk_feedback,
@@ -162,7 +169,9 @@ begin
           'streak', sp.streak,
           'topicStats', sp.topic_stats,
           'completed', sp.completed,
-          'avatarUrl', sp.avatar_url
+          'avatarUrl', sp.avatar_url,
+          'leagueIndex', sp.league_index,
+          'trophyTier', sp.trophy_tier
         )
         order by sp.xp desc, sp.email asc
       )

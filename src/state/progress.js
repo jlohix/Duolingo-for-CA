@@ -1,5 +1,6 @@
 import { DEFAULT_CLASS, normalizeClassId } from "../data/classes";
 import { QUESTION_BANKS, bankLessonKey } from "../data/questionBanks";
+import { trophyFromIndex } from "../data/trophies";
 
 const STORAGE_KEY = "circuito-progress-v1";
 const XP_CORRECT = 10;
@@ -228,6 +229,7 @@ export function progressToRemotePayload(state) {
     leagueIndex: Number.isFinite(Number(state.leagueIndex))
       ? Number(state.leagueIndex)
       : 0,
+    trophyTier: trophyFromIndex(state.leagueIndex).current.id,
     displayName: normalizeDisplayName(state.displayName),
     avatarUrl: normalizeAvatarUrl(state.avatarUrl),
     walkFeedback: parseWalkFeedback(state.walkFeedback),

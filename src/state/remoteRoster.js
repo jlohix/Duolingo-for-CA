@@ -9,6 +9,7 @@ function displayFromUsername(username) {
 }
 
 let remoteCache = [];
+let remoteLoaded = false;
 let rosterEpoch = 0;
 const rosterListeners = new Set();
 
@@ -43,6 +44,10 @@ export function normalizeRemoteStudent(row) {
           : {},
     completed: Array.isArray(row.completed) ? row.completed : [],
     avatarUrl: String(row.avatarUrl || row.avatar_url || "").trim(),
+    leagueIndex: Number.isFinite(Number(row.leagueIndex ?? row.league_index))
+      ? Number(row.leagueIndex ?? row.league_index)
+      : 0,
+    trophyTier: String(row.trophyTier || row.trophy_tier || "").trim(),
     remote: true,
     live: false,
   };
@@ -50,7 +55,12 @@ export function normalizeRemoteStudent(row) {
 
 export function setRemoteStudentCache(rows) {
   remoteCache = Array.isArray(rows) ? rows : [];
+  remoteLoaded = true;
   bumpRoster();
+}
+
+export function isRemoteRosterLoaded() {
+  return remoteLoaded;
 }
 
 export function loadRemoteStudents() {

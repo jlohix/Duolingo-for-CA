@@ -13,6 +13,7 @@ create table if not exists public.student_progress (
   unlocked_by_skip jsonb not null default '[]'::jsonb,
   topic_stats jsonb not null default '{}'::jsonb,
   league_index integer not null default 0,
+  trophy_tier text not null default 'bronze',
   display_name text not null default '',
   walk_feedback jsonb not null default '{}'::jsonb,
   updated_at timestamptz not null default now()

@@ -1,5 +1,23 @@
 export const BUILT_IN_LOGS = [
   {
+    id: "built-2026-09-13-profile-units",
+    date: "2026-09-13",
+    title: "Profile lists real lessons",
+    body: "Profile and Progress no longer show empty Easy/Average/Challenging rows or topics with no questions. They now list the walkthroughs, tests, and banks that are actually in each section.",
+  },
+  {
+    id: "built-2026-09-13-board-row-layout",
+    date: "2026-09-13",
+    title: "Tidy leaderboard rows",
+    body: "Class and individual boards now keep rank, photo, name, XP, and streak on one neat row, instead of wrapping the streak under your name on smaller screens.",
+  },
+  {
+    id: "built-2026-09-13-league-promote",
+    date: "2026-09-13",
+    title: "Trophy leagues promote on time",
+    body: "Every 3 days the top 20% in your league now promote for everyone, not just on one device. Your trophy tier is saved with your account.",
+  },
+  {
     id: "built-2026-09-12-nodal-mesh-walk-label",
     date: "2026-09-12",
     title: "Nodal and Mesh labels",

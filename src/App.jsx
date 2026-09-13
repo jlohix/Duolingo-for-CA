@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { lazy, Suspense, useEffect, useMemo, useState } from "react";
 import { loadQuestions, groupPastPapers, PAST_YEAR_QUESTIONS } from "./data/loadQuestions";
 import { TOPICS, lessonKey } from "./data/topics";
 import { bankLessonKey, questionBankForId } from "./data/questionBanks";
@@ -32,7 +32,7 @@ import {
   hydrateProgressForUser,
   scheduleProgressPush,
 } from "./state/progressSync";
-import { syncLeagueSeason } from "./state/league";
+import { pullLeagueSeason, syncLeagueSeason } from "./state/league";
 import { loadSession, logout, isAdmin } from "./state/auth";
 import AppShell from "./components/AppShell";
 import Login from "./pages/Login";
@@ -53,6 +53,8 @@ import SourceTransformationLesson from "./pages/SourceTransformationLesson";
 import LaplaceLesson from "./section5/LaplaceLesson";
 import { SECTION_WALKS } from "./walks";
 import Results from "./pages/Results";
+
+const QuestionPack = lazy(() => import("./pages/QuestionPack"));
 
 export default function App() {
   const [questions, setQuestions] = useState([]);
@@ -100,8 +102,10 @@ export default function App() {
       setProgressReady(false);
       try {
         const hydrated = await hydrateProgressForUser(session);
+        await bootstrapRemoteRoster();
         if (cancelled) return;
-        const synced = syncLeagueSeason(hydrated, session).progress;
+        const synced = (await pullLeagueSeason(hydrated, session)).progress;
+        if (cancelled) return;
         setProgress(synced);
         await bootstrapRemoteRoster();
       } catch {
@@ -238,6 +242,7 @@ export default function App() {
       "profile",
       "guide",
       "updates",
+      "qpack",
     ].includes(screen)
       ? screen
       : "admin";
@@ -264,11 +269,17 @@ export default function App() {
             progress={progress}
             setProgress={setProgress}
             onPractice={() => setScreen("home")}
+            counts={counts}
+            bankCounts={bankCounts}
           />
         ) : adminNav === "guide" ? (
           <Guide />
         ) : adminNav === "updates" ? (
           <Updates canEdit />
+        ) : adminNav === "qpack" ? (
+          <Suspense fallback={<div className="page"><p>Loading question pack…</p></div>}>
+            <QuestionPack questions={questions} loaded={questionsLoaded} />
+          </Suspense>
         ) : (
           <Admin
             progress={progress}
@@ -308,6 +319,8 @@ export default function App() {
               progress={progress}
               setProgress={setProgress}
               onPractice={() => setScreen("home")}
+              counts={counts}
+              bankCounts={bankCounts}
             />
           ) : screen === "guide" ? (
             <Guide />
@@ -358,6 +371,8 @@ export default function App() {
               progress={progress}
               setProgress={setProgress}
               onPractice={() => setScreen("home")}
+              counts={counts}
+              bankCounts={bankCounts}
             />
           ) : screen === "guide" ? (
             <Guide />
@@ -781,6 +796,8 @@ export default function App() {
         progress={progress}
         setProgress={setProgress}
         onPractice={() => setScreen("home")}
+        counts={counts}
+        bankCounts={bankCounts}
       />
     );
   } else if (screen === "progress") {

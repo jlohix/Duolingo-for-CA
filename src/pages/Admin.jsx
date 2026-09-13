@@ -13,6 +13,7 @@ import { CLASS_IDS, DEFAULT_CLASS, isPartTimeClass } from "../data/classes";
 import { trophyFromIndex } from "../data/trophies";
 import { syncLeagueSeason } from "../state/league";
 import { summarizeWalkFeedback, WALK_TITLES } from "../data/walkTitles";
+import { topicsWithQuestions, unitsForTopic, unitPillText } from "../data/topicUnits";
 import { useRemoteRosterTick } from "../hooks/useRemoteRosterTick";
 import {
   listQuestionReports,
@@ -26,6 +27,7 @@ function lessonKeysForCounts(counts, bankCounts = {}) {
     keys.push(...sectionProgressKeys(topic.id, counts, bankCounts));
   }
   for (const walk of WALK_TITLES) {
+    if (walk.key === "walk-lab-dc") continue;
     if (!keys.includes(walk.key)) keys.push(walk.key);
   }
   return keys;
@@ -52,7 +54,9 @@ function studentSummary(student, counts, leagues, bankCounts = {}) {
   const completed = student.completed || [];
   const done = keys.filter((key) => completed.includes(key)).length;
   return {
-    league: trophyFromIndex(leagues?.[student.username] ?? 0).current,
+    league: trophyFromIndex(
+      leagues?.[student.username] ?? student.leagueIndex ?? 0
+    ).current,
     done,
     total: keys.length,
     weakest,
@@ -62,15 +66,15 @@ function studentSummary(student, counts, leagues, bankCounts = {}) {
 }
 
 export default function Admin({ progress, setProgress, counts, bankCounts = {} }) {
-  useRemoteRosterTick();
+  const rosterEpoch = useRemoteRosterTick();
   const [added, setAdded] = useState(0);
   const students = useMemo(
     () => listStudents(progress, { includeExtras: true }),
-    [progress, added]
+    [progress, added, rosterEpoch]
   );
   const leagues = useMemo(
     () => syncLeagueSeason(progress).state.leagueIndex,
-    [progress, added]
+    [progress, added, rosterEpoch]
   );
   const [selected, setSelected] = useState(students[0]?.username || "live");
   const [newName, setNewName] = useState("");
@@ -554,29 +558,23 @@ function StudentEditor({ student, counts, bankCounts = {}, onSave }) {
           </div>
           <h3>Lessons completed</h3>
           <ol className="admin-topics">
-            {TOPICS.map((topic) => (
+            {topicsWithQuestions(TOPICS, counts, bankCounts).map((topic) => (
               <li key={topic.id} className="admin-topic">
                 <strong>{topic.name}</strong>
                 <div className="admin-lessons">
-                  {DIFFICULTIES.map((diff) => {
-                    const key = lessonKey(topic.id, diff.id);
-                    const n = counts[key] || 0;
-                    if (!n) {
-                      return (
-                        <span key={key} className="progress-pill empty">
-                          {diff.name} · none
-                        </span>
-                      );
-                    }
-                    const on = completed.includes(key);
+                  {unitsForTopic(topic.id, counts, bankCounts).map((unit) => {
+                    const on = completed.includes(unit.key);
                     return (
-                      <label key={key} className={`admin-lesson ${on ? "on" : ""}`}>
+                      <label
+                        key={unit.key}
+                        className={`admin-lesson ${on ? "on" : ""}`}
+                      >
                         <input
                           type="checkbox"
                           checked={on}
-                          onChange={() => toggleLesson(key)}
+                          onChange={() => toggleLesson(unit.key)}
                         />
-                        {diff.name} · {n} Qs
+                        {unitPillText(unit, on)}
                       </label>
                     );
                   })}
@@ -586,7 +584,7 @@ function StudentEditor({ student, counts, bankCounts = {}, onSave }) {
           </ol>
           <h3>First-try accuracy</h3>
           <ol className="admin-topics">
-            {TOPICS.map((topic) => {
+            {topicsWithQuestions(TOPICS, counts, bankCounts).map((topic) => {
               const insight = topicInsight(preview, topic.id);
               const row = stats[topic.id];
               return (

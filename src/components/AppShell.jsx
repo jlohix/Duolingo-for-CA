@@ -21,6 +21,7 @@ const STUDENT_LINKS = [
 const ADMIN_LINKS = [
   { id: "home", label: "Learn", group: "Study", icon: "fa-book" },
   { id: "admin", label: "Students", group: "Staff", icon: "fa-users" },
+  { id: "qpack", label: "Question pack", group: "Staff", icon: "fa-file-pdf-o" },
   { id: "profile", label: "Profile", group: "You", icon: "fa-user" },
   { id: "updates", label: "Updates", group: "Staff", icon: "fa-bullhorn" },
   { id: "guide", label: "How to use", group: "Staff", icon: "fa-question-circle" },

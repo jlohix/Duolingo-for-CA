@@ -59,6 +59,9 @@ export async function hydrateProgressForUser(session) {
       ...state,
       classId: remoteState.classId,
       classChosen: remoteState.classChosen,
+      leagueIndex: Number.isFinite(Number(remoteState.leagueIndex))
+        ? Number(remoteState.leagueIndex)
+        : state.leagueIndex,
     };
   }
 
@@ -166,7 +169,6 @@ export async function bootstrapRemoteRoster() {
     setRemoteStudentCache(rows);
     return rows;
   } catch {
-    setRemoteStudentCache([]);
     return [];
   }
 }

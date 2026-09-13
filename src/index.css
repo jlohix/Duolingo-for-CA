@@ -305,7 +305,7 @@ button {
 
 .board-row {
   display: grid;
-  grid-template-columns: 40px 1fr auto auto;
+  grid-template-columns: 40px minmax(0, 1fr) auto auto;
   gap: 10px;
   align-items: center;
   background: var(--card);
@@ -313,6 +313,10 @@ button {
   border-radius: 16px;
   padding: 12px 14px;
   font-weight: 700;
+}
+
+.board-row:has(.board-avatar) {
+  grid-template-columns: 40px 36px minmax(0, 1fr) auto auto;
 }
 
 .board-row.you {
@@ -344,7 +348,7 @@ button {
 }
 
 .board-row.cohort-row {
-  grid-template-columns: 40px 1fr auto auto auto;
+  grid-template-columns: 40px minmax(0, 1fr) auto auto auto;
 }
 
 .class-chip {
@@ -494,6 +498,7 @@ button {
   flex-wrap: wrap;
   gap: 6px 10px;
   align-items: center;
+  min-width: 0;
 }
 
 .trophy-badge {
@@ -605,6 +610,8 @@ html[data-theme="dark"] [data-tier="obsidian"] { color: #9aa3af; --tier: #9aa3af
 
 .board-xp {
   color: var(--xp);
+  white-space: nowrap;
+  justify-self: end;
 }
 
 .board-streak {
@@ -1084,6 +1091,10 @@ html[data-theme="dark"] .hex-spoke {
 
 .profile-topic .insight-meter {
   margin-bottom: 0;
+}
+
+.profile-topic .progress-diffs {
+  margin-top: 10px;
 }
 
 .insight {
@@ -2325,36 +2336,6 @@ h2 {
     --snake: 52px;
   }
 
-  .board-row {
-    grid-template-columns: 32px 1fr auto;
-    grid-template-areas:
-      "rank name name"
-      "rank xp streak";
-  }
-
-  .board-row.cohort-row {
-    grid-template-columns: 32px 1fr;
-    grid-template-areas:
-      "rank name"
-      "rank xp";
-  }
-
-  .board-rank {
-    grid-area: rank;
-  }
-
-  .board-name {
-    grid-area: name;
-  }
-
-  .board-xp {
-    grid-area: xp;
-  }
-
-  .board-streak {
-    grid-area: streak;
-  }
-
   .profile-split {
     grid-template-columns: 1fr;
   }
@@ -2402,6 +2383,55 @@ h2 {
 
   .shell-main:has(.streak-notice) .page {
     padding-top: 16px;
+  }
+
+  .board-row {
+    grid-template-columns: 32px minmax(0, 1fr) auto;
+    grid-template-areas:
+      "rank name name"
+      "rank xp streak";
+  }
+
+  .board-row:has(.board-avatar) {
+    grid-template-columns: 32px 36px minmax(0, 1fr) auto;
+    grid-template-areas:
+      "rank avatar name name"
+      "rank avatar xp streak";
+  }
+
+  .board-rank {
+    grid-area: rank;
+  }
+
+  .board-avatar {
+    grid-area: avatar;
+    align-self: center;
+  }
+
+  .board-name {
+    grid-area: name;
+  }
+
+  .board-xp {
+    grid-area: xp;
+    justify-self: start;
+  }
+
+  .board-streak {
+    grid-area: streak;
+  }
+
+  .board-row.cohort-row {
+    grid-template-columns: 32px minmax(0, 1fr);
+    grid-template-areas: none;
+  }
+
+  .board-row.cohort-row .board-rank,
+  .board-row.cohort-row .board-name,
+  .board-row.cohort-row .board-xp,
+  .board-row.cohort-row .board-streak,
+  .board-row.cohort-row .login-hint {
+    grid-area: auto;
   }
 
   .sidebar {
@@ -3748,4 +3778,170 @@ html[data-theme="dark"] .circuit-svg .board-step {
 /* Resolved question reports appear dimmed in the admin table */
 .admin-table tr.report-resolved td {
   opacity: 0.5;
+}
+
+.page.question-pack {
+  max-width: 860px;
+}
+
+.pack-toolbar {
+  margin-bottom: 20px;
+}
+
+.pack-count {
+  font-weight: 800;
+  color: var(--muted);
+}
+
+.pack-toc {
+  display: grid;
+  gap: 6px;
+  margin: 16px 0 28px;
+}
+
+.pack-toc a {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 8px 12px;
+  border: 2px solid var(--line);
+  border-radius: 12px;
+  background: var(--card);
+  color: inherit;
+  text-decoration: none;
+  font-weight: 700;
+}
+
+.pack-toc a span {
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.pack-section {
+  margin-top: 28px;
+}
+
+.pack-section h2 {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  padding: 8px 0;
+  background: var(--bg);
+}
+
+.pack-card {
+  background: var(--card);
+  border: 2px solid var(--line);
+  border-radius: 16px;
+  padding: 16px;
+  margin: 14px 0;
+}
+
+.pack-qnum {
+  margin: 0 0 8px;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.pack-fig {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  margin: 12px 0;
+  border-radius: 12px;
+  background: #fff;
+}
+
+.pack-board {
+  margin: 12px 0;
+}
+
+.pack-options {
+  list-style: none;
+  padding: 0;
+  margin: 12px 0 0;
+  display: grid;
+  gap: 8px;
+}
+
+.pack-option {
+  display: grid;
+  grid-template-columns: 28px minmax(0, 1fr) auto;
+  gap: 10px;
+  align-items: start;
+  padding: 10px 12px;
+  border: 2px solid var(--line);
+  border-radius: 12px;
+  font-weight: 700;
+}
+
+.pack-option.is-answer {
+  border-color: var(--green);
+  background: var(--done-bg);
+}
+
+.pack-letter {
+  font-weight: 800;
+}
+
+.pack-tag {
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #58cc02;
+}
+
+.pack-why {
+  margin: 12px 0 0;
+  color: var(--muted);
+}
+
+@media print {
+  .pack-print .menu-btn,
+  .pack-print .sidebar,
+  .pack-print .sidebar-backdrop,
+  .pack-print .pack-toolbar,
+  .pack-print .pack-toc {
+    display: none !important;
+  }
+
+  .pack-print .app-shell {
+    display: block;
+  }
+
+  .pack-print .shell-main {
+    margin: 0;
+    padding: 0;
+  }
+
+  .page.question-pack {
+    max-width: none;
+    padding: 0;
+  }
+
+  .pack-section h2 {
+    position: static;
+    break-after: avoid;
+  }
+
+  .pack-card {
+    break-inside: avoid;
+    page-break-inside: avoid;
+    background: #fff;
+    color: #111;
+    border-color: #ccc;
+  }
+
+  .pack-option.is-answer {
+    background: #eefbe8;
+  }
+
+  body.pack-print {
+    background: #fff !important;
+    color: #111 !important;
+  }
 }

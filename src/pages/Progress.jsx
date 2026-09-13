@@ -1,5 +1,3 @@
-import { DIFFICULTIES, lessonKey } from "../data/topics";
-import { QUESTION_BANKS, bankLessonKey } from "../data/questionBanks";
 import { WALK_TITLES } from "../data/walkTitles";
 import {
   visibleStreak,
@@ -8,6 +6,8 @@ import {
 } from "../state/progress";
 import TopicInsight from "../components/TopicInsight";
 import HexStats from "../components/HexStats";
+import UnitPills from "../components/UnitPills";
+import { topicsWithQuestions, unitsForTopic } from "../data/topicUnits";
 
 function lessonCompletionStats(progress, topics, counts, bankCounts) {
   const keys = [];
@@ -15,6 +15,7 @@ function lessonCompletionStats(progress, topics, counts, bankCounts) {
     keys.push(...sectionProgressKeys(topic.id, counts, bankCounts));
   }
   for (const walk of WALK_TITLES) {
+    if (walk.key === "walk-lab-dc") continue;
     if (!keys.includes(walk.key)) keys.push(walk.key);
   }
   const completed = progress?.completed || [];
@@ -38,9 +39,11 @@ export default function ProgressPage({
     counts,
     bankCounts
   );
-  const insights = topics.map((topic) => ({
+  const liveTopics = topicsWithQuestions(topics, counts, bankCounts);
+  const insights = liveTopics.map((topic) => ({
     topic,
     insight: topicInsight(progress, topic.id),
+    units: unitsForTopic(topic.id, counts, bankCounts),
   }));
   const ranked = insights.filter((row) => row.insight.attempts >= 3);
   const strongest = ranked.reduce(
@@ -106,25 +109,10 @@ export default function ProgressPage({
       )}
       <section className="profile-card hex-stats-card">
         <h2>Topic hex</h2>
-        <HexStats topics={topics} progress={progress} />
+        <HexStats topics={liveTopics} progress={progress} />
       </section>
       <ol className="progress-topics">
-        {insights.map(({ topic, insight }) => {
-          const bankRows = QUESTION_BANKS.filter(
-            (bank) => bank.topicId === topic.id
-          ).flatMap((bank) =>
-            DIFFICULTIES.map((diff) => {
-              const key = bankLessonKey(bank.id, diff.id);
-              const n = bankCounts[key] || 0;
-              if (!n) return null;
-              return {
-                key,
-                label: `${bank.title} ${diff.name}`,
-                n,
-                done: completed.includes(key),
-              };
-            }).filter(Boolean)
-          );
+        {insights.map(({ topic, insight, units }) => {
           return (
             <li key={topic.id} className="progress-topic">
               <h2>{topic.name}</h2>
@@ -138,31 +126,7 @@ export default function ProgressPage({
                   />
                 </div>
               ) : null}
-              <ul className="progress-diffs">
-                {DIFFICULTIES.map((diff) => {
-                  const key = lessonKey(topic.id, diff.id);
-                  const n = counts[key] || 0;
-                  const isDone = completed.includes(key);
-                  return (
-                    <li
-                      key={key}
-                      className={`progress-pill ${isDone ? "done" : ""} ${n ? "" : "empty"}`}
-                    >
-                      {diff.name}
-                      {n ? (isDone ? " · done" : ` · ${n} Qs`) : " · none"}
-                    </li>
-                  );
-                })}
-                {bankRows.map((row) => (
-                  <li
-                    key={row.key}
-                    className={`progress-pill ${row.done ? "done" : ""}`}
-                  >
-                    {row.label}
-                    {row.done ? " · done" : " · step-by-step"}
-                  </li>
-                ))}
-              </ul>
+              <UnitPills units={units} completed={completed} />
             </li>
           );
         })}

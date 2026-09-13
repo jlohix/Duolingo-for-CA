@@ -109,6 +109,11 @@ export async function listStudentProgress() {
   return Array.isArray(data) ? data : [];
 }
 
+export async function syncLeagueSeasonRemote() {
+  const data = await rpc("sync_league_season", {});
+  return data && typeof data === "object" ? data : null;
+}
+
 // ---------- Question reports ----------
 
 export async function submitQuestionReportRemote({

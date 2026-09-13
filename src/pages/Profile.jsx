@@ -7,8 +7,10 @@ import { flushProgressPush } from "../state/progressSync";
 import { uploadAvatar } from "../supabaseClient";
 import TopicInsight from "../components/TopicInsight";
 import HexStats from "../components/HexStats";
+import UnitPills from "../components/UnitPills";
 import StreakNotice from "../components/StreakNotice";
-import { useState } from "react";
+import { topicsWithQuestions, unitsForTopic } from "../data/topicUnits";
+import { useMemo, useState } from "react";
 
 // Resize/compress an image file to a small square PNG blob for the avatar.
 function compressAvatar(file, size = 256) {
@@ -43,7 +45,15 @@ function compressAvatar(file, size = 256) {
 const STRENGTH_KINDS = new Set(["strength", "solid"]);
 const WEAK_KINDS = new Set(["weakness", "developing"]);
 
-export default function Profile({ user, topics, progress, setProgress, onPractice }) {
+export default function Profile({
+  user,
+  topics,
+  progress,
+  setProgress,
+  onPractice,
+  counts = {},
+  bankCounts = {},
+}) {
   const streak = visibleStreak(progress);
   const staff = isAdmin(user);
   const fallbackName = displayNameFor(user.username);
@@ -90,9 +100,15 @@ export default function Profile({ user, topics, progress, setProgress, onPractic
       setAvatarBusy(false);
     }
   }
-  const rows = topics.map((topic) => ({
+  const liveTopics = useMemo(
+    () => topicsWithQuestions(topics, counts, bankCounts),
+    [topics, counts, bankCounts]
+  );
+  const completed = progress.completed || [];
+  const rows = liveTopics.map((topic) => ({
     topic,
     insight: topicInsight(progress, topic.id),
+    units: unitsForTopic(topic.id, counts, bankCounts),
   }));
   const measured = rows.filter((row) => row.insight.attempts > 0);
   const strengths = rows
@@ -102,7 +118,6 @@ export default function Profile({ user, topics, progress, setProgress, onPractic
     .filter((row) => WEAK_KINDS.has(row.insight.kind))
     .sort((a, b) => a.insight.pct - b.insight.pct);
   const starting = rows.filter((row) => row.insight.kind === "starting");
-  const empty = rows.filter((row) => row.insight.kind === "empty");
 
   async function saveName(event) {
     event.preventDefault();
@@ -216,7 +231,9 @@ export default function Profile({ user, topics, progress, setProgress, onPractic
           <span>day streak</span>
         </li>
         <li>
-          <strong>{measured.length}/{topics.length}</strong>
+          <strong>
+            {measured.length}/{liveTopics.length}
+          </strong>
           <span>topics measured</span>
         </li>
       </ul>
@@ -228,11 +245,12 @@ export default function Profile({ user, topics, progress, setProgress, onPractic
       <p className="focus-line">
         Strengths and weaknesses use first-try accuracy on lessons and
         walkthroughs. A topic needs at least 3 answers before it is labeled.
+        Only sections that have questions appear here.
       </p>
 
       <section className="profile-card hex-stats-card">
         <h2>Topic hex</h2>
-        <HexStats topics={topics} progress={progress} />
+        <HexStats topics={liveTopics} progress={progress} />
       </section>
 
       <div className="profile-split">
@@ -267,20 +285,22 @@ export default function Profile({ user, topics, progress, setProgress, onPractic
         </section>
       ) : null}
 
-      {empty.length ? (
-        <section className="profile-block">
-          <h2>Not measured yet</h2>
-          <TopicList rows={empty} />
-        </section>
-      ) : null}
+      <section className="profile-block">
+        <h2>What’s inside</h2>
+        <p className="login-hint">
+          Every walkthrough, test, and question bank that is actually in the
+          app.
+        </p>
+        <TopicList rows={rows} completed={completed} showUnits />
+      </section>
     </div>
   );
 }
 
-function TopicList({ rows }) {
+function TopicList({ rows, completed, showUnits = false }) {
   return (
     <ol className="profile-topics">
-      {rows.map(({ topic, insight }) => (
+      {rows.map(({ topic, insight, units }) => (
         <li key={topic.id} className="profile-topic">
           <div className="profile-topic-head">
             <strong>{topic.name}</strong>
@@ -294,6 +314,9 @@ function TopicList({ rows }) {
                 style={{ width: `${insight.pct}%` }}
               />
             </div>
+          ) : null}
+          {showUnits ? (
+            <UnitPills units={units} completed={completed} />
           ) : null}
         </li>
       ))}

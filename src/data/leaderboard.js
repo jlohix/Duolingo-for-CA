@@ -14,7 +14,9 @@ function decorate(row, leagues, youName) {
     live: Boolean(row.live),
     custom: Boolean(row.custom),
     synthetic: Boolean(row.synthetic),
-    league: trophyFromIndex(leagues[row.username] ?? 0).current,
+    league: trophyFromIndex(
+      leagues[row.username] ?? row.leagueIndex ?? 0
+    ).current,
     isYou: youName
       ? row.username.toLowerCase() === youName.toLowerCase()
       : false,

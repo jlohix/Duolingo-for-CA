@@ -25,7 +25,7 @@ const STEPS = [
   },
   {
     title: "Profile and Progress",
-    text: "On Profile you can pick a board name for Class board and Individual. Offensive names are not anonymous — we know who you are, because your NTU email is still on the account. Profile also lists strengths (about 80%+ first try) and weaknesses (under 60%) after at least 3 answers from lessons and walkthroughs, plus a hex chart of first-try accuracy on every topic. Progress shows the same hex for that student, every topic, and your strongest / focus area.",
+    text: "On Profile you can pick a board name for Class board and Individual. Offensive names are not anonymous — we know who you are, because your NTU email is still on the account. Profile also lists strengths (about 80%+ first try) and weaknesses (under 60%) after at least 3 answers from lessons and walkthroughs, plus a hex chart and a list of the walkthroughs, tests, and banks that are actually in each section. Topics with no questions are left off. Progress shows the same hex, the same lesson list, and your strongest / focus area.",
   },
   {
     title: "Trophy leagues",
