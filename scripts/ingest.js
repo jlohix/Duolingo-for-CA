@@ -25,23 +25,19 @@ import { createRequire } from "node:module";
 import { createClient } from "@supabase/supabase-js";
 import "dotenv/config";
 
-// pdf-parse is a CommonJS package; load it via require so it works in ESM.
-// Different versions export the parser differently, so normalise it.
+// pdf-parse v2+ exports a PDFParse class (CommonJS). Load via require for ESM.
 const require = createRequire(import.meta.url);
-const pdfModule = require("pdf-parse");
-const pdf =
-  typeof pdfModule === "function"
-    ? pdfModule
-    : typeof pdfModule?.default === "function"
-      ? pdfModule.default
-      : typeof pdfModule?.pdf === "function"
-        ? pdfModule.pdf
-        : null;
-if (!pdf) {
-  throw new Error(
-    "Could not load pdf-parse as a function. Installed shape: " +
-      JSON.stringify(Object.keys(pdfModule || {}))
-  );
+const { PDFParse } = require("pdf-parse");
+
+// Extract all text from a PDF buffer using the v2 class API.
+async function extractPdfText(buffer) {
+  const parser = new PDFParse({ data: buffer });
+  try {
+    const result = await parser.getText();
+    return { text: result.text || "", numpages: result.total || 0 };
+  } finally {
+    await parser.destroy();
+  }
 }
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -161,7 +157,7 @@ async function main() {
     }
     console.log(`\n=== ${file} ===`);
     const buf = fs.readFileSync(path.join(LECTURES_DIR, file));
-    const parsed = await pdf(buf);
+    const parsed = await extractPdfText(buf);
     const chunks = chunkText(parsed.text);
     console.log(`  extracted ${parsed.numpages} pages -> ${chunks.length} chunks`);
 
