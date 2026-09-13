@@ -14,13 +14,11 @@ export const CHATBOT_AUDIENCE = "ee22";
 export const CHATBOT_TEST_CLASS = "EE22";
 
 // Screens where the tutor is deliberately HIDDEN, even for eligible users.
-// These are graded / test-out assessments: showing a tutor here would let a
-// student get help clearing a gate that is meant to measure what they already
-// know. Teaching screens (labs, guided lessons, home, boards) still show it.
-//   - "skip"   -> Skip Quiz (test-out gate that unlocks a topic)
-//   - "lesson" -> standard graded topic / question-bank lessons
-//   - "paper"  -> past-year exam paper packs
-export const CHATBOT_HIDDEN_SCREENS = new Set(["skip", "lesson", "paper"]);
+// The Skip Quiz is a test-out gate that unlocks a topic based on what the
+// student already knows, so a tutor there would undermine its purpose.
+// All other screens (lessons, papers, labs, home, boards) show the tutor.
+//   - "skip" -> Skip Quiz (test-out gate that unlocks a topic)
+export const CHATBOT_HIDDEN_SCREENS = new Set(["skip"]);
 
 // Whether the current screen is one where the tutor should stay hidden.
 export function isChatbotHiddenScreen(screen) {
