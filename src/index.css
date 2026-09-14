@@ -4045,6 +4045,8 @@ html[data-theme="dark"] .circuit-svg .board-step {
   display: flex;
   flex-direction: column;
   gap: 6px;
+  max-width: 100%;
+  min-width: 0;
 }
 .chat-msg-user {
   align-items: flex-end;
@@ -4055,6 +4057,7 @@ html[data-theme="dark"] .circuit-svg .board-step {
 .chat-bubble {
   display: block;
   max-width: 85%;
+  min-width: 0;
   padding: 12px 14px;
   border-radius: 12px;
   background: var(--letter-bg);
@@ -4063,6 +4066,19 @@ html[data-theme="dark"] .circuit-svg .board-step {
   line-height: 1.6;
   white-space: normal;
   overflow-wrap: anywhere;
+  word-break: break-word;
+}
+/* KaTeX math can be intrinsically wider than the bubble (long equations,
+   fractions). Let it scroll horizontally inside the bubble instead of
+   spilling out of it, so the panel edge is never breached. */
+.chat-bubble .katex,
+.chat-bubble .katex-display {
+  max-width: 100%;
+  overflow-x: auto;
+  overflow-y: hidden;
+}
+.chat-bubble .katex-display {
+  margin: 0.4em 0;
 }
 .chat-bubble-user {
   background: var(--green);
@@ -4077,8 +4093,10 @@ html[data-theme="dark"] .circuit-svg .board-step {
 }
 .chat-sources {
   margin: 0;
+  max-width: 85%;
   font-size: 12px;
   color: var(--muted);
+  overflow-wrap: anywhere;
 }
 
 .chat-input-row {
