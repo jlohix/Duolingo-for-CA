@@ -205,6 +205,7 @@ export default function ValueDragLab({
           <p className={ok ? "ok-text" : "bad-text"}>
             <MathText
               text={`${ok ? "Correct. " : "Not that value. "}${question.why}`}
+              sentenceLines
             />
           </p>
           {willRepeat ? (

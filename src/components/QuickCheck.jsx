@@ -172,7 +172,7 @@ export function QuickCheckCard({
           <QuizMascot mood={ok ? "happy" : "scary"} playKey={ok ? "ok" : "bad"} />
           <p className={ok ? "ok-text" : "bad-text"}>
             <span className="qc-result">{ok ? "Nice!" : "Not quite"}</span>
-            <MathText text={why} />
+            <MathText text={why} sentenceLines />
           </p>
           {!ok && willRepeat ? (
             <p className="login-hint">This question will come back at the end.</p>

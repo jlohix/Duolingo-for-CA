@@ -448,6 +448,7 @@ export default function DragCircuitLab({
           <p className={ok ? "ok-text" : "bad-text"}>
             <MathText
               text={`${ok ? "Correct. " : pickQuiz ? "Not that one. " : "Not that value. "}${question.why}`}
+              sentenceLines
             />
           </p>
           <button type="button" className="primary" onClick={next}>

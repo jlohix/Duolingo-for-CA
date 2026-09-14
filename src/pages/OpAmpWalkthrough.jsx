@@ -192,7 +192,7 @@ function PracticeView({
         <div className="feedback-row">
           <p className={ok ? "ok-text" : "bad-text"}>
             {ok ? "Correct. " : "Not that value. "}
-            <MathText text={question.why} />
+            <MathText text={question.why} sentenceLines />
           </p>
           <button
             type="button"

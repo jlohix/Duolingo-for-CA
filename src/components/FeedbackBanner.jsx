@@ -23,7 +23,7 @@ export default function FeedbackBanner({
         ) : null}
         {explanation ? (
           <p>
-            <MathText text={explanation} />
+            <MathText text={explanation} sentenceLines />
           </p>
         ) : null}
       </div>
