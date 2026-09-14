@@ -13,7 +13,7 @@ export default function WalkRating({ lessonKey, progress, setProgress }) {
 
   return (
     <div className="walk-rating">
-      <p className="walk-rating-prompt">Did this walkthrough help?</p>
+      <p className="walk-rating-prompt">Like this module?</p>
       <div className="walk-rating-row">
         <button
           type="button"

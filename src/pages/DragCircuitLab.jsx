@@ -14,8 +14,6 @@ import {
   payGuidedCheck,
 } from "../state/progress";
 
-const MODE_KEY = "circuito-lab-mode-v1";
-
 function shuffle(list) {
   const next = [...list];
   for (let i = next.length - 1; i > 0; i -= 1) {
@@ -36,25 +34,19 @@ function formatAmps(amps) {
   return Number.isInteger(amps) ? `${amps}` : String(amps);
 }
 
-function loadMode() {
-  try {
-    return localStorage.getItem(MODE_KEY) === "hard" ? "hard" : "easy";
-  } catch {
-    return "easy";
-  }
-}
 
-function ResistorChip({ ohms, hard, onPointerDown, onPick, disabled }) {
+
+function ResistorChip({ ohms, onPointerDown, onPick, disabled }) {
   return (
     <button
       type="button"
       className="resistor-chip"
       disabled={disabled}
-      aria-label={hard ? "Resistor with colour bands" : `${ohms} ohm resistor`}
+      aria-label={`${ohms} ohm resistor`}
       onClick={() => onPick(ohms)}
       onPointerDown={(event) => onPointerDown(event, ohms)}
     >
-      <ResistorBody ohms={ohms} showValue={!hard} />
+      <ResistorBody ohms={ohms} showValue />
     </button>
   );
 }
@@ -79,7 +71,6 @@ export default function DragCircuitLab({
   const [score, setScore] = useState(0);
   const [done, setDone] = useState(false);
   const [drag, setDrag] = useState(null);
-  const [mode, setMode] = useState(loadMode);
   const slotRef = useRef(null);
   const dragRef = useRef(null);
   const attemptedRef = useRef(new Set());
@@ -87,7 +78,6 @@ export default function DragCircuitLab({
   const xpRef = useRef(0);
   const alreadyDone = Boolean(progress?.completed?.includes(walkKey));
   const xpEach = preview || alreadyDone ? 0 : XP_CORRECT;
-  const hard = mode === "hard";
   const firstHard = queue.findIndex((q) => q.level === "hard");
   const hasHardQs = firstHard >= 0;
 
@@ -99,15 +89,6 @@ export default function DragCircuitLab({
     () => (question ? shuffle(question.choices) : []),
     [question?.id]
   );
-
-  function setLabMode(next) {
-    setMode(next);
-    try {
-      localStorage.setItem(MODE_KEY, next);
-    } catch {
-      /* ignore */
-    }
-  }
 
   function resetPlace() {
     setPlaced(null);
@@ -285,28 +266,6 @@ export default function DragCircuitLab({
         </p>
         <ThemeSwitch compact />
       </header>
-      {!pickQuiz ? (
-      <div className="board-tabs" role="tablist" aria-label="Resistor labels">
-        <button
-          type="button"
-          role="tab"
-          aria-selected={!hard}
-          className={hard ? "" : "on"}
-          onClick={() => setLabMode("easy")}
-        >
-          Ohm values
-        </button>
-        <button
-          type="button"
-          role="tab"
-          aria-selected={hard}
-          className={hard ? "on" : ""}
-          onClick={() => setLabMode("hard")}
-        >
-          Colour bands
-        </button>
-      </div>
-      ) : null}
       {hasHardQs && question.level !== "hard" ? (
         <p className="login-hint">
           {question.kind === "nodal" ? (
@@ -338,7 +297,7 @@ export default function DragCircuitLab({
         <p className="hard-lab-banner">Hard question</p>
       ) : null}
       <p className="focus-line">
-        <MathText text={labPrompt(question, hard)} />
+        <MathText text={labPrompt(question)} />
       </p>
       <div className="circuit-board">
         {question.kind === "power" ? (
@@ -364,7 +323,6 @@ export default function DragCircuitLab({
           drag={drag}
           revealed={revealed}
           ok={ok}
-          hard={hard}
           slotRef={slotRef}
         />
         )}
@@ -467,7 +425,6 @@ export default function DragCircuitLab({
           <ResistorChip
             key={ohms}
             ohms={ohms}
-            hard={hard}
             disabled={revealed}
             onPick={(value) => {
               if (!revealed) setPlaced(value);

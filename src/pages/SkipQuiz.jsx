@@ -32,7 +32,7 @@ function SkipFail({ topicName, misses, needed, total, onRetry, onHome }) {
       </p>
       <p>Try the earlier lessons, then take the skip again.</p>
       <div className="opamp-nav">
-        <button type="button" className="ghost" onClick={onHome}>
+        <button type="button" className="primary" onClick={onHome}>
           Back to Learn
         </button>
         <button type="button" className="primary" onClick={onRetry}>

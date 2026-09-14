@@ -693,10 +693,8 @@ export function labKindLabel(kind) {
   return "series";
 }
 
-export function labPrompt(q, hard) {
-  const hardBit = hard
-    ? " Hard mode: read the colour bands (no ohm labels)."
-    : " Easy mode: ohm value and colour bands.";
+export function labPrompt(q) {
+  const hardBit = "";
   if (q.kind === "parallel") {
     return `Parallel: two resistors, both see the battery voltage. Source current is ${q.amps} A. One branch is ${q.knownOhm} Ω. Drop the other.${hardBit}`;
   }

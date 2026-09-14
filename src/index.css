@@ -2213,6 +2213,7 @@ h2 {
 
 .feedback p {
   margin: 8px 0 0;
+  text-align: justify;
 }
 
 .stats {
@@ -2860,6 +2861,13 @@ html[data-theme="dark"] .labs-egg-b {
   gap: 12px;
 }
 
+/* Justify the explanation body shown after checking a drag-lab answer. */
+.feedback-row .ok-text .math-text,
+.feedback-row .bad-text .math-text {
+  display: block;
+  text-align: justify;
+}
+
 .part-chip {
   min-width: 7.5em;
 }
@@ -3212,6 +3220,12 @@ html[data-theme="dark"] .circuit-svg .board-step {
   margin: 0;
   display: grid;
   gap: 4px;
+}
+
+/* Justify the explanation body (leaves the "Nice!/Not quite" label alone). */
+.qc-feedback p .math-text {
+  display: block;
+  text-align: justify;
 }
 
 .qc-result {
