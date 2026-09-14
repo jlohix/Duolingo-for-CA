@@ -35,6 +35,8 @@ import {
 import { pullLeagueSeason, syncLeagueSeason } from "./state/league";
 import { loadSession, logout, isAdmin } from "./state/auth";
 import AppShell from "./components/AppShell";
+import ChatWidget from "./components/ChatWidget";
+import { canUseChatbot } from "./data/chatbot";
 import Login from "./pages/Login";
 import Home from "./pages/Home";
 import Leaderboard from "./pages/Leaderboard";
@@ -56,7 +58,32 @@ import Results from "./pages/Results";
 
 const QuestionPack = lazy(() => import("./pages/QuestionPack"));
 
+// Top-level wrapper: renders the app and mounts the tutor chatbot ONCE, so it
+// floats over every screen (it's position: fixed) instead of being duplicated
+// into each screen's return. AppBody reports the values the gate needs
+// (current screen, class, admin) up to here via onGateChange.
 export default function App() {
+  const [gate, setGate] = useState({
+    screen: "home",
+    classId: null,
+    isAdmin: false,
+  });
+
+  const showChatbot = canUseChatbot({
+    classId: gate.classId,
+    isAdmin: gate.isAdmin,
+    screen: gate.screen,
+  });
+
+  return (
+    <>
+      <AppBody onGateChange={setGate} />
+      {showChatbot && <ChatWidget />}
+    </>
+  );
+}
+
+function AppBody({ onGateChange }) {
   const [questions, setQuestions] = useState([]);
   const [questionsLoaded, setQuestionsLoaded] = useState(false);
   const [error, setError] = useState("");
@@ -132,6 +159,16 @@ export default function App() {
     if (isAdmin(session)) return;
     scheduleProgressPush(session, progress);
   }, [session, progress, progressReady]);
+
+  // Report the values the chatbot gate needs (current screen, class, admin)
+  // up to the App wrapper, which mounts the single floating ChatWidget.
+  useEffect(() => {
+    onGateChange({
+      screen,
+      classId: progress?.classId ?? null,
+      isAdmin: isAdmin(session),
+    });
+  }, [onGateChange, screen, progress?.classId, session]);
 
   const pastPapers = useMemo(
     () => groupPastPapers(PAST_YEAR_QUESTIONS),

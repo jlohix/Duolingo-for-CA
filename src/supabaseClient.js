@@ -192,3 +192,70 @@ export async function uploadAvatar(email, blob) {
   // Public URL for a public bucket. Cache-bust so the new image shows immediately.
   return `${SUPABASE_URL}/storage/v1/object/public/${AVATAR_BUCKET}/${path}?v=${Date.now()}`;
 }
+
+
+// ---------- RAG tutor chatbot (Supabase Edge Function: "chat") ----------
+
+// Max prior turns (messages) of conversation history to send along. A "turn"
+// is one message, so 8 turns ≈ 4 back-and-forth exchanges. Keeps requests
+// small/fast/cheap; the Edge Function also enforces this cap defensively.
+export const CHAT_HISTORY_LIMIT = 8;
+
+// Send a question (plus recent conversation history) to the deployed `chat`
+// Edge Function and return the grounded answer plus the lecture weeks it drew
+// from. `history` is an array of prior turns: [{ role: "user"|"model", text }].
+// Resolves to { answer, sources }. Throws with a friendly message on failure.
+export async function askChatbot(question, history = []) {
+  const trimmed = String(question || "").trim();
+  if (!trimmed) {
+    throw new Error("Please type a question first.");
+  }
+
+  // Normalize + cap the history to the most recent turns before sending.
+  const safeHistory = (Array.isArray(history) ? history : [])
+    .filter(
+      (t) =>
+        t &&
+        (t.role === "user" || t.role === "model") &&
+        typeof t.text === "string" &&
+        t.text.trim()
+    )
+    .map((t) => ({ role: t.role, text: t.text.trim() }))
+    .slice(-CHAT_HISTORY_LIMIT);
+
+  let response;
+  try {
+    response = await fetch(`${SUPABASE_URL}/functions/v1/chat`, {
+      method: "POST",
+      headers: {
+        apikey: SUPABASE_ANON_KEY,
+        Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ question: trimmed, history: safeHistory }),
+    });
+  } catch {
+    throw new Error("Couldn't reach the tutor. Check your connection and try again.");
+  }
+
+  let data = null;
+  try {
+    data = await response.json();
+  } catch {
+    /* non-JSON body */
+  }
+
+  if (!response.ok) {
+    const detail = data && data.error ? data.error : `HTTP ${response.status}`;
+    throw new Error(`The tutor is unavailable right now. (${detail})`);
+  }
+
+  if (data && data.error) {
+    throw new Error(data.error);
+  }
+
+  return {
+    answer: (data && data.answer) || "",
+    sources: Array.isArray(data && data.sources) ? data.sources : [],
+  };
+}
