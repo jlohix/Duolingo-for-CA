@@ -28,7 +28,7 @@ export default function FeedbackBanner({
         ) : null}
       </div>
       <button type="button" className="primary" onClick={onContinue}>
-        {failOut ? "See why" : "Continue"}
+        {failOut ? "Next" : "Continue"}
       </button>
     </div>
   );
