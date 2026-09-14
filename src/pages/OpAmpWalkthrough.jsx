@@ -10,8 +10,6 @@ import {
   payGuidedCheck,
 } from "../state/progress";
 
-const MODE_KEY = "circuito-lab-mode-v1";
-
 function shuffle(list) {
   const next = [...list];
   for (let i = next.length - 1; i > 0; i -= 1) {
@@ -21,25 +19,17 @@ function shuffle(list) {
   return next;
 }
 
-function loadMode() {
-  try {
-    return localStorage.getItem(MODE_KEY) === "hard" ? "hard" : "easy";
-  } catch {
-    return "easy";
-  }
-}
-
-function ResistorChip({ ohms, hard, onPointerDown, onPick, disabled }) {
+function ResistorChip({ ohms, onPointerDown, onPick, disabled }) {
   return (
     <button
       type="button"
       className="resistor-chip"
       disabled={disabled}
-      aria-label={hard ? "Resistor with colour bands" : `${ohms} kilohm resistor`}
+      aria-label={`${ohms} kilohm resistor`}
       onClick={() => onPick(ohms)}
       onPointerDown={(event) => onPointerDown(event, ohms)}
     >
-      <ResistorBody ohms={ohms} unit="kΩ" showValue={!hard} />
+      <ResistorBody ohms={ohms} unit="kΩ" showValue />
     </button>
   );
 }
@@ -61,25 +51,14 @@ function PracticeView({
   const [ok, setOk] = useState(false);
   const [score, setScore] = useState(0);
   const [drag, setDrag] = useState(null);
-  const [mode, setMode] = useState(loadMode);
   const slotRef = useRef(null);
   const dragRef = useRef(null);
   const attemptedRef = useRef(new Set());
-  const hard = mode === "hard";
   const question = queue[index];
   const choices = useMemo(
     () => (question ? shuffle(question.choices) : []),
     [question?.id]
   );
-
-  function setLabMode(next) {
-    setMode(next);
-    try {
-      localStorage.setItem(MODE_KEY, next);
-    } catch {
-      /* ignore */
-    }
-  }
 
   function resetPlace() {
     setPlaced(null);
@@ -170,31 +149,8 @@ function PracticeView({
         </p>
         <ThemeSwitch compact />
       </header>
-      <div className="board-tabs" role="tablist" aria-label="Lab difficulty">
-        <button
-          type="button"
-          role="tab"
-          aria-selected={!hard}
-          className={hard ? "" : "on"}
-          onClick={() => setLabMode("easy")}
-        >
-          Easy
-        </button>
-        <button
-          type="button"
-          role="tab"
-          aria-selected={hard}
-          className={hard ? "on" : ""}
-          onClick={() => setLabMode("hard")}
-        >
-          Hard
-        </button>
-      </div>
       <p className="focus-line">
         <MathText text={question.prompt} />
-        {hard
-          ? " Hard mode: read the colour bands (no kΩ labels)."
-          : " Easy mode: kΩ value and colour bands."}
       </p>
       <div className="circuit-board">
         <Schematic
@@ -215,7 +171,6 @@ function PracticeView({
           <ResistorChip
             key={ohms}
             ohms={ohms}
-            hard={hard}
             disabled={revealed}
             onPick={(value) => {
               if (!revealed) setPlaced(value);
@@ -237,7 +192,7 @@ function PracticeView({
         <div className="feedback-row">
           <p className={ok ? "ok-text" : "bad-text"}>
             {ok ? "Correct. " : "Not that value. "}
-            <MathText text={question.why} />
+            <MathText text={question.why} sentenceLines />
           </p>
           <button
             type="button"
@@ -251,7 +206,7 @@ function PracticeView({
       <ColourCodeKey />
       {drag ? (
         <div className="resistor-ghost" style={{ left: drag.x, top: drag.y }}>
-          <ResistorBody ohms={drag.ohms} unit="kΩ" showValue={!hard} ghost />
+          <ResistorBody ohms={drag.ohms} unit="kΩ" showValue ghost />
         </div>
       ) : null}
     </div>
