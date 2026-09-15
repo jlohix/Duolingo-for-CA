@@ -36,7 +36,9 @@ import { pullLeagueSeason, syncLeagueSeason } from "./state/league";
 import { loadSession, logout, isAdmin } from "./state/auth";
 import AppShell from "./components/AppShell";
 import ChatWidget from "./components/ChatWidget";
+import ConsentModal from "./components/ConsentModal";
 import { canUseChatbot } from "./data/chatbot";
+import { getStudentConsentStatus } from "./supabaseClient";
 import Login from "./pages/Login";
 import Home from "./pages/Home";
 import Leaderboard from "./pages/Leaderboard";
@@ -67,13 +69,15 @@ export default function App() {
     screen: "home",
     classId: null,
     isAdmin: false,
+    consentPending: false,
   });
 
-  const showChatbot = canUseChatbot({
-    classId: gate.classId,
-    isAdmin: gate.isAdmin,
-    screen: gate.screen,
-  });
+  const showChatbot =
+    canUseChatbot({
+      classId: gate.classId,
+      isAdmin: gate.isAdmin,
+      screen: gate.screen,
+    }) && !gate.consentPending;
 
   return (
     <>
@@ -98,6 +102,10 @@ function AppBody({ onGateChange }) {
     return syncLeagueSeason(loadProgress(), existing).progress;
   });
   const [progressReady, setProgressReady] = useState(() => !loadSession());
+  const [consentReady, setConsentReady] = useState(
+    () => !loadSession() || isAdmin(loadSession())
+  );
+  const [needsConsent, setNeedsConsent] = useState(false);
   const [screen, setScreen] = useState("home");
   const [lesson, setLesson] = useState(null);
   const [paperPack, setPaperPack] = useState(null);
@@ -155,6 +163,29 @@ function AppBody({ onGateChange }) {
   }, [session?.username, session?.role]);
 
   useEffect(() => {
+    if (!session || isAdmin(session)) {
+      setNeedsConsent(false);
+      setConsentReady(true);
+      return;
+    }
+    let cancelled = false;
+    setConsentReady(false);
+    getStudentConsentStatus(session.username)
+      .then((status) => {
+        if (!cancelled) setNeedsConsent(!status.recorded);
+      })
+      .catch(() => {
+        if (!cancelled) setNeedsConsent(true);
+      })
+      .finally(() => {
+        if (!cancelled) setConsentReady(true);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [session?.username, session?.role]);
+
+  useEffect(() => {
     if (!session || !progressReady) return;
     if (isAdmin(session)) return;
     scheduleProgressPush(session, progress);
@@ -167,8 +198,12 @@ function AppBody({ onGateChange }) {
       screen,
       classId: progress?.classId ?? null,
       isAdmin: isAdmin(session),
+      consentPending:
+        Boolean(session) &&
+        !isAdmin(session) &&
+        (!consentReady || needsConsent),
     });
-  }, [onGateChange, screen, progress?.classId, session]);
+  }, [onGateChange, screen, progress?.classId, session, consentReady, needsConsent]);
 
   const pastPapers = useMemo(
     () => groupPastPapers(PAST_YEAR_QUESTIONS),
@@ -217,11 +252,13 @@ function AppBody({ onGateChange }) {
     setProgressOwner(null);
     setProgress(loadProgress());
     setProgressReady(true);
+    setConsentReady(true);
+    setNeedsConsent(false);
     setSession(null);
     setScreen("home");
   }
 
-  if (!isAdmin(session) && !progressReady) {
+  if (!isAdmin(session) && (!progressReady || !consentReady)) {
     return (
       <AppShell
         nav="home"
@@ -234,10 +271,39 @@ function AppBody({ onGateChange }) {
           <header className="topbar">
             <div>
               <p className="eyebrow">Welcome</p>
-              <h1>Loading your progress…</h1>
+              <h1>
+                {!progressReady
+                  ? "Loading your progress…"
+                  : "Checking consent…"}
+              </h1>
             </div>
           </header>
         </div>
+      </AppShell>
+    );
+  }
+
+  if (!isAdmin(session) && needsConsent) {
+    return (
+      <AppShell
+        nav="home"
+        onNav={() => {}}
+        user={session}
+        progress={progress}
+        onLogout={handleLogout}
+      >
+        <div className="page">
+          <header className="topbar">
+            <div>
+              <p className="eyebrow">Welcome</p>
+              <h1>Before you start</h1>
+            </div>
+          </header>
+        </div>
+        <ConsentModal
+          email={session.username}
+          onSaved={() => setNeedsConsent(false)}
+        />
       </AppShell>
     );
   }

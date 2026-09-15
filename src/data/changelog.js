@@ -1,5 +1,11 @@
 export const BUILT_IN_LOGS = [
   {
+    id: "built-2026-09-15-research-consent",
+    date: "2026-09-15",
+    title: "Research consent",
+    body: "The first time you log in, Circuito asks you to read the study information and choose whether your data may be used for research. You can still learn if you say no.",
+  },
+  {
     id: "built-2026-09-14-opamp-csv",
     date: "2026-09-14",
     title: "Updated op-amp bank",

@@ -138,6 +138,27 @@ export async function listQuestionReportsRemote() {
   return Array.isArray(data) ? data : [];
 }
 
+export async function getStudentConsentStatus(email) {
+  const data = await rpc("get_student_consent_status", {
+    p_email: String(email || "").trim().toLowerCase(),
+  });
+  if (!data || typeof data !== "object") {
+    return { recorded: false, research_opt_in: false };
+  }
+  return {
+    recorded: Boolean(data.recorded),
+    research_opt_in: Boolean(data.research_opt_in),
+  };
+}
+
+export async function recordStudentConsent(email, answers) {
+  const data = await rpc("record_student_consent", {
+    p_email: String(email || "").trim().toLowerCase(),
+    p_answers: answers,
+  });
+  return data === true;
+}
+
 export async function resolveQuestionReportRemote(id, resolved) {
   const data = await rpc("resolve_question_report", {
     p_id: id,
