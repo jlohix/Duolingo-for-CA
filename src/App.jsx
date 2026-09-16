@@ -34,6 +34,7 @@ import {
 } from "./state/progressSync";
 import { pullLeagueSeason, syncLeagueSeason } from "./state/league";
 import { loadSession, logout, isAdmin } from "./state/auth";
+import { useSessionTime } from "./hooks/useSessionTime";
 import AppShell from "./components/AppShell";
 import ChatWidget from "./components/ChatWidget";
 import ConsentModal from "./components/ConsentModal";
@@ -190,6 +191,14 @@ function AppBody({ onGateChange }) {
     if (isAdmin(session)) return;
     scheduleProgressPush(session, progress);
   }, [session, progress, progressReady]);
+
+  // Track how long the logged-in user spends on the site and log the
+  // duration to Supabase (session_times). Admins are excluded so staff
+  // browsing doesn't skew the engagement data.
+  useSessionTime(
+    session && !isAdmin(session) ? session.username : null,
+    progress?.classId ?? ""
+  );
 
   // Report the values the chatbot gate needs (current screen, class, admin)
   // up to the App wrapper, which mounts the single floating ChatWidget.

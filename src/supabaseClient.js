@@ -109,6 +109,80 @@ export async function listStudentProgress() {
   return Array.isArray(data) ? data : [];
 }
 
+// ---------- Session time tracking ----------
+
+// Upsert the running duration for one browsing session. Called on start,
+// on periodic heartbeat, and on final flush when the user leaves. The
+// server keeps the largest duration it has seen for the session.
+export async function logSessionTime({
+  sessionId,
+  email,
+  durationSeconds,
+  classId = "",
+  userAgent = "",
+}) {
+  const data = await rpc("log_session_time", {
+    p_session_id: String(sessionId || ""),
+    p_email: String(email || "").trim().toLowerCase(),
+    p_duration_seconds: Math.max(0, Math.round(Number(durationSeconds) || 0)),
+    p_class_id: String(classId || ""),
+    p_user_agent: String(userAgent || ""),
+  });
+  return data === true;
+}
+
+// Fire-and-forget flush that survives the page being closed. Uses
+// navigator.sendBeacon when available (works during unload), and falls
+// back to a keepalive fetch. Safe to call from visibilitychange/pagehide.
+export function logSessionTimeBeacon({
+  sessionId,
+  email,
+  durationSeconds,
+  classId = "",
+  userAgent = "",
+}) {
+  const payload = {
+    p_session_id: String(sessionId || ""),
+    p_email: String(email || "").trim().toLowerCase(),
+    p_duration_seconds: Math.max(0, Math.round(Number(durationSeconds) || 0)),
+    p_class_id: String(classId || ""),
+    p_user_agent: String(userAgent || ""),
+  };
+  const url = `${SUPABASE_URL}/rest/v1/rpc/log_session_time`;
+
+  try {
+    if (typeof navigator !== "undefined" && navigator.sendBeacon) {
+      // sendBeacon can't set custom headers, so pass the apikey as a query
+      // param (PostgREST accepts it) and send a typed JSON blob.
+      const beaconUrl = `${url}?apikey=${encodeURIComponent(SUPABASE_ANON_KEY)}`;
+      const blob = new Blob([JSON.stringify(payload)], {
+        type: "application/json",
+      });
+      if (navigator.sendBeacon(beaconUrl, blob)) return true;
+    }
+  } catch {
+    /* fall through to keepalive fetch */
+  }
+
+  try {
+    fetch(url, {
+      method: "POST",
+      headers: rpcHeaders(),
+      body: JSON.stringify(payload),
+      keepalive: true,
+    }).catch(() => {});
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+// Staff-facing read of all logged session times (sorted by user, then start).
+export async function listSessionTimes() {
+  const data = await rpc("list_session_times", {});
+  return Array.isArray(data) ? data : [];
+}
+
 export async function syncLeagueSeasonRemote() {
   const data = await rpc("sync_league_season", {});
   return data && typeof data === "object" ? data : null;
