@@ -56,10 +56,10 @@ export default function ConsentModal({ email, onSaved }) {
         <p className="eyebrow">Research study</p>
         <h2 id="consent-title">Informed consent</h2>
         <p>
-          Please read the study information and choose your options below.
-          You can still use Circuito if you do not take part in the research;
-          then your data will not be used to improve this and other NTU
-          chatbots.
+          Please read the study information and confirm your consent below.
+          Taking part in the study (sections 1–3) is required to use Circuito.
+          You may still choose whether we contact you about future studies
+          (section 4).
         </p>
         <p>
           <a href={CONSENT_FORM_HREF} target="_blank" rel="noreferrer">
@@ -87,15 +87,6 @@ export default function ConsentModal({ email, onSaved }) {
             I have read and understood the consent form. I am willing to take
             part in the study.
           </label>
-          <label className={answers.study === "no" ? "on" : ""}>
-            <input
-              type="radio"
-              name="study"
-              checked={answers.study === "no"}
-              onChange={() => setField("study", "no")}
-            />
-            I do not wish to participate in this study.
-          </label>
         </fieldset>
 
         <fieldset className="consent-block">
@@ -109,15 +100,6 @@ export default function ConsentModal({ email, onSaved }) {
             />
             YES — store my identifiable data for future research, only with IRB
             or local ethics approval.
-          </label>
-          <label className={answers.futureData === "no" ? "on" : ""}>
-            <input
-              type="radio"
-              name="futureData"
-              checked={answers.futureData === "no"}
-              onChange={() => setField("futureData", "no")}
-            />
-            NO — do not donate my identifiable data for future research.
           </label>
         </fieldset>
 
