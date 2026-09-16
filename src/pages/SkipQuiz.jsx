@@ -56,7 +56,12 @@ function SkipRound({
     () => questionsForSkip(allQuestions, targetTopicId, SKIP_QUIZ_SIZE),
     [allQuestions, targetTopicId]
   );
-  const quiz = useQuizQueue(initial, XP_CORRECT, { recycleMissed: false });
+  const quiz = useQuizQueue(initial, XP_CORRECT, {
+    recycleMissed: false,
+    // Skip-out placement quiz is not a question-family workflow — don't
+    // record it in the per-family timing analytics.
+    trackFamilyTiming: false,
+  });
   const [leaveOpen, setLeaveOpen] = useState(false);
   const [firstMisses, setFirstMisses] = useState(0);
 
