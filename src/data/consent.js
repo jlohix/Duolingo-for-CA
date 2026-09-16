@@ -4,17 +4,24 @@ export const CONSENT_FORM_HREF = "/consent/study-information.html";
 
 export function emptyConsentAnswers() {
   return {
-    // Sections 1 & 2 are required to use the app and only offer "yes", so we
-    // pre-select "yes" — the student confirms rather than choosing.
-    study: "yes",
-    futureData: "yes",
+    study: "",
+    futureData: "",
     futureDataScope: "",
-    // Section 4 (contact for future studies) is optional: the student must
-    // actively choose yes or no.
     futureContact: "",
     contactEmail: false,
     formVersion: CONSENT_FORM_VERSION,
   };
+}
+
+// Whether the student may continue into the app. This drives the enabled
+// state of the "Save and continue" button. Requirements:
+//   - Section 1 (take part in study): must be "yes"
+//   - Section 2 (future-data use): must be "yes", and a scope must be chosen
+//   - Section 4 (contact for future studies): must be answered (yes OR no),
+//     and if "yes", email contact must be agreed to. Choosing "no" is fine.
+// Selecting "no" on section 1 or 2 leaves the button disabled (blacked out).
+export function canSubmitConsent(answers) {
+  return consentError(answers) === "";
 }
 
 export function consentError(answers) {
