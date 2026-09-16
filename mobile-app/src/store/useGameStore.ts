@@ -1,9 +1,6 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
-const MAX_HEARTS = 5;
-const HEART_REFILL_MS = 30 * 60 * 1000; // 30 min per heart
-
 interface TopicProgress {
   completedQuestionIds: string[];
   bestStreak: number;
@@ -13,8 +10,6 @@ interface GameState {
   xp: number;
   streak: number; // day streak
   lastActiveDate: string | null; // YYYY-MM-DD
-  hearts: number;
-  lastHeartLostAt: number | null;
   gems: number;
   tutorialClass: string; // e.g. EE07
   displayName: string;
@@ -22,8 +17,6 @@ interface GameState {
 
   // actions
   addXp: (amount: number) => void;
-  loseHeart: () => void;
-  refillHearts: () => void;
   registerActivity: () => void;
   completeQuestion: (topicId: number, questionId: string, correct: boolean) => void;
   setProfile: (name: string, cls: string) => void;
@@ -46,33 +39,12 @@ export const useGameStore = create<GameState>()(
       xp: 0,
       streak: 0,
       lastActiveDate: null,
-      hearts: MAX_HEARTS,
-      lastHeartLostAt: null,
       gems: 50,
       tutorialClass: 'EE07',
       displayName: 'You',
       progress: {},
 
       addXp: (amount) => set((s) => ({ xp: s.xp + amount })),
-
-      loseHeart: () =>
-        set((s) => ({
-          hearts: Math.max(0, s.hearts - 1),
-          lastHeartLostAt: Date.now(),
-        })),
-
-      refillHearts: () =>
-        set((s) => {
-          if (s.hearts >= MAX_HEARTS || !s.lastHeartLostAt) return s;
-          const elapsed = Date.now() - s.lastHeartLostAt;
-          const gained = Math.floor(elapsed / HEART_REFILL_MS);
-          if (gained <= 0) return s;
-          const hearts = Math.min(MAX_HEARTS, s.hearts + gained);
-          return {
-            hearts,
-            lastHeartLostAt: hearts >= MAX_HEARTS ? null : s.lastHeartLostAt + gained * HEART_REFILL_MS,
-          };
-        }),
 
       registerActivity: () =>
         set((s) => {
@@ -104,8 +76,6 @@ export const useGameStore = create<GameState>()(
           xp: 0,
           streak: 0,
           lastActiveDate: null,
-          hearts: MAX_HEARTS,
-          lastHeartLostAt: null,
           gems: 50,
           progress: {},
         }),
@@ -113,5 +83,3 @@ export const useGameStore = create<GameState>()(
     { name: 'duo-ca-game-v1' }
   )
 );
-
-export { MAX_HEARTS };

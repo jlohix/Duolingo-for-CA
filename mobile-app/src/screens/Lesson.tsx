@@ -1,11 +1,11 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { X, Heart, Check, Info } from 'lucide-react';
+import { X, Check, Info } from 'lucide-react';
 import MathText from '../components/MathText';
 import Mascot from '../components/Mascot';
 import { questionsForTopic, OPTION_KEYS } from '../data/questions';
 import { TOPICS } from '../data/topics';
-import { useGameStore, MAX_HEARTS } from '../store/useGameStore';
+import { useGameStore } from '../store/useGameStore';
 import type { OptionKey, Question } from '../types';
 
 const XP_PER_CORRECT = 10;
@@ -16,7 +16,7 @@ export default function Lesson() {
   const tid = Number(topicId);
   const topic = TOPICS.find((t) => t.id === tid);
 
-  const { addXp, loseHeart, hearts, registerActivity, completeQuestion, refillHearts } = useGameStore();
+  const { addXp, registerActivity, completeQuestion } = useGameStore();
 
   const questions = useMemo(() => {
     const q = questionsForTopic(tid);
@@ -32,9 +32,8 @@ export default function Lesson() {
   const [finished, setFinished] = useState(false);
 
   useEffect(() => {
-    refillHearts();
     registerActivity();
-  }, [refillHearts, registerActivity]);
+  }, [registerActivity]);
 
   if (!topic || questions.length === 0) {
     return (
@@ -56,8 +55,6 @@ export default function Lesson() {
     if (correct) {
       setCorrectCount((c) => c + 1);
       addXp(XP_PER_CORRECT);
-    } else {
-      loseHeart();
     }
     completeQuestion(tid, q.id, correct);
   };
@@ -73,10 +70,6 @@ export default function Lesson() {
     setShowExplain(false);
   };
 
-  if (hearts <= 0 && !finished) {
-    return <OutOfHearts onExit={() => navigate('/')} />;
-  }
-
   if (finished) {
     return (
       <LessonComplete
@@ -90,7 +83,7 @@ export default function Lesson() {
 
   return (
     <div className="flex flex-col min-h-[100dvh]">
-      {/* header: quit + progress + hearts */}
+      {/* header: quit + progress */}
       <div className="flex items-center gap-3 px-4 py-3 pt-safe">
         <button onClick={() => navigate('/')} className="text-neutral-500 active:scale-90">
           <X size={26} />
@@ -100,10 +93,6 @@ export default function Lesson() {
             className="h-full bg-brand-lime rounded-full transition-all duration-300"
             style={{ width: `${progressPct}%` }}
           />
-        </div>
-        <div className="flex items-center gap-1 text-brand-red font-extrabold">
-          <Heart size={22} fill="#FF4B4B" />
-          {hearts}
         </div>
       </div>
 
@@ -247,22 +236,6 @@ function StatBox({ label, value, color }: { label: string; value: string; color:
         {label}
       </p>
       <p className="text-2xl font-extrabold">{value}</p>
-    </div>
-  );
-}
-
-function OutOfHearts({ onExit }: { onExit: () => void }) {
-  return (
-    <div className="flex flex-col items-center justify-center min-h-[100dvh] px-6 text-center gap-5">
-      <Mascot mood="think" size={140} />
-      <Heart size={48} className="text-brand-red" fill="#FF4B4B" />
-      <h1 className="text-2xl font-extrabold">You're out of hearts!</h1>
-      <p className="text-neutral-400">
-        Hearts refill over time ({MAX_HEARTS} max). Come back soon or practice with the tools.
-      </p>
-      <button className="btn-blue max-w-xs" onClick={onExit}>
-        Back to Learn
-      </button>
     </div>
   );
 }

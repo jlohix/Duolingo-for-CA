@@ -1,9 +1,9 @@
-import { Flame, Heart, Gem } from 'lucide-react';
-import { useGameStore, MAX_HEARTS } from '../store/useGameStore';
+import { Flame, Gem } from 'lucide-react';
+import { useGameStore } from '../store/useGameStore';
 import { leagueForXp } from '../data/topics';
 
 export default function TopBar() {
-  const { streak, hearts, gems, xp } = useGameStore();
+  const { streak, gems, xp } = useGameStore();
   const { current } = leagueForXp(xp);
 
   return (
@@ -16,10 +16,6 @@ export default function TopBar() {
         <div className="flex items-center gap-4">
           <Stat icon={<Flame size={20} className="text-brand-orange" fill="#FF9600" />} value={streak} />
           <Stat icon={<Gem size={20} className="text-brand-blue" fill="#1CB0F6" />} value={gems} />
-          <Stat
-            icon={<Heart size={20} className="text-brand-red" fill="#FF4B4B" />}
-            value={`${hearts}/${MAX_HEARTS}`}
-          />
         </div>
       </div>
     </div>
