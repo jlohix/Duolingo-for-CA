@@ -14,19 +14,33 @@ export function emptyConsentAnswers() {
 }
 
 export function consentError(answers) {
+  // 1. Taking part in the study is REQUIRED. Students who decline cannot
+  //    enter the app.
   if (answers.study !== "yes" && answers.study !== "no") {
     return "Choose whether you will take part in the study.";
   }
+  if (answers.study === "no") {
+    return "You must agree to take part in the study to use Circuito.";
+  }
+
+  // 2. Storing identifiable data for future research is REQUIRED.
   if (answers.futureData !== "yes" && answers.futureData !== "no") {
     return "Choose whether your identifiable data may be stored for future research.";
   }
+  if (answers.futureData === "no") {
+    return "You must agree to future research use of your data to use Circuito.";
+  }
+
+  // 3. If (always) yes to future data, a usage scope must be chosen.
   if (
-    answers.futureData === "yes" &&
     answers.futureDataScope !== "unrestricted" &&
     answers.futureDataScope !== "nala"
   ) {
-    return "If you agree to future research, choose how your data may be used.";
+    return "Choose how your data may be used for future research.";
   }
+
+  // 4. Contact for future studies is OPTIONAL — students may opt out here
+  //    (choosing "no" is allowed and still lets them into the app).
   if (answers.futureContact !== "yes" && answers.futureContact !== "no") {
     return "Choose whether we may contact you about future research.";
   }

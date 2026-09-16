@@ -57,9 +57,9 @@ export default function ConsentModal({ email, onSaved }) {
         <h2 id="consent-title">Informed consent</h2>
         <p>
           Please read the study information and choose your options below.
-          You can still use Circuito if you do not take part in the research;
-          then your data will not be used to improve this and other NTU
-          chatbots.
+          Taking part in the study (sections 1–3) is required to use Circuito.
+          You may opt out of being contacted about future studies (section 4)
+          and still use the app.
         </p>
         <p>
           <a href={CONSENT_FORM_HREF} target="_blank" rel="noreferrer">
