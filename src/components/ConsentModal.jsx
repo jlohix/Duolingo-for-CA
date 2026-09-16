@@ -1,6 +1,7 @@
 import { useState } from "react";
 import {
   CONSENT_FORM_HREF,
+  canSubmitConsent,
   consentError,
   emptyConsentAnswers,
 } from "../data/consent";
@@ -10,6 +11,7 @@ export default function ConsentModal({ email, onSaved }) {
   const [answers, setAnswers] = useState(() => emptyConsentAnswers());
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
+  const canContinue = canSubmitConsent(answers);
 
   function setField(key, value) {
     setAnswers((prev) => {
@@ -56,10 +58,10 @@ export default function ConsentModal({ email, onSaved }) {
         <p className="eyebrow">Research study</p>
         <h2 id="consent-title">Informed consent</h2>
         <p>
-          Please read the study information and confirm your consent below.
-          Taking part in the study (sections 1–3) is required to use Circuito.
-          You may still choose whether we contact you about future studies
-          (section 4).
+          Please read the study information and choose your options below.
+          Taking part in the study (sections 1–3) is required to use Circuito —
+          the button below stays disabled until you agree. You may still choose
+          whether we contact you about future studies (section 4).
         </p>
         <p>
           <a href={CONSENT_FORM_HREF} target="_blank" rel="noreferrer">
@@ -87,6 +89,15 @@ export default function ConsentModal({ email, onSaved }) {
             I have read and understood the consent form. I am willing to take
             part in the study.
           </label>
+          <label className={answers.study === "no" ? "on" : ""}>
+            <input
+              type="radio"
+              name="study"
+              checked={answers.study === "no"}
+              onChange={() => setField("study", "no")}
+            />
+            I do not wish to participate in this study.
+          </label>
         </fieldset>
 
         <fieldset className="consent-block">
@@ -100,6 +111,15 @@ export default function ConsentModal({ email, onSaved }) {
             />
             YES — store my identifiable data for future research, only with IRB
             or local ethics approval.
+          </label>
+          <label className={answers.futureData === "no" ? "on" : ""}>
+            <input
+              type="radio"
+              name="futureData"
+              checked={answers.futureData === "no"}
+              onChange={() => setField("futureData", "no")}
+            />
+            NO — do not donate my identifiable data for future research.
           </label>
         </fieldset>
 
@@ -170,7 +190,11 @@ export default function ConsentModal({ email, onSaved }) {
 
         {error ? <p className="consent-error">{error}</p> : null}
 
-        <button type="submit" className="primary" disabled={busy}>
+        <button
+          type="submit"
+          className="primary"
+          disabled={busy || !canContinue}
+        >
           {busy ? "Saving…" : "Save and continue"}
         </button>
       </form>
