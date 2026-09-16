@@ -4,9 +4,13 @@ export const CONSENT_FORM_HREF = "/consent/study-information.html";
 
 export function emptyConsentAnswers() {
   return {
-    study: "",
-    futureData: "",
+    // Sections 1 & 2 are required to use the app and only offer "yes", so we
+    // pre-select "yes" — the student confirms rather than choosing.
+    study: "yes",
+    futureData: "yes",
     futureDataScope: "",
+    // Section 4 (contact for future studies) is optional: the student must
+    // actively choose yes or no.
     futureContact: "",
     contactEmail: false,
     formVersion: CONSENT_FORM_VERSION,
