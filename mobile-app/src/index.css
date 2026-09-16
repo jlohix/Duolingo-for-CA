@@ -1,0 +1,83 @@
+@import 'katex/dist/katex.min.css';
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  * {
+    -webkit-tap-highlight-color: transparent;
+    box-sizing: border-box;
+  }
+  html,
+  body {
+    margin: 0;
+    padding: 0;
+    font-family: 'Nunito', sans-serif;
+    overscroll-behavior-y: none;
+  }
+  body {
+    background: #0f0f0f;
+  }
+  #root {
+    max-width: 480px;
+    margin: 0 auto;
+    min-height: 100dvh;
+    background: #0f0f0f;
+    position: relative;
+    overflow-x: hidden;
+  }
+  /* KaTeX inherit color */
+  .katex {
+    color: inherit;
+    font-size: 1em;
+  }
+}
+
+@layer components {
+  .btn {
+    @apply font-extrabold uppercase tracking-wide rounded-2xl py-3.5 px-5 text-center
+           transition-all duration-75 select-none active:translate-y-1 disabled:opacity-50
+           disabled:cursor-not-allowed w-full;
+  }
+  .btn-lime {
+    @apply btn bg-brand-lime text-black shadow-btn-lime active:shadow-none;
+  }
+  .btn-blue {
+    @apply btn bg-brand-blue text-white shadow-btn-blue active:shadow-none;
+  }
+  .btn-red {
+    @apply btn bg-brand-red text-white shadow-btn-red active:shadow-none;
+  }
+  .btn-ghost {
+    @apply btn bg-ink-700 text-neutral-200 shadow-btn-gray active:shadow-none;
+  }
+  .card {
+    @apply bg-ink-800 rounded-3xl border-2 border-ink-600 p-4;
+  }
+  .option {
+    @apply w-full text-left bg-ink-800 border-2 border-ink-600 rounded-2xl px-4 py-4
+           font-bold text-neutral-100 transition-all duration-100 select-none
+           active:scale-[0.98] border-b-4;
+  }
+  .option-selected {
+    @apply border-brand-blue bg-brand-blue/10 text-brand-blue;
+  }
+  .option-correct {
+    @apply border-brand-lime bg-brand-lime/10 text-brand-lime;
+  }
+  .option-wrong {
+    @apply border-brand-red bg-brand-red/10 text-brand-red;
+  }
+}
+
+::-webkit-scrollbar {
+  width: 0;
+  background: transparent;
+}
+.pb-safe {
+  padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 0.5rem);
+}
+.pt-safe {
+  padding-top: env(safe-area-inset-top, 0px);
+}
