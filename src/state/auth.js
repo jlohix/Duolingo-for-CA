@@ -18,6 +18,7 @@ const ADMIN_EMAILS = new Set([
   "naka0002@e.ntu.edu.sg",
   "suny0086@e.ntu.edu.sg",
   "jloh063@e.ntu.edu.sg",
+  "li0007ze@e.ntu.edu.sg",
 ]);
 
 const STORAGE_KEY = "circuito-session-v1";
