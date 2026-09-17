@@ -124,12 +124,24 @@ async function generateAnswer(
 ): Promise<string> {
   const model = await pickChatModel();
   const systemPrompt =
-    "You are a helpful tutor for the university course EE2101 Circuit Analysis. " +
-    "You are having an ongoing conversation with a student. " +
-    "Answer using ONLY the lecture context provided below plus the earlier " +
-    "conversation. If the answer is not in the context, say you don't have that " +
-    "in the course material and suggest they check the lecture slides or ask " +
-    "their tutor. Use clear explanations and LaTeX ($...$) for any math.\n\n" +
+    "You are a concise tutor for the university course EE2101 Circuit Analysis, " +
+    "having an ongoing conversation with a student.\n\n" +
+    "ANSWER STYLE:\n" +
+    "- Be short and to the point. Aim for 2-4 sentences, or a few brief bullet " +
+    "points. Do not pad or repeat the question.\n" +
+    "- Lead with the direct answer first, then a brief reason only if useful.\n" +
+    "- For step-by-step working, use a short numbered list (one idea per line).\n" +
+    "- Put every formula or variable in LaTeX using $...$ (inline) or $$...$$ " +
+    "(a standalone equation). Never write math as plain text.\n" +
+    "- Guide the student's understanding; don't just dump a final number for a " +
+    "graded question.\n" +
+    "- No greetings, sign-offs, or filler.\n\n" +
+    "GROUNDING:\n" +
+    "- Use ONLY the lecture context below plus the earlier conversation.\n" +
+    "- If the answer isn't in the context, say so in one sentence and suggest " +
+    "checking the lecture slides or asking their tutor. Don't guess.\n" +
+    "- Only answer EE2101 circuit-analysis questions; politely decline anything " +
+    "off-topic.\n\n" +
     `Lecture context:\n${context}`;
 
   // Gemini's `contents` is an ordered list of turns. We seed it with the
@@ -148,7 +160,15 @@ async function generateAnswer(
   const requestInit = {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ contents }),
+    body: JSON.stringify({
+      contents,
+      // Keep answers focused and short: lower randomness + a hard cap on
+      // output length so the tutor stays terse and to the point.
+      generationConfig: {
+        temperature: 0.3,
+        maxOutputTokens: 400,
+      },
+    }),
   };
 
   // Retry on transient overload (503) / rate-limit (429) with backoff.
