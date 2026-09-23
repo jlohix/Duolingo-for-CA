@@ -176,26 +176,40 @@ async function generateAnswer(
           .join("\n")
       : "";
     questionBlock =
-      "\n\nThe student is currently working on this practice question:\n" +
+      "\n\nTHE STUDENT'S CURRENT QUESTION (this is the main thing to help with):\n" +
       `Question: ${cq.question}\n` +
       (optionLines ? `Options:\n${optionLines}\n` : "") +
       (cq.answer ? `Correct answer: (${cq.answer})\n` : "") +
       (cq.explanation ? `Worked explanation: ${cq.explanation}\n` : "") +
-      "How to use this: this is a LEARNING app, so GUIDE the student, do not " +
-      "just give the answer. Explain the relevant concept and the next step " +
-      "or approach so they can work it out themselves. Do NOT state which " +
-      "option is correct or give the final numeric answer unless the student " +
-      "has clearly already answered it or explicitly insists after a hint. " +
-      "Prefer a nudge and a checking question over a full solution.";
+      "\nHow to help with this question:\n" +
+      "- Focus on THIS question. When the student says 'this', 'the question', " +
+      "or 'explain this', they mean the question above.\n" +
+      "- Read the question, then use the lecture context below to explain the " +
+      "concepts and method needed to solve it.\n" +
+      "- This is a LEARNING app: GUIDE the student. Explain the relevant idea " +
+      "and the next step so they can work it out. Do NOT reveal which option " +
+      "is correct or the final numeric answer unless they have clearly already " +
+      "answered it, or they insist after you have given a hint. Prefer a nudge " +
+      "and a checking question over a full solution.\n" +
+      "- If the exact numbers aren't covered by the lecture context, still help " +
+      "using the question itself and the general method from the slides. Do NOT " +
+      "refuse or say it's 'not in the course material' when a question is on " +
+      "screen.";
   }
+
+  const questionOnScreen = Boolean(currentQuestion);
 
   const systemPrompt =
     "You are a tutor for the university course EE2101 Circuit Analysis, " +
     "talking with a student.\n" +
     "Rules:\n" +
-    "- Answer using ONLY the lecture context below and the earlier conversation.\n" +
-    "- If the answer isn't there, say it's not in the course material and " +
-    "suggest checking the lecture slides or asking their tutor.\n" +
+    (questionOnScreen
+      ? "- The student has a practice question open (shown below). Help them " +
+        "with THAT question. Use the lecture context to explain the concepts " +
+        "and method behind it.\n"
+      : "- Answer using the lecture context below and the earlier conversation. " +
+        "If it isn't covered there, say it's not in the course material and " +
+        "suggest checking the lecture slides or asking their tutor.\n") +
     "- Be concise and direct. Get to the point; skip filler.\n" +
     "- Explain what the concept IS and how to use it. Do NOT include " +
     "historical background, origins, who discovered it, or dates.\n" +
@@ -267,8 +281,21 @@ Deno.serve(async (req) => {
     const history = sanitizeHistory(body?.history);
     const currentQuestion = sanitizeCurrentQuestion(body?.currentQuestion);
 
-    // 1. Embed the LATEST question (RAG is always about the newest message).
-    const embedding = await embedQuestion(question.trim());
+    // 1. Retrieve lecture slides for the RIGHT topic. When the student is on a
+    // practice question, we search using the ON-SCREEN QUESTION text (plus any
+    // options), because that reflects the topic they need explained, far more
+    // than a short chat message like "explain this". Otherwise we fall back to
+    // the student's typed message.
+    let retrievalText = question.trim();
+    if (currentQuestion) {
+      const optText = currentQuestion.options
+        ? Object.values(currentQuestion.options).filter(Boolean).join(" ")
+        : "";
+      retrievalText = `${currentQuestion.question} ${optText} ${question.trim()}`
+        .trim()
+        .slice(0, 2000);
+    }
+    const embedding = await embedQuestion(retrievalText);
 
     // 2. Retrieve relevant lecture chunks.
     const supabase = createClient(SUPABASE_URL, SERVICE_ROLE);
@@ -278,7 +305,10 @@ Deno.serve(async (req) => {
     });
     if (error) throw new Error(`match_documents failed: ${error.message}`);
 
-    if (!docs || docs.length === 0) {
+    // If nothing was retrieved AND there is no on-screen question to work from,
+    // there is genuinely nothing to answer. But if a question IS on screen, we
+    // still help using the question itself even when no slide matched.
+    if ((!docs || docs.length === 0) && !currentQuestion) {
       return json({
         answer:
           "I couldn't find anything about that in the EE2101 course material. " +
@@ -287,8 +317,9 @@ Deno.serve(async (req) => {
       });
     }
 
-    // 3. Build context + generate a grounded answer (with conversation memory).
-    const context = docs
+    // 3. Build context + generate an answer that is grounded in the on-screen
+    // question and explained using the lecture slides.
+    const context = (docs || [])
       .map((d: any) => d.content)
       .join("\n\n---\n\n");
     const answer = await generateAnswer(
@@ -300,7 +331,7 @@ Deno.serve(async (req) => {
 
     // 4. Return answer + which weeks it drew from.
     const sources = [
-      ...new Set(docs.map((d: any) => d.metadata?.source).filter(Boolean)),
+      ...new Set((docs || []).map((d: any) => d.metadata?.source).filter(Boolean)),
     ];
     return json({ answer, sources });
   } catch (err) {
