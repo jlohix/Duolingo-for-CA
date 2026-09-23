@@ -13,20 +13,46 @@ function prettySource(source) {
 // Floating "Ask the tutor" chatbot with per-session conversation memory.
 //
 // Memory model:
-//   - Messages live in React state only. The conversation resets when the
-//     student closes the panel, refreshes the page, or logs out (the whole
-//     component unmounts / state is discarded). Nothing is persisted.
+//   - The conversation persists for the whole browser session: closing the
+//     panel just hides it, and messages are mirrored to sessionStorage so a
+//     page refresh keeps the history. It clears only when the session ends
+//     (tab/browser closed) or the student explicitly clears it.
 //   - Each question sends the recent history (capped) so the bot can follow
 //     up on earlier turns. RAG still runs on the latest message.
+
+// sessionStorage lives until the browser tab/session is closed, which is
+// exactly the lifetime we want for the chat history.
+const CHAT_STORAGE_KEY = "chatbot:conversation";
+
+function loadStoredMessages() {
+  try {
+    const raw = sessionStorage.getItem(CHAT_STORAGE_KEY);
+    const parsed = raw ? JSON.parse(raw) : [];
+    return Array.isArray(parsed) ? parsed : [];
+  } catch {
+    return [];
+  }
+}
+
 export default function ChatWidget() {
   const [open, setOpen] = useState(false);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   // Conversation so far. Each entry: { role: "user"|"model", text, sources? }
-  const [messages, setMessages] = useState([]);
+  // Seeded from sessionStorage so a refresh within the session keeps history.
+  const [messages, setMessages] = useState(loadStoredMessages);
   const inputRef = useRef(null);
   const bodyRef = useRef(null);
+
+  // Mirror the conversation to sessionStorage whenever it changes.
+  useEffect(() => {
+    try {
+      sessionStorage.setItem(CHAT_STORAGE_KEY, JSON.stringify(messages));
+    } catch {
+      // Storage full/unavailable: keep working from in-memory state.
+    }
+  }, [messages]);
 
   // Focus the input when the panel opens.
   useEffect(() => {
@@ -40,12 +66,27 @@ export default function ChatWidget() {
     }
   }, [messages, loading]);
 
-  // Closing the panel ends the session: clear the conversation.
+  // Closing the panel just hides it. The conversation is kept for the rest of
+  // the session (in state + sessionStorage) so reopening resumes where we left
+  // off. History clears only when the browser session ends or the student
+  // explicitly clears it via clearConversation().
   function closePanel() {
     setOpen(false);
+    setError("");
+    setInput("");
+  }
+
+  // Explicit reset so the student can start a fresh conversation on demand.
+  function clearConversation() {
     setMessages([]);
     setError("");
     setInput("");
+    try {
+      sessionStorage.removeItem(CHAT_STORAGE_KEY);
+    } catch {
+      // ignore
+    }
+    if (inputRef.current) inputRef.current.focus();
   }
 
   async function handleAsk(e) {
@@ -96,6 +137,16 @@ export default function ChatWidget() {
                 Grounded in your EE2101 lecture slides
               </p>
             </div>
+            {messages.length > 0 && (
+              <button
+                type="button"
+                className="chat-clear"
+                onClick={clearConversation}
+                aria-label="Clear conversation"
+              >
+                Clear
+              </button>
+            )}
           </div>
 
           <div className="chat-body" ref={bodyRef}>

@@ -1,5 +1,11 @@
 export const BUILT_IN_LOGS = [
   {
+    id: "built-2026-09-23-tutor-memory",
+    date: "2026-09-23",
+    title: "Tutor remembers your chat",
+    body: "Closing the tutor now just hides it, so your conversation stays until you close the tab or tap Clear. Reopening picks up right where you left off.",
+  },
+  {
     id: "built-2026-09-23-opamp-csv",
     date: "2026-09-23",
     title: "Updated op-amp bank",

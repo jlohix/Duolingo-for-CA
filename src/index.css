@@ -4065,6 +4065,10 @@ html[data-theme="dark"] .circuit-svg .board-step {
 }
 
 .chat-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
   padding: 14px 16px;
   border-bottom: 1px solid var(--line);
   background: var(--green);
@@ -4079,6 +4083,20 @@ html[data-theme="dark"] .circuit-svg .board-step {
   margin: 2px 0 0;
   font-size: 12px;
   opacity: 0.9;
+}
+.chat-clear {
+  flex: none;
+  padding: 5px 10px;
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  border-radius: 999px;
+  background: transparent;
+  color: #fff;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+}
+.chat-clear:hover {
+  background: rgba(255, 255, 255, 0.15);
 }
 
 .chat-body {
