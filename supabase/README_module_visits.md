@@ -23,9 +23,18 @@ The table only accepts writes for accounts in `authorised_users`, via the
 ## 2. How visits are captured (automatic)
 
 `useModuleTime()` (wired in `App.jsx`) starts a **visit** each time the current
-module changes. "Module" = the app's `screen` (e.g. `home`, `lesson`,
-`dragthevlab`, `leagues`, `profile`, `paper`, `secwalk`, `laplacelab`, …), plus
-a finer `module_detail`:
+learning module changes, and ends it when the user leaves that module (finishes,
+exits, navigates away, or closes the tab) — i.e. from the first click into the
+module to the last click on the way out.
+
+Only **learning modules** are tracked (see `MODULE_SCREENS` in `App.jsx`):
+lessons, the drag-circuit labs, source-transformation / op-amp / Laplace labs,
+section walks, past papers, and skip quizzes. Navigation/menu screens (`home`,
+leaderboards, `profile`, `guide`, `updates`, `results`) are deliberately **not**
+tracked.
+
+Each visit is identified by its `screen` (the `module_key`) plus a finer
+`module_detail`:
 
 - normal lesson → `"<topicId>-<difficulty>"` (e.g. `2-1`)
 - question-bank lesson → `"bank-<bankId>-<difficulty>"`

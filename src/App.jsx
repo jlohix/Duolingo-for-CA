@@ -62,6 +62,34 @@ import Results from "./pages/Results";
 
 const QuestionPack = lazy(() => import("./pages/QuestionPack"));
 
+// Screens that count as an actual learning MODULE for time tracking.
+// Only these are logged to module_visits (time from opening the module to
+// leaving it). Menu/navigation screens (home, leaderboards, profile, guide,
+// updates, results) are deliberately excluded.
+const MODULE_SCREENS = new Set([
+  "lesson",
+  "skip",
+  "draglab",
+  "dragthevlab",
+  "dragnortonlab",
+  "dragdeplab",
+  "dragnodallab",
+  "dragmeshlab",
+  "dragsuperlab",
+  "dragsnlab",
+  "dragsuperposlab",
+  "dragdivlab",
+  "dragbranchlab",
+  "dragpowerlab",
+  "dragmptlab",
+  "sourcetransform",
+  "invopamp",
+  "ninvopamp",
+  "laplacelab",
+  "secwalk",
+  "paper",
+]);
+
 // Top-level wrapper: renders the app and mounts the tutor chatbot ONCE, so it
 // floats over every screen (it's position: fixed) instead of being duplicated
 // into each screen's return. AppBody reports the values the gate needs
@@ -201,10 +229,13 @@ function AppBody({ onGateChange }) {
     progress?.classId ?? ""
   );
 
-  // Track which module the user is in and for how long (module_visits).
-  // The module identity = the current `screen` plus a finer detail derived
-  // from the open lesson / lab / paper / section-walk. A fresh visit starts
-  // whenever moduleKey or moduleDetail changes. Admins are excluded.
+  // Track ONLY the learning modules and how long the user is inside each one
+  // (module_visits) — i.e. from opening a lesson/lab/paper until they leave it
+  // (finish, exit, navigate away, or close the tab). Navigation/menu screens
+  // (home, leaderboards, profile, guide, updates, results) are intentionally
+  // NOT tracked. A fresh visit starts whenever moduleKey or moduleDetail
+  // changes. Admins are excluded.
+  const isModuleScreen = MODULE_SCREENS.has(screen);
   const moduleDetail = lesson
     ? lesson.bankId
       ? `bank-${lesson.bankId}-${lesson.difficulty}`
@@ -218,9 +249,10 @@ function AppBody({ onGateChange }) {
     : skipTarget
     ? `skip-${skipTarget}`
     : "";
+  const trackModules = Boolean(session) && !isAdmin(session) && isModuleScreen;
   useModuleTime({
-    email: session && !isAdmin(session) ? session.username : null,
-    moduleKey: session && !isAdmin(session) ? screen : null,
+    email: trackModules ? session.username : null,
+    moduleKey: trackModules ? screen : null,
     moduleDetail,
     moduleLabel: screen,
     classId: progress?.classId ?? "",
