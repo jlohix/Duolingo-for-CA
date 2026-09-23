@@ -35,6 +35,11 @@ import {
 import { pullLeagueSeason, syncLeagueSeason } from "./state/league";
 import { loadSession, logout, isAdmin } from "./state/auth";
 import { useSessionTime } from "./hooks/useSessionTime";
+import {
+  beginTimingSession,
+  endTimingSession,
+  setTimingClassId,
+} from "./state/familyTiming";
 import AppShell from "./components/AppShell";
 import ChatWidget from "./components/ChatWidget";
 import ConsentModal from "./components/ConsentModal";
@@ -199,6 +204,27 @@ function AppBody({ onGateChange }) {
     session && !isAdmin(session) ? session.username : null,
     progress?.classId ?? ""
   );
+
+  // Start a per-question-family timing session for the logged-in student
+  // (captures loginTime + a unique sessionId). Reuses the existing login /
+  // user id; admins are excluded so staff activity doesn't skew analytics.
+  const timingEmail =
+    session && !isAdmin(session) ? session.username : null;
+  useEffect(() => {
+    if (!timingEmail) return undefined;
+    beginTimingSession({
+      email: timingEmail,
+      classId: progress?.classId ?? "",
+    });
+    return () => endTimingSession();
+    // Restart timing when the logged-in user changes (login / logout).
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [timingEmail]);
+
+  // Keep the reported class id current without restarting the session.
+  useEffect(() => {
+    if (timingEmail) setTimingClassId(progress?.classId ?? "");
+  }, [timingEmail, progress?.classId]);
 
   // Report the values the chatbot gate needs (current screen, class, admin)
   // up to the App wrapper, which mounts the single floating ChatWidget.

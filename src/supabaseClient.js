@@ -183,6 +183,95 @@ export async function listSessionTimes() {
   return Array.isArray(data) ? data : [];
 }
 
+// ---------- Per-question-family timing ----------
+
+// Persist ONE completed question-family attempt (how long the student took
+// across all steps of a family, e.g. Question 201). Timestamps are ISO
+// strings from new Date().toISOString(). Returns true on success.
+export async function logQuestionFamilyTime({
+  email,
+  sessionId,
+  questionFamilyId,
+  questionStartTime,
+  questionFinishTime,
+  durationSeconds,
+  loginTime = null,
+  classId = "",
+}) {
+  const data = await rpc("log_question_family_time", {
+    p_email: String(email || "").trim().toLowerCase(),
+    p_session_id: String(sessionId || ""),
+    p_question_family_id: String(questionFamilyId || "").trim(),
+    p_question_start_time: questionStartTime || null,
+    p_question_finish_time: questionFinishTime || null,
+    p_duration_seconds:
+      durationSeconds == null
+        ? null
+        : Math.max(0, Math.round(Number(durationSeconds) || 0)),
+    p_login_time: loginTime || null,
+    p_class_id: String(classId || ""),
+  });
+  return data === true;
+}
+
+// Unload-safe variant: used when a family completes as the tab is closing.
+// Mirrors logSessionTimeBeacon (sendBeacon + keepalive fallback).
+export function logQuestionFamilyTimeBeacon({
+  email,
+  sessionId,
+  questionFamilyId,
+  questionStartTime,
+  questionFinishTime,
+  durationSeconds,
+  loginTime = null,
+  classId = "",
+}) {
+  const payload = {
+    p_email: String(email || "").trim().toLowerCase(),
+    p_session_id: String(sessionId || ""),
+    p_question_family_id: String(questionFamilyId || "").trim(),
+    p_question_start_time: questionStartTime || null,
+    p_question_finish_time: questionFinishTime || null,
+    p_duration_seconds:
+      durationSeconds == null
+        ? null
+        : Math.max(0, Math.round(Number(durationSeconds) || 0)),
+    p_login_time: loginTime || null,
+    p_class_id: String(classId || ""),
+  };
+  const url = `${SUPABASE_URL}/rest/v1/rpc/log_question_family_time`;
+
+  try {
+    if (typeof navigator !== "undefined" && navigator.sendBeacon) {
+      const beaconUrl = `${url}?apikey=${encodeURIComponent(SUPABASE_ANON_KEY)}`;
+      const blob = new Blob([JSON.stringify(payload)], {
+        type: "application/json",
+      });
+      if (navigator.sendBeacon(beaconUrl, blob)) return true;
+    }
+  } catch {
+    /* fall through to keepalive fetch */
+  }
+
+  try {
+    fetch(url, {
+      method: "POST",
+      headers: rpcHeaders(),
+      body: JSON.stringify(payload),
+      keepalive: true,
+    }).catch(() => {});
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+// Staff-facing read of all completed question-family timings.
+export async function listQuestionFamilyTimes() {
+  const data = await rpc("list_question_family_times", {});
+  return Array.isArray(data) ? data : [];
+}
+
 export async function syncLeagueSeasonRemote() {
   const data = await rpc("sync_league_season", {});
   return data && typeof data === "object" ? data : null;
