@@ -1,5 +1,11 @@
 export const BUILT_IN_LOGS = [
   {
+    id: "built-2026-09-23-opamp-csv",
+    date: "2026-09-23",
+    title: "Updated op-amp bank",
+    body: "Op-amp Easy, Average, and Challenging practice now uses the latest step-by-step questions and explanations.",
+  },
+  {
     id: "built-2026-09-15-research-consent",
     date: "2026-09-15",
     title: "Research consent",
