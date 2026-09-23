@@ -113,7 +113,7 @@ export default function ChatWidget() {
                 </div>
               ) : (
                 <div key={i} className="chat-msg chat-msg-bot">
-                  <MathText className="chat-bubble" text={m.text} />
+                  <MathText className="chat-bubble" text={m.text} markdown />
                   {m.sources && m.sources.length > 0 && (
                     <p className="chat-sources">
                       Sources: {m.sources.map(prettySource).join(", ")}

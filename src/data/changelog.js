@@ -1,5 +1,11 @@
 export const BUILT_IN_LOGS = [
   {
+    id: "built-2026-09-23-tutor-formatting",
+    date: "2026-09-23",
+    title: "Tidier tutor replies",
+    body: "Ask-the-tutor answers now show bold text, bullet lists, and headings properly instead of raw symbols, and the tutor keeps replies shorter and to the point.",
+  },
+  {
     id: "built-2026-09-15-research-consent",
     date: "2026-09-15",
     title: "Research consent",
