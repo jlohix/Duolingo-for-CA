@@ -77,15 +77,34 @@ $$;
 -- NOTE: admin-only viewing is enforced at the APP level — only the
 -- admin screen ever calls this function. For a small class project
 -- that is an acceptable trade-off.
+-- created_at is returned in GMT+8 (Asia/Singapore). Stored value stays UTC;
+-- we convert only on read. Column names are preserved so the app is unchanged.
 create or replace function public.list_question_reports()
-returns setof public.question_reports
+returns table (
+  id            uuid,
+  question_id   text,
+  question_text text,
+  reason        text,
+  note          text,
+  reporter      text,
+  resolved      boolean,
+  created_at    timestamp
+)
 language sql
 security definer
 set search_path = public
 as $$
-  select *
-  from public.question_reports
-  order by created_at desc;
+  select
+    r.id,
+    r.question_id,
+    r.question_text,
+    r.reason,
+    r.note,
+    r.reporter,
+    r.resolved,
+    (r.created_at at time zone 'Asia/Singapore') as created_at
+  from public.question_reports r
+  order by r.created_at desc;
 $$;
 
 

@@ -8,6 +8,15 @@ team export the timings as `user_times_logged.csv`, sorted by user and by time.
 > **from** that data — either by exporting the `user_times_logged` view in the
 > SQL Editor, or with the in-app admin export button.
 
+> **Timezone (GMT+8):** timestamps are *stored* in UTC (the correct,
+> non-destructive way), but every report/read path — the `user_times_logged`
+> and `user_times_totals` views, the `list_session_times` RPC, and the exported
+> CSV — converts them to **GMT+8 (Asia/Singapore)** via
+> `... at time zone 'Asia/Singapore'`, so what you see and export is Singapore
+> local time. Machine-only timestamps (e.g. league `seasonStart` epoch used for
+> countdowns, and progress `updatedAt` sync bookkeeping) are intentionally left
+> in UTC because shifting them would break season timing and sync logic.
+
 ## 1. One-time setup
 
 1. Open your Supabase project → **SQL Editor** → **New query**.

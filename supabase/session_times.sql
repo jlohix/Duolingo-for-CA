@@ -19,6 +19,11 @@
 --   select * from public.user_times_logged;      -- sorted by user, then time
 -- Then use the "Download CSV" button in the SQL Editor results, or the
 -- helper query at the bottom of this file, to produce user_times_logged.csv.
+--
+-- TIMEZONE: timestamps are STORED in UTC (timestamptz + now(), the correct,
+-- non-destructive way). All read/report paths below convert to GMT+8
+-- (Asia/Singapore) via "... at time zone 'Asia/Singapore'", so the values
+-- you see and export are Singapore local time (UTC+8).
 -- ============================================================
 
 create table if not exists public.session_times (
@@ -132,8 +137,10 @@ begin
           'sessionId', st.session_id,
           'email', st.email,
           'classId', st.class_id,
-          'startedAt', st.started_at,
-          'lastSeenAt', st.last_seen_at,
+          -- Timestamps returned as GMT+8 (Asia/Singapore) wall-clock time.
+          -- Stored values stay in UTC; we only convert on read.
+          'startedAt', to_char(st.started_at at time zone 'Asia/Singapore', 'YYYY-MM-DD"T"HH24:MI:SS'),
+          'lastSeenAt', to_char(st.last_seen_at at time zone 'Asia/Singapore', 'YYYY-MM-DD"T"HH24:MI:SS'),
           'durationSeconds', st.duration_seconds
         )
         order by st.email asc, st.started_at asc
@@ -156,13 +163,15 @@ grant execute on function public.list_session_times() to anon, authenticated;
 -- with human-friendly duration columns. Export this to get the
 -- user_times_logged.csv file the team wants.
 -- ============================================================
+-- NOTE: started_at / last_seen_at are shown in GMT+8 (Asia/Singapore).
+-- The underlying columns remain stored in UTC; only the display converts.
 create or replace view public.user_times_logged as
 select
   st.email,
   st.class_id,
   st.session_id,
-  st.started_at,
-  st.last_seen_at,
+  (st.started_at at time zone 'Asia/Singapore') as started_at,
+  (st.last_seen_at at time zone 'Asia/Singapore') as last_seen_at,
   st.duration_seconds,
   round(st.duration_seconds / 60.0, 2) as duration_minutes,
   round(st.duration_seconds / 3600.0, 2) as duration_hours,
@@ -184,8 +193,9 @@ select
   sum(st.duration_seconds)                as total_seconds,
   round(sum(st.duration_seconds) / 60.0, 2) as total_minutes,
   round(sum(st.duration_seconds) / 3600.0, 2) as total_hours,
-  min(st.started_at)                      as first_seen,
-  max(st.last_seen_at)                    as last_seen
+  -- first_seen / last_seen shown in GMT+8 (Asia/Singapore); stored as UTC.
+  (min(st.started_at) at time zone 'Asia/Singapore')  as first_seen,
+  (max(st.last_seen_at) at time zone 'Asia/Singapore') as last_seen
 from public.session_times st
 group by st.email
 order by st.email asc;

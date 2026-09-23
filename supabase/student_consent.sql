@@ -83,7 +83,8 @@ begin
   return jsonb_build_object(
     'recorded', true,
     'research_opt_in', row.research_opt_in,
-    'submitted_at', row.submitted_at
+    -- submitted_at returned as GMT+8 (Asia/Singapore); stored as UTC.
+    'submitted_at', to_char(row.submitted_at at time zone 'Asia/Singapore', 'YYYY-MM-DD"T"HH24:MI:SS')
   );
 end;
 $$;
@@ -133,7 +134,7 @@ begin
     'futureContact', future_contact,
     'contactEmail', case when future_contact = 'yes' then true else false end,
     'formVersion', coalesce(nullif(trim(p_answers->>'formVersion'), ''), 'leads-2026-09'),
-    'submittedAt', to_char(timezone('utc', now()), 'YYYY-MM-DD"T"HH24:MI:SS"Z"')
+    'submittedAt', to_char(timezone('Asia/Singapore', now()), 'YYYY-MM-DD"T"HH24:MI:SS "GMT+8"')
   );
 
   secret := private.consent_secret();
@@ -172,7 +173,8 @@ select
   c.email,
   c.research_opt_in,
   c.form_version,
-  c.submitted_at,
+  -- submitted_at shown in GMT+8 (Asia/Singapore); stored as UTC.
+  (c.submitted_at at time zone 'Asia/Singapore') as submitted_at,
   (extensions.pgp_sym_decrypt(c.answers_enc, k.secret))::jsonb as answers
 from public.student_consent c
 cross join private.consent_crypto k
