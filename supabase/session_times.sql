@@ -165,7 +165,10 @@ grant execute on function public.list_session_times() to anon, authenticated;
 -- ============================================================
 -- NOTE: started_at / last_seen_at are shown in GMT+8 (Asia/Singapore).
 -- The underlying columns remain stored in UTC; only the display converts.
-create or replace view public.user_times_logged as
+-- Drop first: CREATE OR REPLACE VIEW cannot change an existing column's
+-- data type (timestamptz -> timestamp), so re-running would error 42P16.
+drop view if exists public.user_times_logged;
+create view public.user_times_logged as
 select
   st.email,
   st.class_id,
@@ -186,7 +189,9 @@ revoke all on public.user_times_logged from anon, authenticated;
 -- ------------------------------------------------------------
 -- Per-user totals (handy summary; also sorted by user).
 -- ------------------------------------------------------------
-create or replace view public.user_times_totals as
+-- Drop first for the same reason as above (column type change).
+drop view if exists public.user_times_totals;
+create view public.user_times_totals as
 select
   st.email,
   count(*)                                as sessions,

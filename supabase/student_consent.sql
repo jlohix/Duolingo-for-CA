@@ -168,7 +168,10 @@ end;
 $$;
 
 -- Team-only decrypted view. Anon cannot select this (RLS + no grant).
-create or replace view public.student_consent_decrypted as
+-- Drop first: CREATE OR REPLACE VIEW cannot change an existing column's
+-- data type (submitted_at timestamptz -> timestamp), so re-running errors 42P16.
+drop view if exists public.student_consent_decrypted;
+create view public.student_consent_decrypted as
 select
   c.email,
   c.research_opt_in,

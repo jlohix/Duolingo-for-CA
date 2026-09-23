@@ -79,6 +79,9 @@ $$;
 -- that is an acceptable trade-off.
 -- created_at is returned in GMT+8 (Asia/Singapore). Stored value stays UTC;
 -- we convert only on read. Column names are preserved so the app is unchanged.
+-- Drop first: the return type changed (setof table -> table(...)), and
+-- CREATE OR REPLACE FUNCTION cannot change a function's return type.
+drop function if exists public.list_question_reports();
 create or replace function public.list_question_reports()
 returns table (
   id            uuid,
