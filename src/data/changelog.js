@@ -1,5 +1,11 @@
 export const BUILT_IN_LOGS = [
   {
+    id: "built-2026-09-23-tutor-question-context",
+    date: "2026-09-23",
+    title: "Tutor sees your question",
+    body: "While you're on a practice question, the tutor now knows which question you're working on and gives hints to guide you, without just handing over the answer.",
+  },
+  {
     id: "built-2026-09-23-tutor-open-to-all",
     date: "2026-09-23",
     title: "Tutor open to everyone",

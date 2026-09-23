@@ -70,6 +70,42 @@ function sanitizeHistory(raw: unknown): Turn[] {
   return cleaned.slice(-MAX_HISTORY_TURNS);
 }
 
+// The question the student is currently viewing, sent by the client so the
+// tutor can give guided, question-aware help.
+type CurrentQuestion = {
+  question: string;
+  options?: { a?: string; b?: string; c?: string; d?: string };
+  answer?: string;
+  explanation?: string;
+};
+
+// Sanitize the incoming current-question context. Returns null if absent or
+// malformed. Sizes are clamped so the prompt stays small.
+function sanitizeCurrentQuestion(raw: unknown): CurrentQuestion | null {
+  if (!raw || typeof raw !== "object") return null;
+  const r = raw as any;
+  const text = typeof r.question === "string" ? r.question.trim() : "";
+  if (!text) return null;
+  const clip = (v: unknown, n: number) =>
+    typeof v === "string" ? v.trim().slice(0, n) : "";
+  const out: CurrentQuestion = { question: text.slice(0, 1200) };
+  if (r.options && typeof r.options === "object") {
+    const o = r.options;
+    const opts = {
+      a: clip(o.a, 300),
+      b: clip(o.b, 300),
+      c: clip(o.c, 300),
+      d: clip(o.d, 300),
+    };
+    if (opts.a || opts.b || opts.c || opts.d) out.options = opts;
+  }
+  const ans = clip(r.answer, 4).toLowerCase();
+  if (ans === "a" || ans === "b" || ans === "c" || ans === "d") out.answer = ans;
+  const expl = clip(r.explanation, 1500);
+  if (expl) out.explanation = expl;
+  return out;
+}
+
 // Embed the question (768-dim to match the documents table).
 async function embedQuestion(text: string): Promise<number[]> {
   const res = await fetch(
@@ -121,8 +157,38 @@ async function generateAnswer(
   question: string,
   context: string,
   history: Turn[],
+  currentQuestion: CurrentQuestion | null = null,
 ): Promise<string> {
   const model = await pickChatModel();
+
+  // If the student is on a question, give the tutor that context plus rules
+  // to COACH rather than reveal the answer (this is a learning app).
+  let questionBlock = "";
+  if (currentQuestion) {
+    const cq = currentQuestion;
+    const optionLines = cq.options
+      ? ["a", "b", "c", "d"]
+          .map((k) => {
+            const v = (cq.options as any)[k];
+            return v ? `  (${k}) ${v}` : "";
+          })
+          .filter(Boolean)
+          .join("\n")
+      : "";
+    questionBlock =
+      "\n\nThe student is currently working on this practice question:\n" +
+      `Question: ${cq.question}\n` +
+      (optionLines ? `Options:\n${optionLines}\n` : "") +
+      (cq.answer ? `Correct answer: (${cq.answer})\n` : "") +
+      (cq.explanation ? `Worked explanation: ${cq.explanation}\n` : "") +
+      "How to use this: this is a LEARNING app, so GUIDE the student, do not " +
+      "just give the answer. Explain the relevant concept and the next step " +
+      "or approach so they can work it out themselves. Do NOT state which " +
+      "option is correct or give the final numeric answer unless the student " +
+      "has clearly already answered it or explicitly insists after a hint. " +
+      "Prefer a nudge and a checking question over a full solution.";
+  }
+
   const systemPrompt =
     "You are a tutor for the university course EE2101 Circuit Analysis, " +
     "talking with a student.\n" +
@@ -139,7 +205,8 @@ async function generateAnswer(
     "- Do NOT use em dashes (—) or double hyphens (--); use commas or full stops.\n" +
     "- Keep formatting light: short paragraphs, and a simple '- ' bullet list " +
     "only when it genuinely helps. Avoid headings unless the answer is long.\n\n" +
-    `Lecture context:\n${context}`;
+    `Lecture context:\n${context}` +
+    questionBlock;
 
   // Gemini's `contents` is an ordered list of turns. We seed it with the
   // system prompt + retrieved context as the first user turn (and a short
@@ -198,6 +265,7 @@ Deno.serve(async (req) => {
       return json({ error: "Please provide a question." }, 400);
     }
     const history = sanitizeHistory(body?.history);
+    const currentQuestion = sanitizeCurrentQuestion(body?.currentQuestion);
 
     // 1. Embed the LATEST question (RAG is always about the newest message).
     const embedding = await embedQuestion(question.trim());
@@ -223,7 +291,12 @@ Deno.serve(async (req) => {
     const context = docs
       .map((d: any) => d.content)
       .join("\n\n---\n\n");
-    const answer = await generateAnswer(question.trim(), context, history);
+    const answer = await generateAnswer(
+      question.trim(),
+      context,
+      history,
+      currentQuestion,
+    );
 
     // 4. Return answer + which weeks it drew from.
     const sources = [

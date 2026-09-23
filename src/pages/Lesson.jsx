@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   questionsForLesson,
   questionsForBank,
@@ -11,6 +11,7 @@ import { addXp, completeLesson, visibleStreak, wouldExtendStreak, xpForCorrect, 
 import { useQuizQueue } from "../hooks/useQuizQueue";
 import QuestionCard from "../components/QuestionCard";
 import ReviewGate from "../components/ReviewGate";
+import { setCurrentQuestion } from "../data/currentQuestion";
 import StreakChip from "../components/StreakChip";
 import FeedbackBanner from "../components/FeedbackBanner";
 import CloseWarning from "../components/CloseWarning";
@@ -66,6 +67,19 @@ export default function Lesson({
   const [stage, setStage] = useState(
     paperMode || bankMode ? "quiz" : "teach"
   );
+
+  // Publish the active question so the floating tutor can use it as context.
+  // Only while actually answering (stage === "quiz"); cleared on unmount and
+  // during the teach/warmup stage so the tutor isn't primed with an answer
+  // before the student has even seen the question.
+  useEffect(() => {
+    if (stage === "quiz" && quiz.question) {
+      setCurrentQuestion(quiz.question);
+    } else {
+      setCurrentQuestion(null);
+    }
+    return () => setCurrentQuestion(null);
+  }, [stage, quiz.question]);
 
   const topic = TOPICS.find((t) => t.id === topicId);
   const diff = DIFFICULTIES.find((d) => d.id === difficulty);
