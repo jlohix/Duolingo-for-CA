@@ -131,6 +131,10 @@ async function generateAnswer(
     "- If the answer isn't there, say it's not in the course material and " +
     "suggest checking the lecture slides or asking their tutor.\n" +
     "- Be concise and direct. Get to the point; skip filler.\n" +
+    "- Explain what the concept IS and how to use it. Do NOT include " +
+    "historical background, origins, who discovered it, or dates.\n" +
+    "- State each point once. Do NOT restate the same idea in different " +
+    "words or add 'in other words' / 'alternatively' rephrasings.\n" +
     "- Wrap all math in LaTeX: $...$ inline, $$...$$ for display equations.\n" +
     "- Do NOT use em dashes (—) or double hyphens (--); use commas or full stops.\n" +
     "- Keep formatting light: short paragraphs, and a simple '- ' bullet list " +
