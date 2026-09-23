@@ -173,9 +173,11 @@ select
   st.last_seen_at,
   st.duration_seconds,
   round(st.duration_seconds / 60.0, 2) as duration_minutes,
-  round(st.duration_seconds / 3600.0, 2) as duration_hours,
   -- HH:MM:SS pretty print
-  to_char((st.duration_seconds || ' seconds')::interval, 'HH24:MI:SS') as duration_hms
+  to_char((st.duration_seconds || ' seconds')::interval, 'HH24:MI:SS') as duration_hms,
+  -- duration_hours added LAST so CREATE OR REPLACE VIEW only appends a new
+  -- column (it cannot rename/reorder existing columns -> error 42P16).
+  round(st.duration_seconds / 3600.0, 2) as duration_hours
 from public.session_times st
 order by st.email asc, st.started_at asc;
 
@@ -191,9 +193,11 @@ select
   count(*)                                as sessions,
   sum(st.duration_seconds)                as total_seconds,
   round(sum(st.duration_seconds) / 60.0, 2) as total_minutes,
-  round(sum(st.duration_seconds) / 3600.0, 2) as total_hours,
   min(st.started_at)                      as first_seen,
-  max(st.last_seen_at)                    as last_seen
+  max(st.last_seen_at)                    as last_seen,
+  -- total_hours added LAST so CREATE OR REPLACE VIEW only appends a new
+  -- column (it cannot rename/reorder existing columns -> error 42P16).
+  round(sum(st.duration_seconds) / 3600.0, 2) as total_hours
 from public.session_times st
 group by st.email
 order by st.email asc;
@@ -230,8 +234,8 @@ select
   (st.last_seen_at at time zone 'Asia/Singapore') as last_seen_at_sgt,
   st.duration_seconds,
   round(st.duration_seconds / 60.0, 2)   as duration_minutes,
-  round(st.duration_seconds / 3600.0, 2) as duration_hours,
-  to_char((st.duration_seconds || ' seconds')::interval, 'HH24:MI:SS') as duration_hms
+  to_char((st.duration_seconds || ' seconds')::interval, 'HH24:MI:SS') as duration_hms,
+  round(st.duration_seconds / 3600.0, 2) as duration_hours
 from public.session_times st
 order by st.email asc, st.started_at asc;
 
@@ -243,10 +247,10 @@ select
   count(*)                                   as sessions,
   sum(st.duration_seconds)                   as total_seconds,
   round(sum(st.duration_seconds) / 60.0, 2)  as total_minutes,
-  round(sum(st.duration_seconds) / 3600.0, 2) as total_hours,
   -- Converted to GMT+8 wall-clock time (source stays UTC).
   (min(st.started_at)   at time zone 'Asia/Singapore') as first_seen_sgt,
-  (max(st.last_seen_at) at time zone 'Asia/Singapore') as last_seen_sgt
+  (max(st.last_seen_at) at time zone 'Asia/Singapore') as last_seen_sgt,
+  round(sum(st.duration_seconds) / 3600.0, 2) as total_hours
 from public.session_times st
 group by st.email
 order by st.email asc;
