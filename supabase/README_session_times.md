@@ -65,7 +65,7 @@ and downloads a CSV with these columns:
 
 ```
 email, class_id, session_id, started_at, last_seen_at,
-duration_seconds, duration_minutes, duration_hms
+duration_seconds, duration_minutes, duration_hours, duration_hms
 ```
 
 ## Files

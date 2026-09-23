@@ -165,6 +165,7 @@ select
   st.last_seen_at,
   st.duration_seconds,
   round(st.duration_seconds / 60.0, 2) as duration_minutes,
+  round(st.duration_seconds / 3600.0, 2) as duration_hours,
   -- HH:MM:SS pretty print
   to_char((st.duration_seconds || ' seconds')::interval, 'HH24:MI:SS') as duration_hms
 from public.session_times st
@@ -182,6 +183,7 @@ select
   count(*)                                as sessions,
   sum(st.duration_seconds)                as total_seconds,
   round(sum(st.duration_seconds) / 60.0, 2) as total_minutes,
+  round(sum(st.duration_seconds) / 3600.0, 2) as total_hours,
   min(st.started_at)                      as first_seen,
   max(st.last_seen_at)                    as last_seen
 from public.session_times st

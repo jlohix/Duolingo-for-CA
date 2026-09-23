@@ -18,6 +18,7 @@ const CSV_HEADERS = [
   "last_seen_at",
   "duration_seconds",
   "duration_minutes",
+  "duration_hours",
   "duration_hms",
 ];
 
@@ -69,6 +70,7 @@ export function buildSessionTimesCsv(rows) {
         csvField(r.lastSeenAt),
         csvField(durationSeconds),
         csvField((durationSeconds / 60).toFixed(2)),
+        csvField((durationSeconds / 3600).toFixed(2)),
         csvField(secondsToHms(durationSeconds)),
       ].join(",")
     );
