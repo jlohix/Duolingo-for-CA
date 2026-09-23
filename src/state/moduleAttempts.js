@@ -52,6 +52,35 @@ function userAgent() {
   return typeof navigator !== "undefined" ? navigator.userAgent || "" : "";
 }
 
+// ---- DEV-ONLY: mirror attempts to the local logger-server ----------
+// The browser can't write files, so when running locally we also POST
+// each attempt to logger-server.mjs (node logger-server.mjs), which
+// appends it to module_attempts.csv on disk. This runs ONLY on localhost
+// and is fully best-effort: if the logger isn't running, it's ignored.
+const LOCAL_LOGGER_URL = "http://localhost:4321";
+
+function isLocalhost() {
+  if (typeof window === "undefined") return false;
+  const host = window.location?.hostname || "";
+  return host === "localhost" || host === "127.0.0.1";
+}
+
+function logToLocalCsv(event, payload) {
+  if (!isLocalhost()) return;
+  try {
+    fetch(`${LOCAL_LOGGER_URL}/${event}`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+      keepalive: true,
+    }).catch(() => {
+      /* logger not running — ignore */
+    });
+  } catch {
+    /* ignore */
+  }
+}
+
 /**
  * Begin tracking a bank-module attempt. Returns an attempt handle you can
  * later pass to finishModuleAttempt, or null when tracking is skipped
@@ -87,6 +116,9 @@ export function startModuleAttempt({
     /* best-effort; the complete call also upserts if this one is lost */
   });
 
+  // Dev-only local CSV log (no-op unless logger-server.mjs is running).
+  logToLocalCsv("start", { ...handle, answeredCount: 0 });
+
   return handle;
 }
 
@@ -102,11 +134,15 @@ export function finishModuleAttempt(handle, { answeredCount = 0 } = {}) {
   if (!handle || !handle.attemptId || !handle.email || !handle.moduleId) {
     return;
   }
+  const safeAnswered = Math.max(0, Math.round(Number(answeredCount) || 0));
   completeModuleAttempt({
     ...handle,
-    answeredCount: Math.max(0, Math.round(Number(answeredCount) || 0)),
+    answeredCount: safeAnswered,
     userAgent: userAgent(),
   }).catch(() => {
     /* best-effort */
   });
+
+  // Dev-only local CSV log (no-op unless logger-server.mjs is running).
+  logToLocalCsv("complete", { ...handle, answeredCount: safeAnswered });
 }
