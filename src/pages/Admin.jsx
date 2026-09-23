@@ -20,6 +20,12 @@ import {
   resolveQuestionReport,
   reasonLabel,
 } from "../state/questionReports";
+import { listModuleAttempts } from "../supabaseClient";
+import {
+  moduleTitle,
+  MODULE_ANALYTICS_REPORTS,
+  downloadModuleAnalyticsCsv,
+} from "../state/moduleAttemptsExport";
 
 function lessonKeysForCounts(counts, bankCounts = {}) {
   const keys = [];
@@ -199,6 +205,7 @@ export default function Admin({ progress, setProgress, counts, bankCounts = {} }
         </table>
       </div>
       <WalkFeedbackTable students={students} />
+      <ModuleAnalyticsTable />
       <QuestionReportsTable />
       {student ? (
         <StudentEditor
@@ -346,6 +353,218 @@ function QuestionReportsTable() {
             )}
           </tbody>
         </table>
+      </div>
+    </section>
+  );
+}
+
+const DIFFICULTY_NAMES = { 1: "Easy", 2: "Average", 3: "Challenging" };
+
+// Roll up raw attempt rows into the numbers the two features report.
+// Mirrors the logic in moduleAttemptsExport.js so the on-screen tables
+// and the CSV downloads always agree.
+function rollupModuleAttempts(rows) {
+  const list = Array.isArray(rows) ? rows : [];
+  const byModule = new Map();
+  const byModuleDiff = new Map();
+
+  for (const r of list) {
+    const moduleId = String(r.moduleId || "");
+    const difficulty = Math.max(1, Math.min(3, Math.round(Number(r.difficulty) || 1)));
+    const email = String(r.email || "").trim().toLowerCase();
+    const done = Boolean(r.completed ?? r.completedAt);
+    if (!moduleId || !email) continue;
+
+    let m = byModule.get(moduleId);
+    if (!m) {
+      m = { attempts: 0, students: new Set(), completedStudents: new Set(), completedAttempts: 0 };
+      byModule.set(moduleId, m);
+    }
+    m.attempts += 1;
+    m.students.add(email);
+    if (done) {
+      m.completedStudents.add(email);
+      m.completedAttempts += 1;
+    }
+
+    const dKey = `${moduleId}|${difficulty}`;
+    let d = byModuleDiff.get(dKey);
+    if (!d) {
+      d = { moduleId, difficulty, attempts: 0, students: new Set(), completedStudents: new Set(), completedAttempts: 0 };
+      byModuleDiff.set(dKey, d);
+    }
+    d.attempts += 1;
+    d.students.add(email);
+    if (done) {
+      d.completedStudents.add(email);
+      d.completedAttempts += 1;
+    }
+  }
+
+  const perModule = [...byModule.entries()]
+    .map(([moduleId, m]) => ({
+      moduleId,
+      title: moduleTitle(moduleId),
+      attempts: m.attempts,
+      students: m.students.size,
+      repeats: Math.max(m.attempts - m.students.size, 0),
+      studentsCompleted: m.completedStudents.size,
+      completedAttempts: m.completedAttempts,
+    }))
+    .sort((a, b) => b.attempts - a.attempts || a.title.localeCompare(b.title));
+
+  const perModuleDiff = [...byModuleDiff.values()]
+    .map((d) => ({
+      moduleId: d.moduleId,
+      title: moduleTitle(d.moduleId),
+      difficulty: d.difficulty,
+      attempts: d.attempts,
+      students: d.students.size,
+      repeats: Math.max(d.attempts - d.students.size, 0),
+      studentsCompleted: d.completedStudents.size,
+      completedAttempts: d.completedAttempts,
+    }))
+    .sort(
+      (a, b) =>
+        a.title.localeCompare(b.title) || a.difficulty - b.difficulty
+    );
+
+  return { perModule, perModuleDiff, totalAttempts: list.length };
+}
+
+function ModuleAnalyticsTable() {
+  const [rows, setRows] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+  const [splitByDifficulty, setSplitByDifficulty] = useState(false);
+  const [busy, setBusy] = useState("");
+
+  function reload(active = { current: true }) {
+    setLoading(true);
+    setError("");
+    listModuleAttempts()
+      .then((data) => {
+        if (active.current !== false) setRows(Array.isArray(data) ? data : []);
+      })
+      .catch(() => {
+        if (active.current !== false) {
+          setError(
+            "Couldn't load module attempts. Make sure module_attempts.sql has been run in Supabase."
+          );
+        }
+      })
+      .finally(() => {
+        if (active.current !== false) setLoading(false);
+      });
+  }
+
+  useEffect(() => {
+    const active = { current: true };
+    reload(active);
+    return () => {
+      active.current = false;
+    };
+  }, []);
+
+  const { perModule, perModuleDiff, totalAttempts } = useMemo(
+    () => rollupModuleAttempts(rows),
+    [rows]
+  );
+
+  async function download(reportId) {
+    setBusy(reportId);
+    try {
+      await downloadModuleAnalyticsCsv(reportId);
+    } catch {
+      setError("Download failed.");
+    } finally {
+      setBusy("");
+    }
+  }
+
+  const showDiff = splitByDifficulty;
+
+  return (
+    <section className="admin-walk-feedback">
+      <h2>Module analytics</h2>
+      <p className="login-hint">
+        Per-attempt tracking of question-bank modules across all students.
+        A <strong>repeat</strong> is any attempt after a student's first go at a
+        module (completed or abandoned). A <strong>completion</strong> means a
+        student answered every question in the module at least once.{" "}
+        {totalAttempts} attempt{totalAttempts === 1 ? "" : "s"} logged.
+      </p>
+      <label
+        className="login-hint"
+        style={{ display: "inline-block", marginBottom: 8 }}
+      >
+        <input
+          type="checkbox"
+          checked={splitByDifficulty}
+          onChange={(e) => setSplitByDifficulty(e.target.checked)}
+        />{" "}
+        Split by difficulty
+      </label>
+
+      {error ? <p className="login-hint">{error}</p> : null}
+
+      <div className="admin-table-wrap">
+        <table className="admin-table">
+          <thead>
+            <tr>
+              <th>Module</th>
+              {showDiff ? <th>Difficulty</th> : null}
+              <th>Total attempts</th>
+              <th>Students</th>
+              <th>Repeat attempts</th>
+              <th>Students completed</th>
+            </tr>
+          </thead>
+          <tbody>
+            {loading ? (
+              <tr>
+                <td colSpan={showDiff ? 6 : 5}>Loading module attempts…</td>
+              </tr>
+            ) : (showDiff ? perModuleDiff : perModule).length ? (
+              (showDiff ? perModuleDiff : perModule).map((row) => (
+                <tr key={showDiff ? `${row.moduleId}-${row.difficulty}` : row.moduleId}>
+                  <td>{row.title}</td>
+                  {showDiff ? (
+                    <td>{DIFFICULTY_NAMES[row.difficulty] || row.difficulty}</td>
+                  ) : null}
+                  <td>{row.attempts}</td>
+                  <td>{row.students}</td>
+                  <td>{row.repeats}</td>
+                  <td>{row.studentsCompleted}</td>
+                </tr>
+              ))
+            ) : (
+              <tr>
+                <td colSpan={showDiff ? 6 : 5}>
+                  No module attempts logged yet. Play a question bank as a
+                  student to see data here.
+                </td>
+              </tr>
+            )}
+          </tbody>
+        </table>
+      </div>
+
+      <p className="login-hint" style={{ marginTop: 12 }}>
+        Download detailed CSVs:
+      </p>
+      <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
+        {Object.entries(MODULE_ANALYTICS_REPORTS).map(([id, report]) => (
+          <button
+            key={id}
+            type="button"
+            className="admin-name-btn"
+            disabled={busy === id || loading}
+            onClick={() => download(id)}
+          >
+            {busy === id ? "…" : report.label}
+          </button>
+        ))}
       </div>
     </section>
   );
