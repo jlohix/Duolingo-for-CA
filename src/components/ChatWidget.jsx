@@ -1,6 +1,10 @@
 import { useEffect, useRef, useState } from "react";
 import { askChatbot, CHAT_HISTORY_LIMIT } from "../supabaseClient";
 import MathText from "./MathText";
+import {
+  currentQuestionForChat,
+  subscribeCurrentQuestion,
+} from "../data/currentQuestion";
 
 // Turn a source filename like "EE2101_Lecture_Week03.pdf" into "Week 3".
 function prettySource(source) {
@@ -42,8 +46,17 @@ export default function ChatWidget() {
   // Conversation so far. Each entry: { role: "user"|"model", text, sources? }
   // Seeded from sessionStorage so a refresh within the session keeps history.
   const [messages, setMessages] = useState(loadStoredMessages);
+  // Whether the student currently has a question on screen (drives the small
+  // "using your current question" hint). The actual context is read fresh at
+  // send-time via currentQuestionForChat().
+  const [hasQuestion, setHasQuestion] = useState(false);
   const inputRef = useRef(null);
   const bodyRef = useRef(null);
+
+  // Track whether a question is currently active on the page.
+  useEffect(() => {
+    return subscribeCurrentQuestion((q) => setHasQuestion(Boolean(q)));
+  }, []);
 
   // Mirror the conversation to sessionStorage whenever it changes.
   useEffect(() => {
@@ -102,9 +115,12 @@ export default function ChatWidget() {
     setLoading(true);
 
     try {
-      // Send the recent conversation (capped) so the bot has memory.
+      // Send the recent conversation (capped) so the bot has memory, plus the
+      // question the student is currently viewing (if any) so the tutor can
+      // give guided, question-aware help.
       const history = priorHistory.slice(-CHAT_HISTORY_LIMIT);
-      const { answer, sources } = await askChatbot(q, history);
+      const currentQuestion = currentQuestionForChat();
+      const { answer, sources } = await askChatbot(q, history, currentQuestion);
       setMessages((prev) => [
         ...prev,
         { role: "model", text: answer, sources },
@@ -149,11 +165,26 @@ export default function ChatWidget() {
             )}
           </div>
 
+          {hasQuestion && (
+            <p className="chat-context-note">
+              📄 The tutor can see the question you're working on.
+            </p>
+          )}
+
           <div className="chat-body" ref={bodyRef}>
             {messages.length === 0 && !loading && !error && (
               <p className="chat-hint">
-                Ask a circuit-analysis question, e.g.{" "}
-                <em>“What is Kirchhoff's voltage law?”</em>
+                {hasQuestion ? (
+                  <>
+                    Stuck on this question? Ask for a hint, e.g.{" "}
+                    <em>“How do I start this?”</em>
+                  </>
+                ) : (
+                  <>
+                    Ask a circuit-analysis question, e.g.{" "}
+                    <em>“What is Kirchhoff's voltage law?”</em>
+                  </>
+                )}
               </p>
             )}
 

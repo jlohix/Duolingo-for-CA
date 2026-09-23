@@ -383,8 +383,11 @@ export const CHAT_HISTORY_LIMIT = 8;
 // Send a question (plus recent conversation history) to the deployed `chat`
 // Edge Function and return the grounded answer plus the lecture weeks it drew
 // from. `history` is an array of prior turns: [{ role: "user"|"model", text }].
-// Resolves to { answer, sources }. Throws with a friendly message on failure.
-export async function askChatbot(question, history = []) {
+// `currentQuestion` (optional) is the question the student is currently viewing
+// ({ question, options?, answer?, explanation? }), so the tutor can give
+// guided help. Resolves to { answer, sources }. Throws a friendly message on
+// failure.
+export async function askChatbot(question, history = [], currentQuestion = null) {
   const trimmed = String(question || "").trim();
   if (!trimmed) {
     throw new Error("Please type a question first.");
@@ -402,6 +405,11 @@ export async function askChatbot(question, history = []) {
     .map((t) => ({ role: t.role, text: t.text.trim() }))
     .slice(-CHAT_HISTORY_LIMIT);
 
+  const payload = { question: trimmed, history: safeHistory };
+  if (currentQuestion && typeof currentQuestion === "object") {
+    payload.currentQuestion = currentQuestion;
+  }
+
   let response;
   try {
     response = await fetch(`${SUPABASE_URL}/functions/v1/chat`, {
@@ -411,7 +419,7 @@ export async function askChatbot(question, history = []) {
         Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ question: trimmed, history: safeHistory }),
+      body: JSON.stringify(payload),
     });
   } catch {
     throw new Error("Couldn't reach the tutor. Check your connection and try again.");

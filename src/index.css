@@ -4098,6 +4098,15 @@ html[data-theme="dark"] .circuit-svg .board-step {
 .chat-clear:hover {
   background: rgba(255, 255, 255, 0.15);
 }
+.chat-context-note {
+  margin: 0;
+  padding: 8px 16px;
+  font-size: 12px;
+  color: var(--ink);
+  background: var(--letter-bg);
+  border-bottom: 1px solid var(--line);
+  opacity: 0.85;
+}
 
 .chat-body {
   flex: 1;
