@@ -77,37 +77,17 @@ $$;
 -- NOTE: admin-only viewing is enforced at the APP level — only the
 -- admin screen ever calls this function. For a small class project
 -- that is an acceptable trade-off.
--- created_at is returned in GMT+8 (Asia/Singapore). Stored value stays UTC;
--- we convert only on read. Column names are preserved so the app is unchanged.
--- Drop first: the return type changed (setof table -> table(...)), and
--- CREATE OR REPLACE FUNCTION cannot change a function's return type.
-drop function if exists public.list_question_reports();
+-- Original function unchanged (created_at in UTC). For GMT+8, use the
+-- ADDITIONAL view question_reports_sgt appended at the end of this file.
 create or replace function public.list_question_reports()
-returns table (
-  id            uuid,
-  question_id   text,
-  question_text text,
-  reason        text,
-  note          text,
-  reporter      text,
-  resolved      boolean,
-  created_at    timestamp
-)
+returns setof public.question_reports
 language sql
 security definer
 set search_path = public
 as $$
-  select
-    r.id,
-    r.question_id,
-    r.question_text,
-    r.reason,
-    r.note,
-    r.reporter,
-    r.resolved,
-    (r.created_at at time zone 'Asia/Singapore') as created_at
-  from public.question_reports r
-  order by r.created_at desc;
+  select *
+  from public.question_reports
+  order by created_at desc;
 $$;
 
 
@@ -134,3 +114,26 @@ $$;
 grant execute on function public.submit_question_report(text, text, text, text, text) to anon, authenticated;
 grant execute on function public.list_question_reports() to anon, authenticated;
 grant execute on function public.resolve_question_report(uuid, boolean) to anon, authenticated;
+
+
+-- ============================================================
+-- GMT+8 (Asia/Singapore) reports view — APPENDED, nothing dropped
+-- ------------------------------------------------------------
+-- Separate view with created_at converted to Singapore local time
+-- (UTC+8). The table, the original function, and grants are untouched.
+--   Read it with:  select * from public.question_reports_sgt;
+-- ============================================================
+create or replace view public.question_reports_sgt as
+select
+  r.id,
+  r.question_id,
+  r.question_text,
+  r.reason,
+  r.note,
+  r.reporter,
+  r.resolved,
+  (r.created_at at time zone 'Asia/Singapore') as created_at_sgt
+from public.question_reports r
+order by r.created_at desc;
+
+revoke all on public.question_reports_sgt from anon, authenticated;

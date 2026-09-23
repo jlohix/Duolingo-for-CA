@@ -21,9 +21,10 @@
 -- helper query at the bottom of this file, to produce user_times_logged.csv.
 --
 -- TIMEZONE: timestamps are STORED in UTC (timestamptz + now(), the correct,
--- non-destructive way). All read/report paths below convert to GMT+8
--- (Asia/Singapore) via "... at time zone 'Asia/Singapore'", so the values
--- you see and export are Singapore local time (UTC+8).
+-- non-destructive way). The original views/RPC keep UTC. For GMT+8
+-- (Asia/Singapore) local time, use the ADDITIONAL views appended at the
+-- END of this file (user_times_logged_sgt, user_times_totals_sgt) — they
+-- are separate objects, so nothing existing is dropped or altered.
 -- ============================================================
 
 create table if not exists public.session_times (
@@ -137,10 +138,8 @@ begin
           'sessionId', st.session_id,
           'email', st.email,
           'classId', st.class_id,
-          -- Timestamps returned as GMT+8 (Asia/Singapore) wall-clock time.
-          -- Stored values stay in UTC; we only convert on read.
-          'startedAt', to_char(st.started_at at time zone 'Asia/Singapore', 'YYYY-MM-DD"T"HH24:MI:SS'),
-          'lastSeenAt', to_char(st.last_seen_at at time zone 'Asia/Singapore', 'YYYY-MM-DD"T"HH24:MI:SS'),
+          'startedAt', st.started_at,
+          'lastSeenAt', st.last_seen_at,
           'durationSeconds', st.duration_seconds
         )
         order by st.email asc, st.started_at asc
@@ -163,18 +162,15 @@ grant execute on function public.list_session_times() to anon, authenticated;
 -- with human-friendly duration columns. Export this to get the
 -- user_times_logged.csv file the team wants.
 -- ============================================================
--- NOTE: started_at / last_seen_at are shown in GMT+8 (Asia/Singapore).
--- The underlying columns remain stored in UTC; only the display converts.
--- Drop first: CREATE OR REPLACE VIEW cannot change an existing column's
--- data type (timestamptz -> timestamp), so re-running would error 42P16.
-drop view if exists public.user_times_logged;
-create view public.user_times_logged as
+-- NOTE: original view — timestamps are in UTC (unchanged). For GMT+8
+-- (Asia/Singapore) times, use the *_sgt views appended at the end of this file.
+create or replace view public.user_times_logged as
 select
   st.email,
   st.class_id,
   st.session_id,
-  (st.started_at at time zone 'Asia/Singapore') as started_at,
-  (st.last_seen_at at time zone 'Asia/Singapore') as last_seen_at,
+  st.started_at,
+  st.last_seen_at,
   st.duration_seconds,
   round(st.duration_seconds / 60.0, 2) as duration_minutes,
   round(st.duration_seconds / 3600.0, 2) as duration_hours,
@@ -189,18 +185,15 @@ revoke all on public.user_times_logged from anon, authenticated;
 -- ------------------------------------------------------------
 -- Per-user totals (handy summary; also sorted by user).
 -- ------------------------------------------------------------
--- Drop first for the same reason as above (column type change).
-drop view if exists public.user_times_totals;
-create view public.user_times_totals as
+create or replace view public.user_times_totals as
 select
   st.email,
   count(*)                                as sessions,
   sum(st.duration_seconds)                as total_seconds,
   round(sum(st.duration_seconds) / 60.0, 2) as total_minutes,
   round(sum(st.duration_seconds) / 3600.0, 2) as total_hours,
-  -- first_seen / last_seen shown in GMT+8 (Asia/Singapore); stored as UTC.
-  (min(st.started_at) at time zone 'Asia/Singapore')  as first_seen,
-  (max(st.last_seen_at) at time zone 'Asia/Singapore') as last_seen
+  min(st.started_at)                      as first_seen,
+  max(st.last_seen_at)                    as last_seen
 from public.session_times st
 group by st.email
 order by st.email asc;
@@ -216,3 +209,46 @@ revoke all on public.user_times_totals from anon, authenticated;
 --   copy (select * from public.user_times_logged)
 --     to '/tmp/user_times_logged.csv' with (format csv, header true);
 -- ------------------------------------------------------------
+
+
+-- ============================================================
+-- GMT+8 (Asia/Singapore) reporting views — APPENDED, nothing dropped
+-- ------------------------------------------------------------
+-- These are NEW, separate views that present the same data with the
+-- timestamps converted to Singapore local time (UTC+8). The stored
+-- columns and the original UTC views above are left untouched.
+--
+-- Export the SGT CSV from:  select * from public.user_times_logged_sgt;
+-- ============================================================
+create or replace view public.user_times_logged_sgt as
+select
+  st.email,
+  st.class_id,
+  st.session_id,
+  -- Converted to GMT+8 wall-clock time (source stays UTC).
+  (st.started_at   at time zone 'Asia/Singapore') as started_at_sgt,
+  (st.last_seen_at at time zone 'Asia/Singapore') as last_seen_at_sgt,
+  st.duration_seconds,
+  round(st.duration_seconds / 60.0, 2)   as duration_minutes,
+  round(st.duration_seconds / 3600.0, 2) as duration_hours,
+  to_char((st.duration_seconds || ' seconds')::interval, 'HH24:MI:SS') as duration_hms
+from public.session_times st
+order by st.email asc, st.started_at asc;
+
+revoke all on public.user_times_logged_sgt from anon, authenticated;
+
+create or replace view public.user_times_totals_sgt as
+select
+  st.email,
+  count(*)                                   as sessions,
+  sum(st.duration_seconds)                   as total_seconds,
+  round(sum(st.duration_seconds) / 60.0, 2)  as total_minutes,
+  round(sum(st.duration_seconds) / 3600.0, 2) as total_hours,
+  -- Converted to GMT+8 wall-clock time (source stays UTC).
+  (min(st.started_at)   at time zone 'Asia/Singapore') as first_seen_sgt,
+  (max(st.last_seen_at) at time zone 'Asia/Singapore') as last_seen_sgt
+from public.session_times st
+group by st.email
+order by st.email asc;
+
+revoke all on public.user_times_totals_sgt from anon, authenticated;

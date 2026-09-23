@@ -66,8 +66,6 @@ export function buildSessionTimesCsv(rows) {
         csvField(r.email),
         csvField(r.classId),
         csvField(r.sessionId),
-        // startedAt / lastSeenAt already arrive in GMT+8 from the
-        // list_session_times RPC (converted server-side from UTC).
         csvField(r.startedAt),
         csvField(r.lastSeenAt),
         csvField(durationSeconds),

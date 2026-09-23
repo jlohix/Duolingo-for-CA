@@ -9,13 +9,21 @@ team export the timings as `user_times_logged.csv`, sorted by user and by time.
 > SQL Editor, or with the in-app admin export button.
 
 > **Timezone (GMT+8):** timestamps are *stored* in UTC (the correct,
-> non-destructive way), but every report/read path — the `user_times_logged`
-> and `user_times_totals` views, the `list_session_times` RPC, and the exported
-> CSV — converts them to **GMT+8 (Asia/Singapore)** via
-> `... at time zone 'Asia/Singapore'`, so what you see and export is Singapore
-> local time. Machine-only timestamps (e.g. league `seasonStart` epoch used for
-> countdowns, and progress `updatedAt` sync bookkeeping) are intentionally left
-> in UTC because shifting them would break season timing and sync logic.
+> non-destructive way), and the original views/RPCs are **unchanged**. For
+> Singapore local time (UTC+8), use the **additional `*_sgt` views** that are
+> appended to each SQL file — nothing existing is dropped or altered:
+>
+> | UTC (original) | GMT+8 (appended) |
+> |----------------|------------------|
+> | `public.user_times_logged` | `public.user_times_logged_sgt` |
+> | `public.user_times_totals` | `public.user_times_totals_sgt` |
+> | `public.student_consent_decrypted` | `public.student_consent_decrypted_sgt` |
+> | `public.question_reports` | `public.question_reports_sgt` |
+>
+> These use `... at time zone 'Asia/Singapore'`, so their `*_sgt` timestamp
+> columns read as Singapore local time. Export the SGT CSV from
+> `select * from public.user_times_logged_sgt;`. Machine-only timestamps
+> (league `seasonStart` epoch, progress `updatedAt`) stay in UTC.
 
 ## 1. One-time setup
 

@@ -168,16 +168,14 @@ end;
 $$;
 
 -- Team-only decrypted view. Anon cannot select this (RLS + no grant).
--- Drop first: CREATE OR REPLACE VIEW cannot change an existing column's
--- data type (submitted_at timestamptz -> timestamp), so re-running errors 42P16.
-drop view if exists public.student_consent_decrypted;
-create view public.student_consent_decrypted as
+-- Original view keeps submitted_at in UTC (unchanged). For GMT+8, use the
+-- ADDITIONAL view student_consent_decrypted_sgt appended below.
+create or replace view public.student_consent_decrypted as
 select
   c.email,
   c.research_opt_in,
   c.form_version,
-  -- submitted_at shown in GMT+8 (Asia/Singapore); stored as UTC.
-  (c.submitted_at at time zone 'Asia/Singapore') as submitted_at,
+  c.submitted_at,
   (extensions.pgp_sym_decrypt(c.answers_enc, k.secret))::jsonb as answers
 from public.student_consent c
 cross join private.consent_crypto k
@@ -187,3 +185,25 @@ revoke all on public.student_consent from public, anon, authenticated;
 revoke all on public.student_consent_decrypted from public, anon, authenticated;
 grant execute on function public.get_student_consent_status(text) to anon, authenticated;
 grant execute on function public.record_student_consent(text, jsonb) to anon, authenticated;
+
+
+-- ============================================================
+-- GMT+8 (Asia/Singapore) decrypted view — APPENDED, nothing dropped
+-- ------------------------------------------------------------
+-- Separate view identical to student_consent_decrypted but with
+-- submitted_at converted to Singapore local time (UTC+8). The original
+-- view and stored column are left untouched.
+--   Read it with:  select * from public.student_consent_decrypted_sgt;
+-- ============================================================
+create or replace view public.student_consent_decrypted_sgt as
+select
+  c.email,
+  c.research_opt_in,
+  c.form_version,
+  (c.submitted_at at time zone 'Asia/Singapore') as submitted_at_sgt,
+  (extensions.pgp_sym_decrypt(c.answers_enc, k.secret))::jsonb as answers
+from public.student_consent c
+cross join private.consent_crypto k
+where k.id = 1;
+
+revoke all on public.student_consent_decrypted_sgt from public, anon, authenticated;
