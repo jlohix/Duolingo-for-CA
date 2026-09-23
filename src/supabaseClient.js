@@ -354,3 +354,63 @@ export async function askChatbot(question, history = []) {
     sources: Array.isArray(data && data.sources) ? data.sources : [],
   };
 }
+
+
+// ---------- Module attempt tracking (repeats & completions) ----------
+
+// Record that a question-bank module attempt has STARTED. Called every time
+// a bank module enters its quiz stage, so a new row (a new attempt) is logged
+// on each (re)start. The server keys on attemptId, so retries are idempotent.
+export async function logModuleAttemptStart({
+  attemptId,
+  email,
+  moduleId,
+  difficulty = 1,
+  classId = "",
+  questionCount = 0,
+  userAgent = "",
+}) {
+  const data = await rpc("log_module_attempt_start", {
+    p_attempt_id: String(attemptId || ""),
+    p_email: String(email || "").trim().toLowerCase(),
+    p_module_id: String(moduleId || "").trim(),
+    p_difficulty: Math.max(1, Math.min(3, Math.round(Number(difficulty) || 1))),
+    p_class_id: String(classId || ""),
+    p_question_count: Math.max(0, Math.round(Number(questionCount) || 0)),
+    p_user_agent: String(userAgent || ""),
+  });
+  return data === true;
+}
+
+// Stamp a module attempt as COMPLETED (every question answered at least once).
+// Safe to call even if the start row never landed — the server upserts a
+// completed row keyed on attemptId.
+export async function completeModuleAttempt({
+  attemptId,
+  email,
+  moduleId,
+  difficulty = 1,
+  classId = "",
+  questionCount = 0,
+  answeredCount = 0,
+  userAgent = "",
+}) {
+  const data = await rpc("complete_module_attempt", {
+    p_attempt_id: String(attemptId || ""),
+    p_email: String(email || "").trim().toLowerCase(),
+    p_module_id: String(moduleId || "").trim(),
+    p_difficulty: Math.max(1, Math.min(3, Math.round(Number(difficulty) || 1))),
+    p_class_id: String(classId || ""),
+    p_question_count: Math.max(0, Math.round(Number(questionCount) || 0)),
+    p_answered_count: Math.max(0, Math.round(Number(answeredCount) || 0)),
+    p_user_agent: String(userAgent || ""),
+  });
+  return data === true;
+}
+
+// Staff-facing read of every module attempt row (sorted by module, then
+// user, then start time). Backs the analytics CSV export.
+export async function listModuleAttempts() {
+  const data = await rpc("list_module_attempts", {});
+  return Array.isArray(data) ? data : [];
+}
