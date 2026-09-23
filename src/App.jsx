@@ -35,6 +35,7 @@ import {
 import { pullLeagueSeason, syncLeagueSeason } from "./state/league";
 import { loadSession, logout, isAdmin } from "./state/auth";
 import { useSessionTime } from "./hooks/useSessionTime";
+import { useModuleTime } from "./hooks/useModuleTime";
 import AppShell from "./components/AppShell";
 import ChatWidget from "./components/ChatWidget";
 import ConsentModal from "./components/ConsentModal";
@@ -199,6 +200,31 @@ function AppBody({ onGateChange }) {
     session && !isAdmin(session) ? session.username : null,
     progress?.classId ?? ""
   );
+
+  // Track which module the user is in and for how long (module_visits).
+  // The module identity = the current `screen` plus a finer detail derived
+  // from the open lesson / lab / paper / section-walk. A fresh visit starts
+  // whenever moduleKey or moduleDetail changes. Admins are excluded.
+  const moduleDetail = lesson
+    ? lesson.bankId
+      ? `bank-${lesson.bankId}-${lesson.difficulty}`
+      : `${lesson.topicId}-${lesson.difficulty}`
+    : secWalk
+    ? String(secWalk)
+    : laplaceLabId
+    ? String(laplaceLabId)
+    : paperPack?.id
+    ? String(paperPack.id)
+    : skipTarget
+    ? `skip-${skipTarget}`
+    : "";
+  useModuleTime({
+    email: session && !isAdmin(session) ? session.username : null,
+    moduleKey: session && !isAdmin(session) ? screen : null,
+    moduleDetail,
+    moduleLabel: screen,
+    classId: progress?.classId ?? "",
+  });
 
   // Report the values the chatbot gate needs (current screen, class, admin)
   // up to the App wrapper, which mounts the single floating ChatWidget.

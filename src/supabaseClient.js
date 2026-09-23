@@ -183,6 +183,90 @@ export async function listSessionTimes() {
   return Array.isArray(data) ? data : [];
 }
 
+// ---------- Module visit tracking ----------
+
+// Upsert the running duration for one module visit. Called on entering a
+// module, on periodic heartbeat, and on final flush when the user leaves.
+// The server keeps the largest duration it has seen for the visit.
+export async function logModuleVisit({
+  visitId,
+  email,
+  moduleKey,
+  durationSeconds,
+  moduleDetail = "",
+  moduleLabel = "",
+  classId = "",
+  sessionId = null,
+}) {
+  const data = await rpc("log_module_visit", {
+    p_visit_id: String(visitId || ""),
+    p_email: String(email || "").trim().toLowerCase(),
+    p_module_key: String(moduleKey || "").trim(),
+    p_duration_seconds: Math.max(0, Math.round(Number(durationSeconds) || 0)),
+    p_module_detail: String(moduleDetail || ""),
+    p_module_label: String(moduleLabel || ""),
+    p_class_id: String(classId || ""),
+    p_session_id: sessionId ? String(sessionId) : null,
+  });
+  return data === true;
+}
+
+// Fire-and-forget flush that survives the page/module being closed. Uses
+// navigator.sendBeacon when available (works during unload), and falls back
+// to a keepalive fetch. Safe to call from visibilitychange/pagehide.
+export function logModuleVisitBeacon({
+  visitId,
+  email,
+  moduleKey,
+  durationSeconds,
+  moduleDetail = "",
+  moduleLabel = "",
+  classId = "",
+  sessionId = null,
+}) {
+  const payload = {
+    p_visit_id: String(visitId || ""),
+    p_email: String(email || "").trim().toLowerCase(),
+    p_module_key: String(moduleKey || "").trim(),
+    p_duration_seconds: Math.max(0, Math.round(Number(durationSeconds) || 0)),
+    p_module_detail: String(moduleDetail || ""),
+    p_module_label: String(moduleLabel || ""),
+    p_class_id: String(classId || ""),
+    p_session_id: sessionId ? String(sessionId) : null,
+  };
+  const url = `${SUPABASE_URL}/rest/v1/rpc/log_module_visit`;
+
+  try {
+    if (typeof navigator !== "undefined" && navigator.sendBeacon) {
+      const beaconUrl = `${url}?apikey=${encodeURIComponent(SUPABASE_ANON_KEY)}`;
+      const blob = new Blob([JSON.stringify(payload)], {
+        type: "application/json",
+      });
+      if (navigator.sendBeacon(beaconUrl, blob)) return true;
+    }
+  } catch {
+    /* fall through to keepalive fetch */
+  }
+
+  try {
+    fetch(url, {
+      method: "POST",
+      headers: rpcHeaders(),
+      body: JSON.stringify(payload),
+      keepalive: true,
+    }).catch(() => {});
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+// Staff-facing read of all module visits (sorted by user, module, entry).
+export async function listModuleVisits() {
+  const data = await rpc("list_module_visits", {});
+  return Array.isArray(data) ? data : [];
+}
+
 export async function syncLeagueSeasonRemote() {
   const data = await rpc("sync_league_season", {});
   return data && typeof data === "object" ? data : null;
