@@ -1,5 +1,11 @@
 export const BUILT_IN_LOGS = [
   {
+    id: "built-2026-09-23-tutor-open-to-all",
+    date: "2026-09-23",
+    title: "Tutor open to everyone",
+    body: "The Ask the tutor helper is now available to all students (still under development). Look for it on your lessons, papers, labs, and home screens.",
+  },
+  {
     id: "built-2026-09-23-tutor-memory",
     date: "2026-09-23",
     title: "Tutor remembers your chat",

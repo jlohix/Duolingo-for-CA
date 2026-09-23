@@ -132,7 +132,7 @@ export default function ChatWidget() {
         <div className="chat-panel" role="dialog" aria-label="Ask the tutor">
           <div className="chat-header">
             <div>
-              <p className="chat-title">Ask the tutor</p>
+              <p className="chat-title">Ask the tutor (Under Development)</p>
               <p className="chat-subtitle">
                 Grounded in your EE2101 lecture slides
               </p>

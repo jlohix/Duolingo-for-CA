@@ -7,7 +7,7 @@
 //
 // EE22 is chosen for the test phase because our test accounts and admins are
 // already assigned to it, so no extra setup is needed to gate the rollout.
-export const CHATBOT_AUDIENCE = "ee22";
+export const CHATBOT_AUDIENCE = "all";
 
 // The class the "ee22" audience unlocks. Kept as a constant so the gated
 // class is easy to change without hunting through the logic below.
