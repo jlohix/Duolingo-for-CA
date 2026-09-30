@@ -225,11 +225,14 @@ grant execute on function public.chat_usage_summary()         to anon, authentic
 
 
 -- ============================================================
--- GMT+8 (Asia/Singapore) raw view — APPENDED, nothing dropped.
+-- GMT+8 (Asia/Singapore) raw view — safe to re-run.
 --   Read it with:  select * from public.chat_logs_sgt;
--- The table and functions above are untouched.
+-- We DROP then recreate because new columns (lecture_week, week_inferred) are
+-- inserted mid-list, which "create or replace view" cannot do (it only allows
+-- appending columns). Dropping the view does NOT affect the table or its data.
 -- ============================================================
-create or replace view public.chat_logs_sgt as
+drop view if exists public.chat_logs_sgt;
+create view public.chat_logs_sgt as
 select
   c.id,
   c.email,
