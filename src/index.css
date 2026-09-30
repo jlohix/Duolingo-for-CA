@@ -4329,3 +4329,54 @@ html[data-theme="dark"] .circuit-svg .board-step {
   font-size: 12px;
   opacity: 0.65;
 }
+
+
+/* ---------- Admin student roster: searchable, scrollable box ---------- */
+.admin-roster {
+  margin: 12px 0 20px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--letter-bg);
+  padding: 12px 14px;
+}
+.admin-roster-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.admin-roster-head h2 {
+  margin: 0;
+  font-size: 16px;
+}
+.admin-search {
+  flex: 1 1 220px;
+  max-width: 320px;
+  padding: 8px 12px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  font-size: 14px;
+}
+.admin-roster-count {
+  margin: 6px 0 8px;
+  font-size: 12px;
+  opacity: 0.7;
+}
+/* Fixed-height scroll area so the roster no longer pushes the rest of the
+   page down; the header row stays visible while scrolling. */
+.admin-roster-scroll {
+  max-height: 360px;
+  overflow-y: auto;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+}
+.admin-roster-scroll table {
+  margin: 0;
+}
+.admin-roster-scroll thead th {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  background: var(--letter-bg);
+}
