@@ -291,6 +291,29 @@ export async function submitQuestionReportRemote({
   return data === true;
 }
 
+// ---------- Chatbot usage analytics (admin dashboard) ----------
+// Raw RPC wrappers; the shaping/aggregation lives in src/state/chatAnalytics.js.
+
+export async function chatUsageSummaryRemote() {
+  const data = await rpc("chat_usage_summary", {});
+  return Array.isArray(data) ? data[0] || null : data || null;
+}
+
+export async function listChatTopicTallyRemote() {
+  const data = await rpc("list_chat_topic_tally", {});
+  return Array.isArray(data) ? data : [];
+}
+
+export async function listChatDailyRemote() {
+  const data = await rpc("list_chat_daily", {});
+  return Array.isArray(data) ? data : [];
+}
+
+export async function listChatByStudentRemote() {
+  const data = await rpc("list_chat_by_student", {});
+  return Array.isArray(data) ? data : [];
+}
+
 export async function listQuestionReportsRemote() {
   const data = await rpc("list_question_reports", {});
   return Array.isArray(data) ? data : [];
@@ -385,9 +408,15 @@ export const CHAT_HISTORY_LIMIT = 8;
 // from. `history` is an array of prior turns: [{ role: "user"|"model", text }].
 // `currentQuestion` (optional) is the question the student is currently viewing
 // ({ question, options?, answer?, explanation? }), so the tutor can give
-// guided help. Resolves to { answer, sources }. Throws a friendly message on
-// failure.
-export async function askChatbot(question, history = [], currentQuestion = null) {
+// guided help. `meta` (optional) carries analytics metadata for usage logging
+// ({ email, sessionId, isAdmin, currentQuestionId }) — no transcripts.
+// Resolves to { answer, sources }. Throws a friendly message on failure.
+export async function askChatbot(
+  question,
+  history = [],
+  currentQuestion = null,
+  meta = null
+) {
   const trimmed = String(question || "").trim();
   if (!trimmed) {
     throw new Error("Please type a question first.");
@@ -408,6 +437,13 @@ export async function askChatbot(question, history = [], currentQuestion = null)
   const payload = { question: trimmed, history: safeHistory };
   if (currentQuestion && typeof currentQuestion === "object") {
     payload.currentQuestion = currentQuestion;
+  }
+  if (meta && typeof meta === "object") {
+    if (meta.email) payload.email = String(meta.email);
+    if (meta.sessionId) payload.sessionId = String(meta.sessionId);
+    if (meta.isAdmin) payload.isAdmin = true;
+    if (meta.currentQuestionId)
+      payload.currentQuestionId = String(meta.currentQuestionId);
   }
 
   let response;

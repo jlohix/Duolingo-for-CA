@@ -3,6 +3,7 @@ import { askChatbot, CHAT_HISTORY_LIMIT } from "../supabaseClient";
 import MathText from "./MathText";
 import {
   currentQuestionForChat,
+  getCurrentQuestion,
   subscribeCurrentQuestion,
 } from "../data/currentQuestion";
 
@@ -27,6 +28,25 @@ function prettySource(source) {
 // sessionStorage lives until the browser tab/session is closed, which is
 // exactly the lifetime we want for the chat history.
 const CHAT_STORAGE_KEY = "chatbot:conversation";
+const CHAT_SESSION_KEY = "chatbot:sessionId";
+
+// A per-tab chat session id, used only for usage analytics to group a burst of
+// questions in one sitting. Lives in sessionStorage so it is stable across a
+// refresh and cleared when the tab closes (matching the conversation lifetime).
+function getChatSessionId() {
+  try {
+    let id = sessionStorage.getItem(CHAT_SESSION_KEY);
+    if (!id) {
+      id =
+        globalThis.crypto?.randomUUID?.() ||
+        `sess-${Date.now()}-${Math.random().toString(36).slice(2)}`;
+      sessionStorage.setItem(CHAT_SESSION_KEY, id);
+    }
+    return id;
+  } catch {
+    return "";
+  }
+}
 
 function loadStoredMessages() {
   try {
@@ -38,7 +58,7 @@ function loadStoredMessages() {
   }
 }
 
-export default function ChatWidget() {
+export default function ChatWidget({ email = null, isAdmin = false }) {
   const [open, setOpen] = useState(false);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
@@ -120,7 +140,19 @@ export default function ChatWidget() {
       // give guided, question-aware help.
       const history = priorHistory.slice(-CHAT_HISTORY_LIMIT);
       const currentQuestion = currentQuestionForChat();
-      const { answer, sources } = await askChatbot(q, history, currentQuestion);
+      const activeQuestion = getCurrentQuestion();
+      const meta = {
+        email,
+        isAdmin,
+        sessionId: getChatSessionId(),
+        currentQuestionId: activeQuestion?.id ?? null,
+      };
+      const { answer, sources } = await askChatbot(
+        q,
+        history,
+        currentQuestion,
+        meta
+      );
       setMessages((prev) => [
         ...prev,
         { role: "model", text: answer, sources },

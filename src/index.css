@@ -4263,3 +4263,64 @@ html[data-theme="dark"] .circuit-svg .board-step {
   opacity: 0.5;
   cursor: not-allowed;
 }
+
+
+/* ---------- Tutor usage analytics (admin dashboard) ---------- */
+.tutor-usage-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.tutor-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 12px;
+  margin: 12px 0 20px;
+}
+.tutor-card {
+  padding: 14px 16px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--letter-bg);
+}
+.tutor-card-value {
+  font-size: 26px;
+  font-weight: 800;
+  color: var(--ink);
+  line-height: 1.1;
+}
+.tutor-card-label {
+  margin-top: 4px;
+  font-size: 13px;
+  color: var(--ink);
+  opacity: 0.75;
+}
+.tutor-card-sub {
+  margin-top: 2px;
+  font-size: 12px;
+  color: var(--green);
+  font-weight: 700;
+}
+.tutor-chart {
+  margin: 18px 0;
+}
+.tutor-chart h3 {
+  margin: 0 0 8px;
+  font-size: 15px;
+}
+.tutor-chart-split {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+  align-items: start;
+}
+@media (max-width: 720px) {
+  .tutor-chart-split {
+    grid-template-columns: 1fr;
+  }
+}
+.admin-empty {
+  font-size: 13px;
+  opacity: 0.7;
+}

@@ -52,6 +52,60 @@ function json(body: unknown, status = 200) {
   });
 }
 
+// --- Analytics: map cited lecture sources to a course topic ---------------
+// Mirrors src/data/chatTopics.js (kept in sync manually — this Deno function
+// cannot import from the app's src/). Extend WEEK_TO_TOPIC as topics grow.
+const UNCATEGORIZED = "Uncategorized";
+const WEEK_TO_TOPIC: Record<number, string> = {
+  1: "Basic laws",
+  2: "Basic laws",
+  3: "Op-amps",
+  4: "First-order circuits",
+  5: "Laplace transforms",
+  6: "Laplace transforms",
+  7: "Laplace transforms",
+  8: "Network functions",
+  9: "Network functions",
+  10: "Frequency domain",
+  11: "Frequency domain",
+  12: "Frequency domain",
+  13: "Frequency domain",
+};
+const KEYWORD_TO_TOPIC: Array<[RegExp, string]> = [
+  [/\b(ohm|kcl|kvl|nodal|mesh|supernode|basic)\b/i, "Basic laws"],
+  [/\b(op[-\s]?amp|opamp)\b/i, "Op-amps"],
+  [/\b(transient|rc|rl)\b/i, "Transients"],
+  [/\b(first[-\s]?order)\b/i, "First-order circuits"],
+  [/\b(laplace|s[-\s]?domain)\b/i, "Laplace transforms"],
+  [/\b(network function|transfer function|two[-\s]?port|one[-\s]?port|pole|zero)\b/i, "Network functions"],
+  [/\b(phasor|sinusoid|impedance|admittance|frequency|ac power|three[-\s]?phase)\b/i, "Frequency domain"],
+];
+function topicFromSource(source: string): string | null {
+  const m = String(source || "").match(/week\s*0*(\d+)/i);
+  const week = m ? Number(m[1]) : null;
+  if (week && WEEK_TO_TOPIC[week]) return WEEK_TO_TOPIC[week];
+  for (const [re, topic] of KEYWORD_TO_TOPIC) {
+    if (re.test(String(source || ""))) return topic;
+  }
+  return null;
+}
+function topicFromSources(sources: string[]): string {
+  const counts = new Map<string, number>();
+  for (const s of sources || []) {
+    const t = topicFromSource(s);
+    if (t) counts.set(t, (counts.get(t) || 0) + 1);
+  }
+  let best = UNCATEGORIZED;
+  let bestN = -1;
+  for (const [topic, n] of counts) {
+    if (n > bestN) {
+      best = topic;
+      bestN = n;
+    }
+  }
+  return best;
+}
+
 type Turn = { role: "user" | "model"; text: string };
 
 // Sanitize the incoming history: keep only well-formed user/model turns,
@@ -281,6 +335,45 @@ Deno.serve(async (req) => {
     const history = sanitizeHistory(body?.history);
     const currentQuestion = sanitizeCurrentQuestion(body?.currentQuestion);
 
+    // Analytics metadata (no transcripts). Admins and unknown accounts are
+    // filtered out here so they are never logged.
+    const analyticsEmail =
+      typeof body?.email === "string" ? body.email.trim().toLowerCase() : "";
+    const analyticsSessionId =
+      typeof body?.sessionId === "string" ? body.sessionId.trim().slice(0, 100) : "";
+    const analyticsIsAdmin = body?.isAdmin === true;
+    const analyticsQuestionId =
+      typeof body?.currentQuestionId === "string"
+        ? body.currentQuestionId.trim().slice(0, 100)
+        : "";
+    const shouldLog = Boolean(analyticsEmail) && !analyticsIsAdmin;
+
+    // Fire-and-forget metadata log. Never let logging failures affect the
+    // student's answer.
+    const logChat = (
+      sources: string[],
+      answered: boolean,
+    ) => {
+      if (!shouldLog) return;
+      try {
+        const client = createClient(SUPABASE_URL, SERVICE_ROLE);
+        client
+          .from("chat_logs")
+          .insert({
+            email: analyticsEmail,
+            session_id: analyticsSessionId || null,
+            topic: topicFromSources(sources),
+            current_question_id: analyticsQuestionId || null,
+            on_screen: Boolean(currentQuestion),
+            sources: sources,
+            answered,
+          })
+          .then(() => {}, () => {});
+      } catch {
+        // ignore logging errors
+      }
+    };
+
     // 1. Retrieve lecture slides for the RIGHT topic. When the student is on a
     // practice question, we search using the ON-SCREEN QUESTION text (plus any
     // options), because that reflects the topic they need explained, far more
@@ -309,6 +402,7 @@ Deno.serve(async (req) => {
     // there is genuinely nothing to answer. But if a question IS on screen, we
     // still help using the question itself even when no slide matched.
     if ((!docs || docs.length === 0) && !currentQuestion) {
+      logChat([], false); // metadata: an unanswered ("not in material") query
       return json({
         answer:
           "I couldn't find anything about that in the EE2101 course material. " +
@@ -332,7 +426,8 @@ Deno.serve(async (req) => {
     // 4. Return answer + which weeks it drew from.
     const sources = [
       ...new Set((docs || []).map((d: any) => d.metadata?.source).filter(Boolean)),
-    ];
+    ] as string[];
+    logChat(sources, true); // metadata: an answered query
     return json({ answer, sources });
   } catch (err) {
     return json({ error: String(err?.message || err) }, 500);
