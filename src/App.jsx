@@ -107,11 +107,16 @@ export default function App() {
   });
 
   const showChatbot =
+    // Only show the tutor once a user is actually logged in. On the login /
+    // pre-auth screens there is no session (gate.email is null), so the tutor
+    // stays hidden there.
+    Boolean(gate.email) &&
     canUseChatbot({
       classId: gate.classId,
       isAdmin: gate.isAdmin,
       screen: gate.screen,
-    }) && !gate.consentPending;
+    }) &&
+    !gate.consentPending;
 
   return (
     <>
