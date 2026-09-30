@@ -131,12 +131,14 @@ export default function TutorUsage({ totalStudents = 0 }) {
                 <XAxis dataKey="label" tick={{ fontSize: 11 }} interval={0} angle={-30} textAnchor="end" height={50} />
                 <YAxis allowDecimals={false} />
                 <Tooltip />
-                <Bar dataKey="queries" fill="#ce82ff" radius={[4, 4, 0, 0]} name="Questions" />
+                <Legend />
+                <Bar dataKey="cited" stackId="w" fill="#ce82ff" name="From slides" radius={[0, 0, 0, 0]} />
+                <Bar dataKey="inferred" stackId="w" fill="#e5c6ff" name="Nearest week (textbook)" radius={[4, 4, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
             <p className="tutor-note">
-              Only counts questions answered from the lecture slides (which name
-              their week). Textbook-only answers have no week.
+              Darker = the tutor answered from that week's slides. Lighter =
+              answered from the textbook, attributed to the most relevant week.
             </p>
           </div>
 

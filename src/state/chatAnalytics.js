@@ -77,13 +77,22 @@ export async function loadChatAnalytics(totalStudentsForAdoption = 0) {
   // --- Lecture week breakdown (Weeks 1-13, incl. zero-count) ---
   const byWeek = new Map();
   for (let w = 1; w <= 13; w++) {
-    byWeek.set(w, { week: w, label: `Week ${w}`, queries: 0, unanswered: 0 });
+    byWeek.set(w, {
+      week: w,
+      label: `Week ${w}`,
+      queries: 0,
+      cited: 0,
+      inferred: 0,
+      unanswered: 0,
+    });
   }
   for (const row of weekRows) {
     const w = Number(row?.lecture_week);
     if (byWeek.has(w)) {
       const e = byWeek.get(w);
       e.queries = Number(row.queries || 0);
+      e.cited = Number(row.cited || 0);
+      e.inferred = Number(row.inferred || 0);
       e.unanswered = Number(row.unanswered || 0);
     }
   }

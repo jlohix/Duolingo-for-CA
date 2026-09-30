@@ -36,8 +36,11 @@ create table if not exists public.chat_logs (
   created_at          timestamptz not null default now()
 );
 
--- Safe to re-run on an existing table: add the week column if it is missing.
+-- Safe to re-run on an existing table: add newer columns if missing.
 alter table public.chat_logs add column if not exists lecture_week int;
+-- week_inferred = true when lecture_week was GUESSED as the nearest lecture week
+-- for a textbook-sourced answer, rather than a slide being directly cited.
+alter table public.chat_logs add column if not exists week_inferred boolean not null default false;
 
 -- Lock the table: RLS on, no policies -> no direct anon/authenticated access.
 alter table public.chat_logs enable row level security;
@@ -59,6 +62,7 @@ create or replace function public.log_chat_query(
   p_session_id          text,
   p_topic               text,
   p_lecture_week        int,
+  p_week_inferred       boolean,
   p_current_question_id text,
   p_on_screen           boolean,
   p_sources             text[],
@@ -75,12 +79,13 @@ begin
   end if;
 
   insert into public.chat_logs
-    (email, session_id, topic, lecture_week, current_question_id, on_screen, sources, answered)
+    (email, session_id, topic, lecture_week, week_inferred, current_question_id, on_screen, sources, answered)
   values
     (lower(trim(p_email)),
      nullif(trim(coalesce(p_session_id, '')), ''),
      coalesce(nullif(trim(coalesce(p_topic, '')), ''), 'Uncategorized'),
      case when p_lecture_week between 1 and 13 then p_lecture_week else null end,
+     coalesce(p_week_inferred, false),
      nullif(trim(coalesce(p_current_question_id, '')), ''),
      coalesce(p_on_screen, false),
      coalesce(p_sources, '{}'),
@@ -127,16 +132,23 @@ $$;
 
 -- 3b-ii. Tally of queries per specific lecture week (drill-down).
 create or replace function public.list_chat_week_tally()
-returns table (lecture_week int, queries bigint, answered bigint, unanswered bigint)
+returns table (
+  lecture_week int,
+  queries bigint,
+  cited bigint,
+  inferred bigint,
+  unanswered bigint
+)
 language sql
 security definer
 set search_path = public
 as $$
   select
     lecture_week,
-    count(*)                              as queries,
-    count(*) filter (where answered)      as answered,
-    count(*) filter (where not answered)  as unanswered
+    count(*)                                    as queries,
+    count(*) filter (where not week_inferred)   as cited,
+    count(*) filter (where week_inferred)       as inferred,
+    count(*) filter (where not answered)        as unanswered
   from public.chat_logs
   where lecture_week is not null
   group by lecture_week
@@ -203,7 +215,7 @@ $$;
 -- The Edge Function calls log_chat_query via the service role, but we also
 -- grant it so the write path is uniform. The list_* / summary functions are
 -- called by the admin screen using the anon key.
-grant execute on function public.log_chat_query(text, text, text, int, text, boolean, text[], boolean) to anon, authenticated;
+grant execute on function public.log_chat_query(text, text, text, int, boolean, text, boolean, text[], boolean) to anon, authenticated;
 grant execute on function public.list_chat_logs(int)          to anon, authenticated;
 grant execute on function public.list_chat_topic_tally()      to anon, authenticated;
 grant execute on function public.list_chat_week_tally()       to anon, authenticated;
@@ -224,6 +236,7 @@ select
   c.session_id,
   c.topic,
   c.lecture_week,
+  c.week_inferred,
   c.current_question_id,
   c.on_screen,
   c.sources,

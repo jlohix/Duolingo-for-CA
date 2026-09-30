@@ -30,7 +30,10 @@ const SERVICE_ROLE = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 
 const EMBED_MODEL = "gemini-embedding-001";
 const EMBED_DIM = 768;
-const MATCH_COUNT = 5;
+// Retrieve a few extra matches: the top ones ground the answer, and the fuller
+// ranked list lets us infer the most relevant lecture week for textbook-only
+// answers (see inferWeekFromDocs).
+const MATCH_COUNT = 8;
 
 // Max number of prior turns (user + model messages) to keep as context.
 // A "turn" here is a single message, so 8 turns ≈ 4 back-and-forth
@@ -121,16 +124,35 @@ const WEEK_TO_TOPIC: Record<number, string> = {
   13: "Frequency domain",
 };
 
-// Extract the lecture week number from the cited sources (e.g.
-// "EE2102_Lecture_Week03" -> 3). Returns the FIRST matching week, or null when
-// only non-week sources (like the textbook) were cited.
+// Extract a lecture week number from a single source string (e.g.
+// "EE2102_Lecture_Week03" -> 3). Null if none / out of range.
+function weekFromSource(source: string): number | null {
+  const m = String(source || "").match(/week\s*0*(\d+)/i);
+  if (!m) return null;
+  const w = Number(m[1]);
+  return w >= 1 && w <= 13 ? w : null;
+}
+
+// The lecture week directly among the cited sources (the tutor actually used a
+// slide). Returns the first matching week, or null if only the textbook (or
+// other non-week sources) were cited.
 function weekFromSources(sources: string[]): number | null {
   for (const s of sources || []) {
-    const m = String(s || "").match(/week\s*0*(\d+)/i);
-    if (m) {
-      const w = Number(m[1]);
-      if (w >= 1 && w <= 13) return w;
-    }
+    const w = weekFromSource(s);
+    if (w != null) return w;
+  }
+  return null;
+}
+
+// The "most relevant" lecture week INFERRED from the ranked retrieval matches:
+// walk the matches in similarity order and return the week of the first slide
+// chunk that has one. Used when the answer came from the textbook (no cited
+// slide week) but we still want to attribute it to the nearest lecture week.
+function inferWeekFromDocs(docs: any[]): number | null {
+  for (const d of docs || []) {
+    const src = d?.metadata?.source ?? "";
+    const w = weekFromSource(String(src));
+    if (w != null) return w;
   }
   return null;
 }
@@ -404,14 +426,24 @@ Deno.serve(async (req) => {
     // Fire-and-forget metadata log. Never let logging failures affect the
     // student's answer. Topic is classified from the on-screen question's
     // topicId when present, else from the retrieved slide text + the question.
+    //   lecture_week   -> a lecture week attributed to the query (or null)
+    //   week_inferred  -> true when the week came from the nearest-slide guess
+    //                     (textbook answer), false when a slide was cited.
     const logChat = (
       sources: string[],
       contextText: string,
+      docs: any[],
       answered: boolean,
     ) => {
       if (!shouldLog) return;
       try {
-        const lectureWeek = weekFromSources(sources);
+        // Prefer a week from a directly-cited slide; else infer the most
+        // relevant week from the ranked retrieval matches (textbook answers).
+        const citedWeek = weekFromSources(sources);
+        const inferredWeek = citedWeek == null ? inferWeekFromDocs(docs) : null;
+        const lectureWeek = citedWeek ?? inferredWeek;
+        const weekInferred = citedWeek == null && inferredWeek != null;
+
         const topic = classifyTopic(
           question.trim(),
           contextText,
@@ -426,6 +458,7 @@ Deno.serve(async (req) => {
             session_id: analyticsSessionId || null,
             topic,
             lecture_week: lectureWeek,
+            week_inferred: weekInferred,
             current_question_id: analyticsQuestionId || null,
             on_screen: Boolean(currentQuestion),
             sources: sources,
@@ -465,7 +498,7 @@ Deno.serve(async (req) => {
     // there is genuinely nothing to answer. But if a question IS on screen, we
     // still help using the question itself even when no slide matched.
     if ((!docs || docs.length === 0) && !currentQuestion) {
-      logChat([], "", false); // metadata: an unanswered ("not in material") query
+      logChat([], "", [], false); // metadata: an unanswered ("not in material") query
       return json({
         answer:
           "I couldn't find anything about that in the EE2101 course material. " +
@@ -490,7 +523,7 @@ Deno.serve(async (req) => {
     const sources = [
       ...new Set((docs || []).map((d: any) => d.metadata?.source).filter(Boolean)),
     ] as string[];
-    logChat(sources, context, true); // metadata: an answered query
+    logChat(sources, context, docs || [], true); // metadata: an answered query
     return json({ answer, sources });
   } catch (err) {
     return json({ error: String(err?.message || err) }, 500);
