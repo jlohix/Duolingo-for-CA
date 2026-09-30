@@ -28,20 +28,25 @@ create table if not exists public.chat_logs (
   email               text        not null,      -- who asked (student email)
   session_id          text,                      -- groups a burst of questions into one chat session
   topic               text        not null default 'Uncategorized',
+  lecture_week        int,                        -- specific lecture week cited (1-13), null if only textbook
   current_question_id text,                      -- practice question on screen (if any)
   on_screen           boolean     not null default false,  -- was it question-linked
-  sources             text[]      not null default '{}',   -- lecture weeks the tutor cited
+  sources             text[]      not null default '{}',   -- lecture materials the tutor cited
   answered            boolean     not null default true,   -- false = "not in course material"
   created_at          timestamptz not null default now()
 );
+
+-- Safe to re-run on an existing table: add the week column if it is missing.
+alter table public.chat_logs add column if not exists lecture_week int;
 
 -- Lock the table: RLS on, no policies -> no direct anon/authenticated access.
 alter table public.chat_logs enable row level security;
 
 -- Helpful indexes for the admin dashboard queries.
-create index if not exists chat_logs_created_at_idx on public.chat_logs (created_at desc);
-create index if not exists chat_logs_topic_idx      on public.chat_logs (topic);
-create index if not exists chat_logs_email_idx      on public.chat_logs (email);
+create index if not exists chat_logs_created_at_idx   on public.chat_logs (created_at desc);
+create index if not exists chat_logs_topic_idx        on public.chat_logs (topic);
+create index if not exists chat_logs_email_idx        on public.chat_logs (email);
+create index if not exists chat_logs_lecture_week_idx on public.chat_logs (lecture_week);
 
 
 -- ---------- 2. Write a log row (called by the Edge Function) ----------
@@ -53,6 +58,7 @@ create or replace function public.log_chat_query(
   p_email               text,
   p_session_id          text,
   p_topic               text,
+  p_lecture_week        int,
   p_current_question_id text,
   p_on_screen           boolean,
   p_sources             text[],
@@ -69,11 +75,12 @@ begin
   end if;
 
   insert into public.chat_logs
-    (email, session_id, topic, current_question_id, on_screen, sources, answered)
+    (email, session_id, topic, lecture_week, current_question_id, on_screen, sources, answered)
   values
     (lower(trim(p_email)),
      nullif(trim(coalesce(p_session_id, '')), ''),
      coalesce(nullif(trim(coalesce(p_topic, '')), ''), 'Uncategorized'),
+     case when p_lecture_week between 1 and 13 then p_lecture_week else null end,
      nullif(trim(coalesce(p_current_question_id, '')), ''),
      coalesce(p_on_screen, false),
      coalesce(p_sources, '{}'),
@@ -116,6 +123,24 @@ as $$
   from public.chat_logs
   group by topic
   order by queries desc;
+$$;
+
+-- 3b-ii. Tally of queries per specific lecture week (drill-down).
+create or replace function public.list_chat_week_tally()
+returns table (lecture_week int, queries bigint, answered bigint, unanswered bigint)
+language sql
+security definer
+set search_path = public
+as $$
+  select
+    lecture_week,
+    count(*)                              as queries,
+    count(*) filter (where answered)      as answered,
+    count(*) filter (where not answered)  as unanswered
+  from public.chat_logs
+  where lecture_week is not null
+  group by lecture_week
+  order by lecture_week;
 $$;
 
 -- 3c. Daily usage (Singapore local date) for the "uses over time" chart.
@@ -178,9 +203,10 @@ $$;
 -- The Edge Function calls log_chat_query via the service role, but we also
 -- grant it so the write path is uniform. The list_* / summary functions are
 -- called by the admin screen using the anon key.
-grant execute on function public.log_chat_query(text, text, text, text, boolean, text[], boolean) to anon, authenticated;
+grant execute on function public.log_chat_query(text, text, text, int, text, boolean, text[], boolean) to anon, authenticated;
 grant execute on function public.list_chat_logs(int)          to anon, authenticated;
 grant execute on function public.list_chat_topic_tally()      to anon, authenticated;
+grant execute on function public.list_chat_week_tally()       to anon, authenticated;
 grant execute on function public.list_chat_daily()            to anon, authenticated;
 grant execute on function public.list_chat_by_student()       to anon, authenticated;
 grant execute on function public.chat_usage_summary()         to anon, authenticated;
@@ -197,6 +223,7 @@ select
   c.email,
   c.session_id,
   c.topic,
+  c.lecture_week,
   c.current_question_id,
   c.on_screen,
   c.sources,

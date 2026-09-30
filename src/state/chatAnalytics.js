@@ -6,6 +6,7 @@
 import {
   chatUsageSummaryRemote,
   listChatTopicTallyRemote,
+  listChatWeekTallyRemote,
   listChatDailyRemote,
   listChatByStudentRemote,
 } from "../supabaseClient";
@@ -23,12 +24,14 @@ import { orderedTopicNames, UNCATEGORIZED } from "../data/chatTopics";
 // `totalStudentsForAdoption` (optional) lets the caller compute an adoption %
 // against the roster size.
 export async function loadChatAnalytics(totalStudentsForAdoption = 0) {
-  const [summaryRow, tallyRows, dailyRows, studentRows] = await Promise.all([
-    chatUsageSummaryRemote().catch(() => null),
-    listChatTopicTallyRemote().catch(() => []),
-    listChatDailyRemote().catch(() => []),
-    listChatByStudentRemote().catch(() => []),
-  ]);
+  const [summaryRow, tallyRows, weekRows, dailyRows, studentRows] =
+    await Promise.all([
+      chatUsageSummaryRemote().catch(() => null),
+      listChatTopicTallyRemote().catch(() => []),
+      listChatWeekTallyRemote().catch(() => []),
+      listChatDailyRemote().catch(() => []),
+      listChatByStudentRemote().catch(() => []),
+    ]);
 
   // --- Summary (big-number cards) ---
   const totalQueries = Number(summaryRow?.total_queries || 0);
@@ -71,6 +74,21 @@ export async function loadChatAnalytics(totalStudentsForAdoption = 0) {
   }
   const topics = [...byTopic.values()];
 
+  // --- Lecture week breakdown (Weeks 1-13, incl. zero-count) ---
+  const byWeek = new Map();
+  for (let w = 1; w <= 13; w++) {
+    byWeek.set(w, { week: w, label: `Week ${w}`, queries: 0, unanswered: 0 });
+  }
+  for (const row of weekRows) {
+    const w = Number(row?.lecture_week);
+    if (byWeek.has(w)) {
+      const e = byWeek.get(w);
+      e.queries = Number(row.queries || 0);
+      e.unanswered = Number(row.unanswered || 0);
+    }
+  }
+  const weeks = [...byWeek.values()];
+
   // --- Daily usage (area chart) ---
   const daily = (dailyRows || []).map((r) => ({
     day: String(r.day || "").slice(0, 10),
@@ -97,5 +115,5 @@ export async function loadChatAnalytics(totalStudentsForAdoption = 0) {
     .filter((t) => t.unanswered > 0)
     .sort((a, b) => b.unanswered - a.unanswered);
 
-  return { summary, topics, daily, students, answeredSplit, gaps };
+  return { summary, topics, weeks, daily, students, answeredSplit, gaps };
 }

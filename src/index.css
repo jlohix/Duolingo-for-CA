@@ -4324,3 +4324,8 @@ html[data-theme="dark"] .circuit-svg .board-step {
   font-size: 13px;
   opacity: 0.7;
 }
+.tutor-note {
+  margin: 6px 0 0;
+  font-size: 12px;
+  opacity: 0.65;
+}

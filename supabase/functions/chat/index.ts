@@ -102,16 +102,54 @@ function topicFromText(text: string): string {
   return best;
 }
 
+// Lecture week -> topic. The school slides are named EE2102_Lecture_WeekNN, so
+// when a slide is cited we know the exact week and can map it to a topic. The
+// textbook (CAD_3rd_ed_OA) has no week, so it falls through to keywords.
+const WEEK_TO_TOPIC: Record<number, string> = {
+  1: "Basic laws",
+  2: "Basic laws",
+  3: "Op-amps",
+  4: "First-order circuits",
+  5: "Laplace transforms",
+  6: "Laplace transforms",
+  7: "Laplace transforms",
+  8: "Network functions",
+  9: "Network functions",
+  10: "Frequency domain",
+  11: "Frequency domain",
+  12: "Frequency domain",
+  13: "Frequency domain",
+};
+
+// Extract the lecture week number from the cited sources (e.g.
+// "EE2102_Lecture_Week03" -> 3). Returns the FIRST matching week, or null when
+// only non-week sources (like the textbook) were cited.
+function weekFromSources(sources: string[]): number | null {
+  for (const s of sources || []) {
+    const m = String(s || "").match(/week\s*0*(\d+)/i);
+    if (m) {
+      const w = Number(m[1]);
+      if (w >= 1 && w <= 13) return w;
+    }
+  }
+  return null;
+}
+
 // Decide the topic for a logged query. Priority:
 //   1. on-screen practice question's topicId (exact), else
-//   2. keyword match over retrieved slide text + the student's question.
+//   2. cited lecture-slide week (exact week -> topic), else
+//   3. keyword match over retrieved slide text + the student's question.
 function classifyTopic(
   questionText: string,
   contextText: string,
   topicId: number | null,
+  lectureWeek: number | null,
 ): string {
   if (topicId != null && TOPIC_ID_TO_NAME[topicId]) {
     return TOPIC_ID_TO_NAME[topicId];
+  }
+  if (lectureWeek != null && WEEK_TO_TOPIC[lectureWeek]) {
+    return WEEK_TO_TOPIC[lectureWeek];
   }
   // Weight the retrieved slide text heavily, but include the question too.
   return topicFromText(`${contextText}\n${questionText}`);
@@ -373,10 +411,12 @@ Deno.serve(async (req) => {
     ) => {
       if (!shouldLog) return;
       try {
+        const lectureWeek = weekFromSources(sources);
         const topic = classifyTopic(
           question.trim(),
           contextText,
           analyticsTopicId,
+          lectureWeek,
         );
         const client = createClient(SUPABASE_URL, SERVICE_ROLE);
         client
@@ -385,6 +425,7 @@ Deno.serve(async (req) => {
             email: analyticsEmail,
             session_id: analyticsSessionId || null,
             topic,
+            lecture_week: lectureWeek,
             current_question_id: analyticsQuestionId || null,
             on_screen: Boolean(currentQuestion),
             sources: sources,

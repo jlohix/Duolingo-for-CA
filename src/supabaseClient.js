@@ -304,6 +304,11 @@ export async function listChatTopicTallyRemote() {
   return Array.isArray(data) ? data : [];
 }
 
+export async function listChatWeekTallyRemote() {
+  const data = await rpc("list_chat_week_tally", {});
+  return Array.isArray(data) ? data : [];
+}
+
 export async function listChatDailyRemote() {
   const data = await rpc("list_chat_daily", {});
   return Array.isArray(data) ? data : [];

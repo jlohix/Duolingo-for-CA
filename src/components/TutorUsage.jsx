@@ -119,6 +119,27 @@ export default function TutorUsage({ totalStudents = 0 }) {
             </ResponsiveContainer>
           </div>
 
+          {/* Queries per lecture week (drill-down) */}
+          <div className="tutor-chart">
+            <h3>Questions by lecture week</h3>
+            <ResponsiveContainer width="100%" height={240}>
+              <BarChart
+                data={data.weeks}
+                margin={{ top: 4, right: 16, bottom: 4, left: 0 }}
+              >
+                <CartesianGrid strokeDasharray="3 3" vertical={false} />
+                <XAxis dataKey="label" tick={{ fontSize: 11 }} interval={0} angle={-30} textAnchor="end" height={50} />
+                <YAxis allowDecimals={false} />
+                <Tooltip />
+                <Bar dataKey="queries" fill="#ce82ff" radius={[4, 4, 0, 0]} name="Questions" />
+              </BarChart>
+            </ResponsiveContainer>
+            <p className="tutor-note">
+              Only counts questions answered from the lecture slides (which name
+              their week). Textbook-only answers have no week.
+            </p>
+          </div>
+
           {/* Uses over time */}
           <div className="tutor-chart">
             <h3>Questions over time</h3>
