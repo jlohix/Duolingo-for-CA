@@ -444,6 +444,8 @@ export async function askChatbot(
     if (meta.isAdmin) payload.isAdmin = true;
     if (meta.currentQuestionId)
       payload.currentQuestionId = String(meta.currentQuestionId);
+    if (meta.currentQuestionTopicId != null)
+      payload.currentQuestionTopicId = Number(meta.currentQuestionTopicId);
   }
 
   let response;

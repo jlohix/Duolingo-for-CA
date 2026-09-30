@@ -146,6 +146,7 @@ export default function ChatWidget({ email = null, isAdmin = false }) {
         isAdmin,
         sessionId: getChatSessionId(),
         currentQuestionId: activeQuestion?.id ?? null,
+        currentQuestionTopicId: activeQuestion?.topicId ?? null,
       };
       const { answer, sources } = await askChatbot(
         q,

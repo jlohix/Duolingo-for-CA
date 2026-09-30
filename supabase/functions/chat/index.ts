@@ -52,51 +52,47 @@ function json(body: unknown, status = 200) {
   });
 }
 
-// --- Analytics: map cited lecture sources to a course topic ---------------
-// Mirrors src/data/chatTopics.js (kept in sync manually — this Deno function
-// cannot import from the app's src/). Extend WEEK_TO_TOPIC as topics grow.
+// --- Analytics: classify a query into a course topic ----------------------
+// The lecture slides all share ONE source filename (a textbook), so the source
+// name can't tell topics apart. Instead we classify from (1) the on-screen
+// practice question's topicId when available (exact), else (2) keyword matching
+// over the retrieved slide TEXT + the student's question. Mirrors the logic in
+// src/data/chatTopics.js (kept in sync manually — Deno can't import from src/).
 const UNCATEGORIZED = "Uncategorized";
-const WEEK_TO_TOPIC: Record<number, string> = {
+
+// App topic ids (src/data/topics.js) -> analytics topic name.
+const TOPIC_ID_TO_NAME: Record<number, string> = {
   1: "Basic laws",
-  2: "Basic laws",
-  3: "Op-amps",
+  2: "Op-amps",
+  3: "Transients",
   4: "First-order circuits",
   5: "Laplace transforms",
-  6: "Laplace transforms",
-  7: "Laplace transforms",
-  8: "Network functions",
-  9: "Network functions",
-  10: "Frequency domain",
-  11: "Frequency domain",
-  12: "Frequency domain",
-  13: "Frequency domain",
+  6: "Network functions",
+  7: "Frequency domain",
 };
-const KEYWORD_TO_TOPIC: Array<[RegExp, string]> = [
-  [/\b(ohm|kcl|kvl|nodal|mesh|supernode|basic)\b/i, "Basic laws"],
-  [/\b(op[-\s]?amp|opamp)\b/i, "Op-amps"],
-  [/\b(transient|rc|rl)\b/i, "Transients"],
-  [/\b(first[-\s]?order)\b/i, "First-order circuits"],
-  [/\b(laplace|s[-\s]?domain)\b/i, "Laplace transforms"],
-  [/\b(network function|transfer function|two[-\s]?port|one[-\s]?port|pole|zero)\b/i, "Network functions"],
-  [/\b(phasor|sinusoid|impedance|admittance|frequency|ac power|three[-\s]?phase)\b/i, "Frequency domain"],
+
+// Keyword rules over slide/question TEXT. Ordered by specificity (more specific
+// topics first) so e.g. "op-amp" wins over a stray "resistor". Each match adds a
+// point to its topic; the highest-scoring topic wins.
+const KEYWORD_RULES: Array<[RegExp, string]> = [
+  [/\b(op[-\s]?amp|opamp|operational amplifier|inverting|non[-\s]?inverting|feedback)\b/i, "Op-amps"],
+  [/\b(laplace|s[-\s]?domain|partial fraction|inverse transform)\b/i, "Laplace transforms"],
+  [/\b(network function|transfer function|two[-\s]?port|one[-\s]?port|pole|zero|stability|impulse response|step response of.*network)\b/i, "Network functions"],
+  [/\b(phasor|sinusoid|impedance|admittance|reactance|ac power|rms|power factor|three[-\s]?phase|frequency[-\s]?domain)\b/i, "Frequency domain"],
+  [/\b(first[-\s]?order|source[-\s]?free|natural response|time constant|charging|discharging)\b/i, "First-order circuits"],
+  [/\b(transient|capacitor|inductor|second[-\s]?order|rc circuit|rl circuit|rlc)\b/i, "Transients"],
+  [/\b(ohm|kcl|kvl|kirchhoff|nodal|mesh|supernode|supermesh|thevenin|norton|superposition|source transformation|max(imum)? power|voltage divider|current divider)\b/i, "Basic laws"],
 ];
-function topicFromSource(source: string): string | null {
-  const m = String(source || "").match(/week\s*0*(\d+)/i);
-  const week = m ? Number(m[1]) : null;
-  if (week && WEEK_TO_TOPIC[week]) return WEEK_TO_TOPIC[week];
-  for (const [re, topic] of KEYWORD_TO_TOPIC) {
-    if (re.test(String(source || ""))) return topic;
-  }
-  return null;
-}
-function topicFromSources(sources: string[]): string {
+
+function topicFromText(text: string): string {
   const counts = new Map<string, number>();
-  for (const s of sources || []) {
-    const t = topicFromSource(s);
-    if (t) counts.set(t, (counts.get(t) || 0) + 1);
+  const hay = String(text || "");
+  for (const [re, topic] of KEYWORD_RULES) {
+    const m = hay.match(new RegExp(re.source, "gi"));
+    if (m && m.length) counts.set(topic, (counts.get(topic) || 0) + m.length);
   }
   let best = UNCATEGORIZED;
-  let bestN = -1;
+  let bestN = 0;
   for (const [topic, n] of counts) {
     if (n > bestN) {
       best = topic;
@@ -104,6 +100,21 @@ function topicFromSources(sources: string[]): string {
     }
   }
   return best;
+}
+
+// Decide the topic for a logged query. Priority:
+//   1. on-screen practice question's topicId (exact), else
+//   2. keyword match over retrieved slide text + the student's question.
+function classifyTopic(
+  questionText: string,
+  contextText: string,
+  topicId: number | null,
+): string {
+  if (topicId != null && TOPIC_ID_TO_NAME[topicId]) {
+    return TOPIC_ID_TO_NAME[topicId];
+  }
+  // Weight the retrieved slide text heavily, but include the question too.
+  return topicFromText(`${contextText}\n${questionText}`);
 }
 
 type Turn = { role: "user" | "model"; text: string };
@@ -346,23 +357,34 @@ Deno.serve(async (req) => {
       typeof body?.currentQuestionId === "string"
         ? body.currentQuestionId.trim().slice(0, 100)
         : "";
+    const analyticsTopicId =
+      typeof body?.currentQuestionTopicId === "number"
+        ? body.currentQuestionTopicId
+        : null;
     const shouldLog = Boolean(analyticsEmail) && !analyticsIsAdmin;
 
     // Fire-and-forget metadata log. Never let logging failures affect the
-    // student's answer.
+    // student's answer. Topic is classified from the on-screen question's
+    // topicId when present, else from the retrieved slide text + the question.
     const logChat = (
       sources: string[],
+      contextText: string,
       answered: boolean,
     ) => {
       if (!shouldLog) return;
       try {
+        const topic = classifyTopic(
+          question.trim(),
+          contextText,
+          analyticsTopicId,
+        );
         const client = createClient(SUPABASE_URL, SERVICE_ROLE);
         client
           .from("chat_logs")
           .insert({
             email: analyticsEmail,
             session_id: analyticsSessionId || null,
-            topic: topicFromSources(sources),
+            topic,
             current_question_id: analyticsQuestionId || null,
             on_screen: Boolean(currentQuestion),
             sources: sources,
@@ -402,7 +424,7 @@ Deno.serve(async (req) => {
     // there is genuinely nothing to answer. But if a question IS on screen, we
     // still help using the question itself even when no slide matched.
     if ((!docs || docs.length === 0) && !currentQuestion) {
-      logChat([], false); // metadata: an unanswered ("not in material") query
+      logChat([], "", false); // metadata: an unanswered ("not in material") query
       return json({
         answer:
           "I couldn't find anything about that in the EE2101 course material. " +
@@ -427,7 +449,7 @@ Deno.serve(async (req) => {
     const sources = [
       ...new Set((docs || []).map((d: any) => d.metadata?.source).filter(Boolean)),
     ] as string[];
-    logChat(sources, true); // metadata: an answered query
+    logChat(sources, context, true); // metadata: an answered query
     return json({ answer, sources });
   } catch (err) {
     return json({ error: String(err?.message || err) }, 500);
