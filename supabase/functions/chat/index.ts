@@ -30,7 +30,10 @@ const SERVICE_ROLE = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 
 const EMBED_MODEL = "gemini-embedding-001";
 const EMBED_DIM = 768;
-const MATCH_COUNT = 5;
+// Retrieve a few extra matches: the top ones ground the answer, and the fuller
+// ranked list lets us infer the most relevant lecture week for textbook-only
+// answers (see inferWeekFromDocs).
+const MATCH_COUNT = 8;
 
 // Max number of prior turns (user + model messages) to keep as context.
 // A "turn" here is a single message, so 8 turns ≈ 4 back-and-forth
@@ -50,6 +53,128 @@ function json(body: unknown, status = 200) {
     status,
     headers: { ...corsHeaders, "Content-Type": "application/json" },
   });
+}
+
+// --- Analytics: classify a query into a course topic ----------------------
+// The lecture slides all share ONE source filename (a textbook), so the source
+// name can't tell topics apart. Instead we classify from (1) the on-screen
+// practice question's topicId when available (exact), else (2) keyword matching
+// over the retrieved slide TEXT + the student's question. Mirrors the logic in
+// src/data/chatTopics.js (kept in sync manually — Deno can't import from src/).
+const UNCATEGORIZED = "Uncategorized";
+
+// App topic ids (src/data/topics.js) -> analytics topic name.
+const TOPIC_ID_TO_NAME: Record<number, string> = {
+  1: "Basic laws",
+  2: "Op-amps",
+  3: "Transients",
+  4: "First-order circuits",
+  5: "Laplace transforms",
+  6: "Network functions",
+  7: "Frequency domain",
+};
+
+// Keyword rules over slide/question TEXT. Ordered by specificity (more specific
+// topics first) so e.g. "op-amp" wins over a stray "resistor". Each match adds a
+// point to its topic; the highest-scoring topic wins.
+const KEYWORD_RULES: Array<[RegExp, string]> = [
+  [/\b(op[-\s]?amp|opamp|operational amplifier|inverting|non[-\s]?inverting|feedback)\b/i, "Op-amps"],
+  [/\b(laplace|s[-\s]?domain|partial fraction|inverse transform)\b/i, "Laplace transforms"],
+  [/\b(network function|transfer function|two[-\s]?port|one[-\s]?port|pole|zero|stability|impulse response|step response of.*network)\b/i, "Network functions"],
+  [/\b(phasor|sinusoid|impedance|admittance|reactance|ac power|rms|power factor|three[-\s]?phase|frequency[-\s]?domain)\b/i, "Frequency domain"],
+  [/\b(first[-\s]?order|source[-\s]?free|natural response|time constant|charging|discharging)\b/i, "First-order circuits"],
+  [/\b(transient|capacitor|inductor|second[-\s]?order|rc circuit|rl circuit|rlc)\b/i, "Transients"],
+  [/\b(ohm|kcl|kvl|kirchhoff|nodal|mesh|supernode|supermesh|thevenin|norton|superposition|source transformation|max(imum)? power|voltage divider|current divider)\b/i, "Basic laws"],
+];
+
+function topicFromText(text: string): string {
+  const counts = new Map<string, number>();
+  const hay = String(text || "");
+  for (const [re, topic] of KEYWORD_RULES) {
+    const m = hay.match(new RegExp(re.source, "gi"));
+    if (m && m.length) counts.set(topic, (counts.get(topic) || 0) + m.length);
+  }
+  let best = UNCATEGORIZED;
+  let bestN = 0;
+  for (const [topic, n] of counts) {
+    if (n > bestN) {
+      best = topic;
+      bestN = n;
+    }
+  }
+  return best;
+}
+
+// Lecture week -> topic. The school slides are named EE2102_Lecture_WeekNN, so
+// when a slide is cited we know the exact week and can map it to a topic. The
+// textbook (CAD_3rd_ed_OA) has no week, so it falls through to keywords.
+const WEEK_TO_TOPIC: Record<number, string> = {
+  1: "Basic laws",
+  2: "Basic laws",
+  3: "Op-amps",
+  4: "First-order circuits",
+  5: "Laplace transforms",
+  6: "Laplace transforms",
+  7: "Laplace transforms",
+  8: "Network functions",
+  9: "Network functions",
+  10: "Frequency domain",
+  11: "Frequency domain",
+  12: "Frequency domain",
+  13: "Frequency domain",
+};
+
+// Extract a lecture week number from a single source string (e.g.
+// "EE2102_Lecture_Week03" -> 3). Null if none / out of range.
+function weekFromSource(source: string): number | null {
+  const m = String(source || "").match(/week\s*0*(\d+)/i);
+  if (!m) return null;
+  const w = Number(m[1]);
+  return w >= 1 && w <= 13 ? w : null;
+}
+
+// The lecture week directly among the cited sources (the tutor actually used a
+// slide). Returns the first matching week, or null if only the textbook (or
+// other non-week sources) were cited.
+function weekFromSources(sources: string[]): number | null {
+  for (const s of sources || []) {
+    const w = weekFromSource(s);
+    if (w != null) return w;
+  }
+  return null;
+}
+
+// The "most relevant" lecture week INFERRED from the ranked retrieval matches:
+// walk the matches in similarity order and return the week of the first slide
+// chunk that has one. Used when the answer came from the textbook (no cited
+// slide week) but we still want to attribute it to the nearest lecture week.
+function inferWeekFromDocs(docs: any[]): number | null {
+  for (const d of docs || []) {
+    const src = d?.metadata?.source ?? "";
+    const w = weekFromSource(String(src));
+    if (w != null) return w;
+  }
+  return null;
+}
+
+// Decide the topic for a logged query. Priority:
+//   1. on-screen practice question's topicId (exact), else
+//   2. cited lecture-slide week (exact week -> topic), else
+//   3. keyword match over retrieved slide text + the student's question.
+function classifyTopic(
+  questionText: string,
+  contextText: string,
+  topicId: number | null,
+  lectureWeek: number | null,
+): string {
+  if (topicId != null && TOPIC_ID_TO_NAME[topicId]) {
+    return TOPIC_ID_TO_NAME[topicId];
+  }
+  if (lectureWeek != null && WEEK_TO_TOPIC[lectureWeek]) {
+    return WEEK_TO_TOPIC[lectureWeek];
+  }
+  // Weight the retrieved slide text heavily, but include the question too.
+  return topicFromText(`${contextText}\n${questionText}`);
 }
 
 type Turn = { role: "user" | "model"; text: string };
@@ -281,6 +406,70 @@ Deno.serve(async (req) => {
     const history = sanitizeHistory(body?.history);
     const currentQuestion = sanitizeCurrentQuestion(body?.currentQuestion);
 
+    // Analytics metadata (no transcripts). Admins and unknown accounts are
+    // filtered out here so they are never logged.
+    const analyticsEmail =
+      typeof body?.email === "string" ? body.email.trim().toLowerCase() : "";
+    const analyticsSessionId =
+      typeof body?.sessionId === "string" ? body.sessionId.trim().slice(0, 100) : "";
+    const analyticsIsAdmin = body?.isAdmin === true;
+    const analyticsQuestionId =
+      typeof body?.currentQuestionId === "string"
+        ? body.currentQuestionId.trim().slice(0, 100)
+        : "";
+    const analyticsTopicId =
+      typeof body?.currentQuestionTopicId === "number"
+        ? body.currentQuestionTopicId
+        : null;
+    const shouldLog = Boolean(analyticsEmail) && !analyticsIsAdmin;
+
+    // Fire-and-forget metadata log. Never let logging failures affect the
+    // student's answer. Topic is classified from the on-screen question's
+    // topicId when present, else from the retrieved slide text + the question.
+    //   lecture_week   -> a lecture week attributed to the query (or null)
+    //   week_inferred  -> true when the week came from the nearest-slide guess
+    //                     (textbook answer), false when a slide was cited.
+    const logChat = (
+      sources: string[],
+      contextText: string,
+      docs: any[],
+      answered: boolean,
+    ) => {
+      if (!shouldLog) return;
+      try {
+        // Prefer a week from a directly-cited slide; else infer the most
+        // relevant week from the ranked retrieval matches (textbook answers).
+        const citedWeek = weekFromSources(sources);
+        const inferredWeek = citedWeek == null ? inferWeekFromDocs(docs) : null;
+        const lectureWeek = citedWeek ?? inferredWeek;
+        const weekInferred = citedWeek == null && inferredWeek != null;
+
+        const topic = classifyTopic(
+          question.trim(),
+          contextText,
+          analyticsTopicId,
+          lectureWeek,
+        );
+        const client = createClient(SUPABASE_URL, SERVICE_ROLE);
+        client
+          .from("chat_logs")
+          .insert({
+            email: analyticsEmail,
+            session_id: analyticsSessionId || null,
+            topic,
+            lecture_week: lectureWeek,
+            week_inferred: weekInferred,
+            current_question_id: analyticsQuestionId || null,
+            on_screen: Boolean(currentQuestion),
+            sources: sources,
+            answered,
+          })
+          .then(() => {}, () => {});
+      } catch {
+        // ignore logging errors
+      }
+    };
+
     // 1. Retrieve lecture slides for the RIGHT topic. When the student is on a
     // practice question, we search using the ON-SCREEN QUESTION text (plus any
     // options), because that reflects the topic they need explained, far more
@@ -309,6 +498,7 @@ Deno.serve(async (req) => {
     // there is genuinely nothing to answer. But if a question IS on screen, we
     // still help using the question itself even when no slide matched.
     if ((!docs || docs.length === 0) && !currentQuestion) {
+      logChat([], "", [], false); // metadata: an unanswered ("not in material") query
       return json({
         answer:
           "I couldn't find anything about that in the EE2101 course material. " +
@@ -332,7 +522,8 @@ Deno.serve(async (req) => {
     // 4. Return answer + which weeks it drew from.
     const sources = [
       ...new Set((docs || []).map((d: any) => d.metadata?.source).filter(Boolean)),
-    ];
+    ] as string[];
+    logChat(sources, context, docs || [], true); // metadata: an answered query
     return json({ answer, sources });
   } catch (err) {
     return json({ error: String(err?.message || err) }, 500);

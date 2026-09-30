@@ -47,7 +47,7 @@ import Leaderboard from "./pages/Leaderboard";
 import Profile from "./pages/Profile";
 import ProgressPage from "./pages/Progress";
 import Leagues from "./pages/Leagues";
-import Admin from "./pages/Admin";
+
 import Guide from "./pages/Guide";
 import Updates from "./pages/Updates";
 import Lesson from "./pages/Lesson";
@@ -61,6 +61,9 @@ import { SECTION_WALKS } from "./walks";
 import Results from "./pages/Results";
 
 const QuestionPack = lazy(() => import("./pages/QuestionPack"));
+// Admin is lazy-loaded so its analytics dashboard (and the Recharts library it
+// uses) is a separate chunk downloaded only for admins, not students.
+const Admin = lazy(() => import("./pages/Admin"));
 
 // Screens that count as an actual learning MODULE for time tracking.
 // Only these are logged to module_visits (time from opening the module to
@@ -97,22 +100,30 @@ const MODULE_SCREENS = new Set([
 export default function App() {
   const [gate, setGate] = useState({
     screen: "home",
+    email: null,
     classId: null,
     isAdmin: false,
     consentPending: false,
   });
 
   const showChatbot =
+    // Only show the tutor once a user is actually logged in. On the login /
+    // pre-auth screens there is no session (gate.email is null), so the tutor
+    // stays hidden there.
+    Boolean(gate.email) &&
     canUseChatbot({
       classId: gate.classId,
       isAdmin: gate.isAdmin,
       screen: gate.screen,
-    }) && !gate.consentPending;
+    }) &&
+    !gate.consentPending;
 
   return (
     <>
       <AppBody onGateChange={setGate} />
-      {showChatbot && <ChatWidget />}
+      {showChatbot && (
+        <ChatWidget email={gate.email} isAdmin={gate.isAdmin} />
+      )}
     </>
   );
 }
@@ -265,6 +276,7 @@ function AppBody({ onGateChange }) {
       screen,
       classId: progress?.classId ?? null,
       isAdmin: isAdmin(session),
+      email: session?.username ?? null,
       consentPending:
         Boolean(session) &&
         !isAdmin(session) &&
@@ -451,12 +463,14 @@ function AppBody({ onGateChange }) {
             <QuestionPack questions={questions} loaded={questionsLoaded} />
           </Suspense>
         ) : (
-          <Admin
-            progress={progress}
-            setProgress={setProgress}
-            counts={counts}
-            bankCounts={bankCounts}
-          />
+          <Suspense fallback={<div className="page"><p>Loading admin…</p></div>}>
+            <Admin
+              progress={progress}
+              setProgress={setProgress}
+              counts={counts}
+              bankCounts={bankCounts}
+            />
+          </Suspense>
         )}
       </AppShell>
     );
