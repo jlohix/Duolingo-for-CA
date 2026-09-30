@@ -1,0 +1,740 @@
+﻿id,topicid,main_question,question,optionA,optionB,optionC,optionD,answer,image,explanation,difficulty,walkthrough_tag
+201-1,2,"A capacitor has an initial voltage of 18 V. At \(t=0\), the switch is closed and the capacitor discharges through a \(15\,k\Omega\) resistor.
+
+Find:
+
+(a) The capacitor voltage \(v_C(t)\) for \(t\geq0\).
+
+(b) The time constant \(\tau\).
+
+(c) The voltage across the capacitor at \(t=\tau\).
+
+(d) The energy stored in the capacitor at \(t=2\tau\).
+part (d) answer: 
+First find the voltage:
+
+$$ v_C(2\tau)=18e^{-2} $$ $$ v_C(2\tau)\approx2.436\text{ V} $$
+
+Energy stored in a capacitor:
+
+$$ w_C=\frac12Cv_C^2 $$
+
+Thus,
+
+$$ w_C=\frac12(20\times10^{-6})(2.436)^2 $$ $$ \boxed{w_C\approx59.3\ \mu\text{J}} $$
+Explanation
+
+There is no independent source after the switch closes, so this is a source-free (natural) response. The capacitor releases its stored energy through the resistor, causing an exponential decay. The chapter gives the same form, \(v_C(t)=v_C(0)e^{-t/\tau}\), with τ=RC","Find the capacitor voltage $v_C(t)$ for $t \geq 0$ given an initial voltage of $18\text{ V}$, $R = 15\text{ k}\Omega$, and $C = 20\text{ }\mu\text{F}$.",$v_C(t) = 15e^{-t/0.3}\text{ V}$,$v_C(t) = 18e^{-3.33t}\text{ V}$,$v_C(t) = 18e^{-t/0.3}\text{ V}$,$v_C(t) = 20e^{-t/0.3}\text{ V}$,optionC,"https://raw.githubusercontent.com/jlohix/Duolingo-for-CA/main/question-bank/foc/foc1.png","For a source-free $RC$ circuit, the voltage response is given by $v_C(t) = v_C(0)e^{-t/\tau}$, where $\tau = RC = (15 \times 10^3 \ \Omega)(20 \times 10^{-6}\text{ F}) = 0.3\text{ s}$. Substituting the initial voltage $v_C(0) = 18\text{ V}$, we get $v_C(t) = 18e^{-t/0.3}\text{ V}$.",1,custom
+201-2,2,"A capacitor has an initial voltage of 18 V. At \(t=0\), the switch is closed and the capacitor discharges through a \(15\,k\Omega\) resistor.
+
+Find:
+
+(a) The capacitor voltage \(v_C(t)\) for \(t\geq0\).
+
+(b) The time constant \(\tau\).
+
+(c) The voltage across the capacitor at \(t=\tau\).
+
+(d) The energy stored in the capacitor at \(t=2\tau\).
+part (d) answer: 
+First find the voltage:
+
+$$ v_C(2\tau)=18e^{-2} $$ $$ v_C(2\tau)\approx2.436\text{ V} $$
+
+Energy stored in a capacitor:
+
+$$ w_C=\frac12Cv_C^2 $$
+
+Thus,
+
+$$ w_C=\frac12(20\times10^{-6})(2.436)^2 $$ $$ \boxed{w_C\approx59.3\ \mu\text{J}} $$
+Explanation
+
+There is no independent source after the switch closes, so this is a source-free (natural) response. The capacitor releases its stored energy through the resistor, causing an exponential decay. The chapter gives the same form, \(v_C(t)=v_C(0)e^{-t/\tau}\), with τ=RC",Calculate the time constant $\tau$ for the $RC$ circuit where $R = 15\text{ k}\Omega$ and $C = 20\text{ }\mu\text{F}$.,$\tau = 0.15\text{ s}$,$\tau = 3.0\text{ s}$,$\tau = 1.5\text{ s}$,$\tau = 0.3\text{ s}$,optionD,"https://raw.githubusercontent.com/jlohix/Duolingo-for-CA/main/question-bank/foc/foc1.png","The time constant $\tau$ of an $RC$ circuit is calculated as $\tau = R \times C$. Substituting the given values: $\tau = (15 \times 10^3\text{ }\Omega)(20 \times 10^{-6}\text{ F}) = 0.3\text{ s}$.",1,custom
+201-3,2,"A capacitor has an initial voltage of 18 V. At \(t=0\), the switch is closed and the capacitor discharges through a \(15\,k\Omega\) resistor.
+
+Find:
+
+(a) The capacitor voltage \(v_C(t)\) for \(t\geq0\).
+
+(b) The time constant \(\tau\).
+
+(c) The voltage across the capacitor at \(t=\tau\).
+
+(d) The energy stored in the capacitor at \(t=2\tau\).
+part (d) answer: 
+First find the voltage:
+
+$$ v_C(2\tau)=18e^{-2} $$ $$ v_C(2\tau)\approx2.436\text{ V} $$
+
+Energy stored in a capacitor:
+
+$$ w_C=\frac12Cv_C^2 $$
+
+Thus,
+
+$$ w_C=\frac12(20\times10^{-6})(2.436)^2 $$ $$ \boxed{w_C\approx59.3\ \mu\text{J}} $$
+Explanation
+
+There is no independent source after the switch closes, so this is a source-free (natural) response. The capacitor releases its stored energy through the resistor, causing an exponential decay. The chapter gives the same form, \(v_C(t)=v_C(0)e^{-t/\tau}\), with τ=RC",Find the voltage across the capacitor at $t = \tau$.,$v_C(\tau) \approx 11.37\text{ V}$,$v_C(\tau) \approx 3.32\text{ V}$,$v_C(\tau) \approx 2.44\text{ V}$,$v_C(\tau) \approx 6.62\text{ V}$,optionD,"https://raw.githubusercontent.com/jlohix/Duolingo-for-CA/main/question-bank/foc/foc1.png","Substitute $t = \tau$ into the voltage equation: $v_C(\tau) = 18e^{-\tau/\tau} = 18e^{-1} \approx 18 \times 0.367879 \approx 6.62\text{ V}$.",1,custom
+201-4,2,"A capacitor has an initial voltage of 18 V. At \(t=0\), the switch is closed and the capacitor discharges through a \(15\,k\Omega\) resistor.
+
+Find:
+
+(a) The capacitor voltage \(v_C(t)\) for \(t\geq0\).
+
+(b) The time constant \(\tau\).
+
+(c) The voltage across the capacitor at \(t=\tau\).
+
+(d) The energy stored in the capacitor at \(t=2\tau\).
+part (d) answer: 
+First find the voltage:
+
+$$ v_C(2\tau)=18e^{-2} $$ $$ v_C(2\tau)\approx2.436\text{ V} $$
+
+Energy stored in a capacitor:
+
+$$ w_C=\frac12Cv_C^2 $$
+
+Thus,
+
+$$ w_C=\frac12(20\times10^{-6})(2.436)^2 $$ $$ \boxed{w_C\approx59.3\ \mu\text{J}} $$
+Explanation
+
+There is no independent source after the switch closes, so this is a source-free (natural) response. The capacitor releases its stored energy through the resistor, causing an exponential decay. The chapter gives the same form, \(v_C(t)=v_C(0)e^{-t/\tau}\), with τ=RC",Find the energy stored in the capacitor at $t = 2\tau$.,$w_C \approx 245.1\text{ }\mu\text{J}$,$w_C \approx 59.3\text{ }\mu\text{J}$,$w_C \approx 30.5\text{ }\mu\text{J}$,$w_C \approx 118.6\text{ }\mu\text{J}$,optionB,"https://raw.githubusercontent.com/jlohix/Duolingo-for-CA/main/question-bank/foc/foc1.png","First, find the voltage at $t = 2\tau$: $v_C(2\tau) = 18e^{-2} \approx 2.436\text{ V}$. Then, use the energy stored formula for a capacitor: $w_C = \frac{1}{2}Cv_C^2 = \frac{1}{2}(20 \times 10^{-6}\text{ F})(2.436\text{ V})^2 \approx 59.3\text{ }\mu\text{J}$.",1,custom
+202-1,2,"An inductor has an initial current of 0.25 A. At \(t=0\), the switch is closed and the inductor discharges through a \(40\,\Omega\) resistor.
+
+Find:
+
+(a) The time constant.
+
+(b) The inductor current \(i_L(t)\).
+
+(c) The inductor current at \(t=3\tau\).
+
+(d) The initial voltage across the inductor, using the passive sign convention.
+
+Answer
+(a) Time constant
+
+For a source-free RL circuit,
+
+$$ \tau=\frac{L}{R} $$
+
+Therefore,
+
+$$ \tau=\frac{0.8}{40} $$ $$ \boxed{\tau=0.020\text{ s}=20\text{ ms}} $$
+(b) Inductor current
+
+The natural response is
+
+$$ i_L(t)=i_L(0)e^{-t/\tau} $$
+
+Therefore,
+
+$$ \boxed{i_L(t)=0.25e^{-t/0.020}\text{ A}} $$
+
+or
+
+$$ \boxed{i_L(t)=0.25e^{-50t}\text{ A}} $$
+(c) Current at \(3\tau\)
+$$ i_L(3\tau)=0.25e^{-3} $$ $$ i_L(3\tau)\approx0.01245\text{ A} $$ $$ \boxed{i_L(3\tau)\approx12.45\text{ mA}} $$
+(d) Initial inductor voltage
+
+Using
+
+$$ v_L=L\frac{di_L}{dt} $$
+
+From
+
+$$ i_L(t)=0.25e^{-50t} $$
+
+we get
+
+$$ \frac{di_L}{dt}=-12.5e^{-50t} $$
+
+Therefore,
+
+$$ v_L=0.8(-12.5e^{-50t}) $$ $$ v_L=-10e^{-50t}\text{ V} $$
+
+At \(t=0^+\),
+
+$$ \boxed{v_L(0^+)=-10\text{ V}} $$
+Explanation
+
+For a source-free inductor, the current decays exponentially. The PDF gives
+
+$$ i_L(t)=i_L(0)e^{-t/\tau}, \qquad \tau=\frac LR $$
+
+and stresses that the current through an inductor cannot change instantaneously.",what is The time constant for the source-free RL circuit given an inductance $L = 0.8\text{ H}$ and resistance $R = 40\;\Omega$?,$32\text{ ms}$,$20\text{ ms}$,$50\text{ ms}$,$10\text{ ms}$,optionB,"https://raw.githubusercontent.com/jlohix/Duolingo-for-CA/main/question-bank/foc/foc3.png","For a source-free RL circuit, the time constant $\tau$ is given by $\tau = \frac{L}{R}$. Substituting $L = 0.8\text{ H}$ and $R = 40\;\Omega$, we get $\tau = \frac{0.8}{40} = 0.020\text{ s} = 20\text{ ms}$.",1,custom
+202-2,2,"An inductor has an initial current of 0.25 A. At \(t=0\), the switch is closed and the inductor discharges through a \(40\,\Omega\) resistor.
+
+Find:
+
+(a) The time constant.
+
+(b) The inductor current \(i_L(t)\).
+
+(c) The inductor current at \(t=3\tau\).
+
+(d) The initial voltage across the inductor, using the passive sign convention.
+
+Answer
+(a) Time constant
+
+For a source-free RL circuit,
+
+$$ \tau=\frac{L}{R} $$
+
+Therefore,
+
+$$ \tau=\frac{0.8}{40} $$ $$ \boxed{\tau=0.020\text{ s}=20\text{ ms}} $$
+(b) Inductor current
+
+The natural response is
+
+$$ i_L(t)=i_L(0)e^{-t/\tau} $$
+
+Therefore,
+
+$$ \boxed{i_L(t)=0.25e^{-t/0.020}\text{ A}} $$
+
+or
+
+$$ \boxed{i_L(t)=0.25e^{-50t}\text{ A}} $$
+(c) Current at \(3\tau\)
+$$ i_L(3\tau)=0.25e^{-3} $$ $$ i_L(3\tau)\approx0.01245\text{ A} $$ $$ \boxed{i_L(3\tau)\approx12.45\text{ mA}} $$
+(d) Initial inductor voltage
+
+Using
+
+$$ v_L=L\frac{di_L}{dt} $$
+
+From
+
+$$ i_L(t)=0.25e^{-50t} $$
+
+we get
+
+$$ \frac{di_L}{dt}=-12.5e^{-50t} $$
+
+Therefore,
+
+$$ v_L=0.8(-12.5e^{-50t}) $$ $$ v_L=-10e^{-50t}\text{ V} $$
+
+At \(t=0^+\),
+
+$$ \boxed{v_L(0^+)=-10\text{ V}} $$
+Explanation
+
+For a source-free inductor, the current decays exponentially. The PDF gives
+
+$$ i_L(t)=i_L(0)e^{-t/\tau}, \qquad \tau=\frac LR $$
+
+and stresses that the current through an inductor cannot change instantaneously.",what is The inductor current $i_L(t)$ given an initial current $i_L(0) = 0.25\text{ A}$ and time constant $\tau = 0.020\text{ s}$?,$0.25e^{-20t}\text{ A}$,$2.0e^{-50t}\text{ A}$,$0.50e^{-20t}\text{ A}$,$0.25e^{-50t}\text{ A}$,optionD,"https://raw.githubusercontent.com/jlohix/Duolingo-for-CA/main/question-bank/foc/foc3.png","The natural response of an RL circuit is given by $i_L(t) = i_L(0)e^{-t/\tau}$. Substituting $i_L(0) = 0.25\text{ A}$ and $\tau = 0.020\text{ s}$, we obtain $i_L(t) = 0.25e^{-t/0.020} = 0.25e^{-50t}\text{ A}$.",1,custom
+202-3,2,"An inductor has an initial current of 0.25 A. At \(t=0\), the switch is closed and the inductor discharges through a \(40\,\Omega\) resistor.
+
+Find:
+
+(a) The time constant.
+
+(b) The inductor current \(i_L(t)\).
+
+(c) The inductor current at \(t=3\tau\).
+
+(d) The initial voltage across the inductor, using the passive sign convention.
+
+Answer
+(a) Time constant
+
+For a source-free RL circuit,
+
+$$ \tau=\frac{L}{R} $$
+
+Therefore,
+
+$$ \tau=\frac{0.8}{40} $$ $$ \boxed{\tau=0.020\text{ s}=20\text{ ms}} $$
+(b) Inductor current
+
+The natural response is
+
+$$ i_L(t)=i_L(0)e^{-t/\tau} $$
+
+Therefore,
+
+$$ \boxed{i_L(t)=0.25e^{-t/0.020}\text{ A}} $$
+
+or
+
+$$ \boxed{i_L(t)=0.25e^{-50t}\text{ A}} $$
+(c) Current at \(3\tau\)
+$$ i_L(3\tau)=0.25e^{-3} $$ $$ i_L(3\tau)\approx0.01245\text{ A} $$ $$ \boxed{i_L(3\tau)\approx12.45\text{ mA}} $$
+(d) Initial inductor voltage
+
+Using
+
+$$ v_L=L\frac{di_L}{dt} $$
+
+From
+
+$$ i_L(t)=0.25e^{-50t} $$
+
+we get
+
+$$ \frac{di_L}{dt}=-12.5e^{-50t} $$
+
+Therefore,
+
+$$ v_L=0.8(-12.5e^{-50t}) $$ $$ v_L=-10e^{-50t}\text{ V} $$
+
+At \(t=0^+\),
+
+$$ \boxed{v_L(0^+)=-10\text{ V}} $$
+Explanation
+
+For a source-free inductor, the current decays exponentially. The PDF gives
+
+$$ i_L(t)=i_L(0)e^{-t/\tau}, \qquad \tau=\frac LR $$
+
+and stresses that the current through an inductor cannot change instantaneously.","what is The inductor current at $t = 3\tau$, given $i_L(t) = 0.25e^{-50t}\text{ A}$?",$12.45\text{ mA}$,$124.5\text{ mA}$,$1.245\text{ mA}$,$50.2\text{ mA}$,optionA,"https://raw.githubusercontent.com/jlohix/Duolingo-for-CA/main/question-bank/foc/foc3.png","Substituting $t = 3\tau$ into the current equation gives $i_L(3\tau) = 0.25e^{-3}\text{ A}$. Calculating this value yields $0.25 \times 0.049787 \approx 0.01245\text{ A}$, which is approximately $12.45\text{ mA}$.",1,custom
+202-4,2,"An inductor has an initial current of 0.25 A. At \(t=0\), the switch is closed and the inductor discharges through a \(40\,\Omega\) resistor.
+
+Find:
+
+(a) The time constant.
+
+(b) The inductor current \(i_L(t)\).
+
+(c) The inductor current at \(t=3\tau\).
+
+(d) The initial voltage across the inductor, using the passive sign convention.
+
+Answer
+(a) Time constant
+
+For a source-free RL circuit,
+
+$$ \tau=\frac{L}{R} $$
+
+Therefore,
+
+$$ \tau=\frac{0.8}{40} $$ $$ \boxed{\tau=0.020\text{ s}=20\text{ ms}} $$
+(b) Inductor current
+
+The natural response is
+
+$$ i_L(t)=i_L(0)e^{-t/\tau} $$
+
+Therefore,
+
+$$ \boxed{i_L(t)=0.25e^{-t/0.020}\text{ A}} $$
+
+or
+
+$$ \boxed{i_L(t)=0.25e^{-50t}\text{ A}} $$
+(c) Current at \(3\tau\)
+$$ i_L(3\tau)=0.25e^{-3} $$ $$ i_L(3\tau)\approx0.01245\text{ A} $$ $$ \boxed{i_L(3\tau)\approx12.45\text{ mA}} $$
+(d) Initial inductor voltage
+
+Using
+
+$$ v_L=L\frac{di_L}{dt} $$
+
+From
+
+$$ i_L(t)=0.25e^{-50t} $$
+
+we get
+
+$$ \frac{di_L}{dt}=-12.5e^{-50t} $$
+
+Therefore,
+
+$$ v_L=0.8(-12.5e^{-50t}) $$ $$ v_L=-10e^{-50t}\text{ V} $$
+
+At \(t=0^+\),
+
+$$ \boxed{v_L(0^+)=-10\text{ V}} $$
+Explanation
+
+For a source-free inductor, the current decays exponentially. The PDF gives
+
+$$ i_L(t)=i_L(0)e^{-t/\tau}, \qquad \tau=\frac LR $$
+
+and stresses that the current through an inductor cannot change instantaneously.","what is The initial voltage across the inductor, using the passive sign convention, given $L = 0.8\text{ H}$ and $i_L(t) = 0.25e^{-50t}\text{ A}$?",-10 V,$0\text{ V}$,$+10\text{ V}$,$-5\text{ V}$,optionA,"https://raw.githubusercontent.com/jlohix/Duolingo-for-CA/main/question-bank/foc/foc3.png","The inductor voltage is given by $v_L = L\frac{di_L}{dt}$. Taking the derivative of $i_L(t) = 0.25e^{-50t}$ gives $\frac{di_L}{dt} = -12.5e^{-50t}$. Multiplying by $L = 0.8\text{ H}$ yields $v_L = -10e^{-50t}\text{ V}$. At $t = 0^+$, the initial voltage is $v_L(0^+) = -10\text{ V}$.",1,custom
+203-1,2,"An initially uncharged capacitor is connected to a 10 V DC source through a \(12\,k\Omega\) resistor at \(t=0\).
+
+Find:
+
+(a) The time constant.
+
+(b) The capacitor voltage \(v_C(t)\).
+
+(c) The charging current \(i(t)\).
+
+(d) The capacitor voltage at \(t=\tau\).
+
+(e) How long does it take for the capacitor voltage to reach \(90\%\) of its final value?
+
+Answer
+(a) Time constant
+$$ \tau=RC $$ $$ \tau=(12\times10^3)(25\times10^{-6}) $$ $$ \boxed{\tau=0.30\text{ s}} $$
+(b) Capacitor voltage
+
+For an RC step response,
+
+$$ v_C(t)=v_C(\infty)+[v_C(0)-v_C(\infty)]e^{-t/\tau} $$
+
+Here:
+
+$$ v_C(0)=0 $$
+
+and
+
+$$ v_C(\infty)=10\text{ V} $$
+
+Therefore,
+
+$$ v_C(t)=10+(0-10)e^{-t/0.30} $$ $$ \boxed{v_C(t)=10(1-e^{-t/0.30})\text{ V}} $$
+(c) Charging current
+
+Using Ohm's law,
+
+$$ i(t)=\frac{10-v_C(t)}{12\,k\Omega} $$
+
+Substitute \(v_C(t)\):
+
+$$ i(t)=\frac{10e^{-t/0.30}}{12\,000} $$
+
+Therefore,
+
+$$ \boxed{i(t)=0.833e^{-t/0.30}\text{ mA}} $$
+
+Notice that the current starts at
+
+$$ i(0)=0.833\text{ mA} $$
+
+and eventually falls to zero.
+
+(d) Voltage at \(t=\tau\)
+$$ v_C(\tau)=10(1-e^{-1}) $$ $$ v_C(\tau)=6.321\text{ V} $$ $$ \boxed{v_C(\tau)\approx6.32\text{ V}} $$
+
+So after one time constant, the capacitor has charged to about 63.2% of its final voltage.
+
+(e) Time to reach 90%
+
+Set
+
+$$ v_C(t)=0.9(10)=9\text{ V} $$
+
+Therefore,
+
+$$ 9=10(1-e^{-t/0.30}) $$ $$ 0.9=1-e^{-t/0.30} $$ $$ e^{-t/0.30}=0.1 $$
+
+Taking ln:
+
+$$ -\frac{t}{0.30}=\ln(0.1) $$ $$ t=-0.30\ln(0.1) $$ $$ \boxed{t\approx0.691\text{ s}} $$
+Explanation
+
+A step response does not immediately jump to its final value. Instead, the capacitor moves exponentially from its initial value toward its final value. The textbook describes the RC response in terms of the initial voltage, final voltage, and time constant.","How do we calculate the time constant $\tau$ of the RC circuit given a resistance $R = 12\text{ k}\Omega$ and capacitance $C = 25\, \mu\text{F}$?",$\tau = \frac{1}{RC} = 3.33\text{ s}$,$\tau = R \times C = 0.30\text{ s}$,$\tau = \frac{R}{C} = 0.48\text{ s}$,$\tau = R + C = 12.025\text{ s}$,optionB,"https://raw.githubusercontent.com/jlohix/Duolingo-for-CA/main/question-bank/foc/foc3.png","The time constant $\tau$ for a series RC circuit is given by the product of resistance and capacitance: $\tau = RC$. Substituting the given values: $\tau = (12 \times 10^3\ \Omega)(25 \times 10^{-6}\text{ F}) = 0.30\text{ s}$.",1,custom
+203-2,2,"An initially uncharged capacitor is connected to a 10 V DC source through a \(12\,k\Omega\) resistor at \(t=0\).
+
+Find:
+
+(a) The time constant.
+
+(b) The capacitor voltage \(v_C(t)\).
+
+(c) The charging current \(i(t)\).
+
+(d) The capacitor voltage at \(t=\tau\).
+
+(e) How long does it take for the capacitor voltage to reach \(90\%\) of its final value?
+
+Answer
+(a) Time constant
+$$ \tau=RC $$ $$ \tau=(12\times10^3)(25\times10^{-6}) $$ $$ \boxed{\tau=0.30\text{ s}} $$
+(b) Capacitor voltage
+
+For an RC step response,
+
+$$ v_C(t)=v_C(\infty)+[v_C(0)-v_C(\infty)]e^{-t/\tau} $$
+
+Here:
+
+$$ v_C(0)=0 $$
+
+and
+
+$$ v_C(\infty)=10\text{ V} $$
+
+Therefore,
+
+$$ v_C(t)=10+(0-10)e^{-t/0.30} $$ $$ \boxed{v_C(t)=10(1-e^{-t/0.30})\text{ V}} $$
+(c) Charging current
+
+Using Ohm's law,
+
+$$ i(t)=\frac{10-v_C(t)}{12\,k\Omega} $$
+
+Substitute \(v_C(t)\):
+
+$$ i(t)=\frac{10e^{-t/0.30}}{12\,000} $$
+
+Therefore,
+
+$$ \boxed{i(t)=0.833e^{-t/0.30}\text{ mA}} $$
+
+Notice that the current starts at
+
+$$ i(0)=0.833\text{ mA} $$
+
+and eventually falls to zero.
+
+(d) Voltage at \(t=\tau\)
+$$ v_C(\tau)=10(1-e^{-1}) $$ $$ v_C(\tau)=6.321\text{ V} $$ $$ \boxed{v_C(\tau)\approx6.32\text{ V}} $$
+
+So after one time constant, the capacitor has charged to about 63.2% of its final voltage.
+
+(e) Time to reach 90%
+
+Set
+
+$$ v_C(t)=0.9(10)=9\text{ V} $$
+
+Therefore,
+
+$$ 9=10(1-e^{-t/0.30}) $$ $$ 0.9=1-e^{-t/0.30} $$ $$ e^{-t/0.30}=0.1 $$
+
+Taking ln:
+
+$$ -\frac{t}{0.30}=\ln(0.1) $$ $$ t=-0.30\ln(0.1) $$ $$ \boxed{t\approx0.691\text{ s}} $$
+Explanation
+
+A step response does not immediately jump to its final value. Instead, the capacitor moves exponentially from its initial value toward its final value. The textbook describes the RC response in terms of the initial voltage, final voltage, and time constant.",What are the initial $v_C(0)$ and final $v_C(\infty)$ values of the capacitor voltage when the switch closes at $t = 0$ in a circuit connected to a $10\text{ V}$ DC source and initially uncharged?,"$v_C(0) = 0\text{ V}, \ v_C(\infty) = 0\text{ V}$","$v_C(0) = 10\text{ V}, \ v_C(\infty) = 0\text{ V}$","$v_C(0) = 5\text{ V}, \ v_C(\infty) = 5\text{ V}$","$v_C(0) = 0\text{ V}, \ v_C(\infty) = 10\text{ V}$",optionD,"https://raw.githubusercontent.com/jlohix/Duolingo-for-CA/main/question-bank/foc/foc3.png","Since the capacitor is initially uncharged, the initial voltage is $v_C(0) = 0\text{ V}$. As $t \to \infty$, the capacitor becomes fully charged to the DC source voltage, so the final steady-state voltage is $v_C(\infty) = 10\text{ V}$.",1,custom
+203-3,2,"An initially uncharged capacitor is connected to a 10 V DC source through a \(12\,k\Omega\) resistor at \(t=0\).
+
+Find:
+
+(a) The time constant.
+
+(b) The capacitor voltage \(v_C(t)\).
+
+(c) The charging current \(i(t)\).
+
+(d) The capacitor voltage at \(t=\tau\).
+
+(e) How long does it take for the capacitor voltage to reach \(90\%\) of its final value?
+
+Answer
+(a) Time constant
+$$ \tau=RC $$ $$ \tau=(12\times10^3)(25\times10^{-6}) $$ $$ \boxed{\tau=0.30\text{ s}} $$
+(b) Capacitor voltage
+
+For an RC step response,
+
+$$ v_C(t)=v_C(\infty)+[v_C(0)-v_C(\infty)]e^{-t/\tau} $$
+
+Here:
+
+$$ v_C(0)=0 $$
+
+and
+
+$$ v_C(\infty)=10\text{ V} $$
+
+Therefore,
+
+$$ v_C(t)=10+(0-10)e^{-t/0.30} $$ $$ \boxed{v_C(t)=10(1-e^{-t/0.30})\text{ V}} $$
+(c) Charging current
+
+Using Ohm's law,
+
+$$ i(t)=\frac{10-v_C(t)}{12\,k\Omega} $$
+
+Substitute \(v_C(t)\):
+
+$$ i(t)=\frac{10e^{-t/0.30}}{12\,000} $$
+
+Therefore,
+
+$$ \boxed{i(t)=0.833e^{-t/0.30}\text{ mA}} $$
+
+Notice that the current starts at
+
+$$ i(0)=0.833\text{ mA} $$
+
+and eventually falls to zero.
+
+(d) Voltage at \(t=\tau\)
+$$ v_C(\tau)=10(1-e^{-1}) $$ $$ v_C(\tau)=6.321\text{ V} $$ $$ \boxed{v_C(\tau)\approx6.32\text{ V}} $$
+
+So after one time constant, the capacitor has charged to about 63.2% of its final voltage.
+
+(e) Time to reach 90%
+
+Set
+
+$$ v_C(t)=0.9(10)=9\text{ V} $$
+
+Therefore,
+
+$$ 9=10(1-e^{-t/0.30}) $$ $$ 0.9=1-e^{-t/0.30} $$ $$ e^{-t/0.30}=0.1 $$
+
+Taking ln:
+
+$$ -\frac{t}{0.30}=\ln(0.1) $$ $$ t=-0.30\ln(0.1) $$ $$ \boxed{t\approx0.691\text{ s}} $$
+Explanation
+
+A step response does not immediately jump to its final value. Instead, the capacitor moves exponentially from its initial value toward its final value. The textbook describes the RC response in terms of the initial voltage, final voltage, and time constant.",How can we use the general step response formula $v_C(t) = v_C(\infty) + [v_C(0) - v_C(\infty)]e^{-t/\tau}$ to express the capacitor voltage $v_C(t)$?,$v_C(t) = 10(1 + e^{-t/0.30})\text{ V}$,$v_C(t) = 5(1 - e^{-t/0.30})\text{ V}$,$v_C(t) = 10e^{-t/0.30}\text{ V}$,$v_C(t) = 10(1 - e^{-t/0.30})\text{ V}$,optionD,"https://raw.githubusercontent.com/jlohix/Duolingo-for-CA/main/question-bank/foc/foc3.png","Substituting $v_C(0) = 0$, $v_C(\infty) = 10\text{ V}$, and $\tau = 0.30\text{ s}$ into the general formula gives: $v_C(t) = 10 + (0 - 10)e^{-t/0.30} = 10(1 - e^{-t/0.30})\text{ V}$.",1,custom
+203-4,2,"An initially uncharged capacitor is connected to a 10 V DC source through a \(12\,k\Omega\) resistor at \(t=0\).
+
+Find:
+
+(a) The time constant.
+
+(b) The capacitor voltage \(v_C(t)\).
+
+(c) The charging current \(i(t)\).
+
+(d) The capacitor voltage at \(t=\tau\).
+
+(e) How long does it take for the capacitor voltage to reach \(90\%\) of its final value?
+
+Answer
+(a) Time constant
+$$ \tau=RC $$ $$ \tau=(12\times10^3)(25\times10^{-6}) $$ $$ \boxed{\tau=0.30\text{ s}} $$
+(b) Capacitor voltage
+
+For an RC step response,
+
+$$ v_C(t)=v_C(\infty)+[v_C(0)-v_C(\infty)]e^{-t/\tau} $$
+
+Here:
+
+$$ v_C(0)=0 $$
+
+and
+
+$$ v_C(\infty)=10\text{ V} $$
+
+Therefore,
+
+$$ v_C(t)=10+(0-10)e^{-t/0.30} $$ $$ \boxed{v_C(t)=10(1-e^{-t/0.30})\text{ V}} $$
+(c) Charging current
+
+Using Ohm's law,
+
+$$ i(t)=\frac{10-v_C(t)}{12\,k\Omega} $$
+
+Substitute \(v_C(t)\):
+
+$$ i(t)=\frac{10e^{-t/0.30}}{12\,000} $$
+
+Therefore,
+
+$$ \boxed{i(t)=0.833e^{-t/0.30}\text{ mA}} $$
+
+Notice that the current starts at
+
+$$ i(0)=0.833\text{ mA} $$
+
+and eventually falls to zero.
+
+(d) Voltage at \(t=\tau\)
+$$ v_C(\tau)=10(1-e^{-1}) $$ $$ v_C(\tau)=6.321\text{ V} $$ $$ \boxed{v_C(\tau)\approx6.32\text{ V}} $$
+
+So after one time constant, the capacitor has charged to about 63.2% of its final voltage.
+
+(e) Time to reach 90%
+
+Set
+
+$$ v_C(t)=0.9(10)=9\text{ V} $$
+
+Therefore,
+
+$$ 9=10(1-e^{-t/0.30}) $$ $$ 0.9=1-e^{-t/0.30} $$ $$ e^{-t/0.30}=0.1 $$
+
+Taking ln:
+
+$$ -\frac{t}{0.30}=\ln(0.1) $$ $$ t=-0.30\ln(0.1) $$ $$ \boxed{t\approx0.691\text{ s}} $$
+Explanation
+
+A step response does not immediately jump to its final value. Instead, the capacitor moves exponentially from its initial value toward its final value. The textbook describes the RC response in terms of the initial voltage, final voltage, and time constant.","Using Ohm's law and the capacitor voltage equation, how do we determine the charging current $i(t)$ through the circuit?",$i(t) = \frac{v_C(t) - 10}{R}$,$i(t) = \frac{10 - v_C(t)}{R}$,$i(t) = \frac{10}{R}e^{t/\tau}$,$i(t) = \frac{v_C(t)}{R}$,optionB,"https://raw.githubusercontent.com/jlohix/Duolingo-for-CA/main/question-bank/foc/foc3.png","The current flowing through the resistor from the $10\text{ V}$ source to the capacitor is given by Ohm's law using the voltage drop across the resistor: $i(t) = \frac{10 - v_C(t)}{12\text{ k}\Omega}$. Substituting $v_C(t)$ yields $i(t) = 0.833e^{-t/0.30}\text{ mA}$.",1,custom
+203-5,2,"An initially uncharged capacitor is connected to a 10 V DC source through a \(12\,k\Omega\) resistor at \(t=0\).
+
+Find:
+
+(a) The time constant.
+
+(b) The capacitor voltage \(v_C(t)\).
+
+(c) The charging current \(i(t)\).
+
+(d) The capacitor voltage at \(t=\tau\).
+
+(e) How long does it take for the capacitor voltage to reach \(90\%\) of its final value?
+
+Answer
+(a) Time constant
+$$ \tau=RC $$ $$ \tau=(12\times10^3)(25\times10^{-6}) $$ $$ \boxed{\tau=0.30\text{ s}} $$
+(b) Capacitor voltage
+
+For an RC step response,
+
+$$ v_C(t)=v_C(\infty)+[v_C(0)-v_C(\infty)]e^{-t/\tau} $$
+
+Here:
+
+$$ v_C(0)=0 $$
+
+and
+
+$$ v_C(\infty)=10\text{ V} $$
+
+Therefore,
+
+$$ v_C(t)=10+(0-10)e^{-t/0.30} $$ $$ \boxed{v_C(t)=10(1-e^{-t/0.30})\text{ V}} $$
+(c) Charging current
+
+Using Ohm's law,
+
+$$ i(t)=\frac{10-v_C(t)}{12\,k\Omega} $$
+
+Substitute \(v_C(t)\):
+
+$$ i(t)=\frac{10e^{-t/0.30}}{12\,000} $$
+
+Therefore,
+
+$$ \boxed{i(t)=0.833e^{-t/0.30}\text{ mA}} $$
+
+Notice that the current starts at
+
+$$ i(0)=0.833\text{ mA} $$
+
+and eventually falls to zero.
+
+(d) Voltage at \(t=\tau\)
+$$ v_C(\tau)=10(1-e^{-1}) $$ $$ v_C(\tau)=6.321\text{ V} $$ $$ \boxed{v_C(\tau)\approx6.32\text{ V}} $$
+
+So after one time constant, the capacitor has charged to about 63.2% of its final voltage.
+
+(e) Time to reach 90%
+
+Set
+
+$$ v_C(t)=0.9(10)=9\text{ V} $$
+
+Therefore,
+
+$$ 9=10(1-e^{-t/0.30}) $$ $$ 0.9=1-e^{-t/0.30} $$ $$ e^{-t/0.30}=0.1 $$
+
+Taking ln:
+
+$$ -\frac{t}{0.30}=\ln(0.1) $$ $$ t=-0.30\ln(0.1) $$ $$ \boxed{t\approx0.691\text{ s}} $$
+Explanation
+
+A step response does not immediately jump to its final value. Instead, the capacitor moves exponentially from its initial value toward its final value. The textbook describes the RC response in terms of the initial voltage, final voltage, and time constant.",How do we set up an equation to find the exact time it takes for the capacitor voltage to reach $90\%$ of its final value ($10\text{ V}$)?,$0.9 = 10(1 - e^{-t/0.30})$,$1 = 10(1 - e^{-t/0.30})$,$9 = 10e^{-t/0.30}$,$9 = 10(1 - e^{-t/0.30})$,optionD,"https://raw.githubusercontent.com/jlohix/Duolingo-for-CA/main/question-bank/foc/foc3.png",$90\%$ of the final value of $10\text{ V}$ is $9\text{ V}$. Setting $v_C(t) = 9$ in the voltage equation gives $9 = 10(1 - e^{-t/0.30})$. Solving this yields $t = -0.30\ln(0.1) \approx 0.691\text{ s}$.,1,custom
