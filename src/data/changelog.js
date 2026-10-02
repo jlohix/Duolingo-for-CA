@@ -1,5 +1,17 @@
 export const BUILT_IN_LOGS = [
   {
+    id: "built-2026-10-03-malayalam-option",
+    date: "2026-10-03",
+    title: "Fixed a garbled option",
+    body: "One Laplace Circuit Application choice had leftover text in the wrong script. It now shows the equation only.",
+  },
+  {
+    id: "built-2026-10-03-laplace-poles-csv",
+    date: "2026-10-03",
+    title: "Updated practice sets",
+    body: "Laplace Circuit Application and Poles practice have updated questions. Easy, Average, and Challenging stay as their own nodes after each walkthrough.",
+  },
+  {
     id: "built-2026-10-02-unit-circle-1j",
     date: "2026-10-02",
     title: "Unit circle 1 and j",

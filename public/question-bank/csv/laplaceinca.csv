@@ -37,18 +37,93 @@
 206-3,2,,"Apply Kirchhoff's Current Law (KCL) at the node connecting the resistor $R_2$, capacitor $C$, and inductor $L$ to express the nodal equation in terms of $V(s)$. Note $R_1+R_2 = 7\Omega$.",$\frac{2/s - V(s)}{7} = \frac{V(s)}{s} + \frac{V(s)}{0.5s}$,$\frac{2/s}{7} = \frac{V(s)}{s} + 0.5sV(s)$,$\frac{2/s - V(s)}{7} = V(s)s + 0.5sV(s)$,$\frac{2/s - V(s)}{7} = \frac{V(s)}{s} + 0.5sV(s)$,optionD,"https://raw.githubusercontent.com/jlohix/Duolingo-for-CA/main/question-bank/laplaceCA/laplaceCAq6.png","$\text{The current entering the node through }R_1+R_2=7\Omega\text{ is }\frac{\frac{2}{s}-V(s)}{7}.\text{ The currents leaving the node through the inductor and capacitor are }\frac{V(s)}{s}\text{ and }0.5sV(s),\text{ respectively. Therefore, by KCL, }\boxed{\frac{\frac{2}{s}-V(s)}{7}=\frac{V(s)}{s}+0.5sV(s)}.$",3,custom
 206-4,2,,Solve the KCL nodal equation for the node voltage $V(s)$.,$V(s) = \frac{2}{3.5s^2+s+7}$,$V(s) = \frac{4}{7s^2+2s+14}$,$V(s) = \frac{2/s}{7s^2+s+14}$,$V(s) = \frac{1}{7s^2+2s+14}$,optionB,"https://raw.githubusercontent.com/jlohix/Duolingo-for-CA/main/question-bank/laplaceCA/laplaceCAq6.png",Rearranging the KCL equation $\frac{2/s - V(s)}{7} = \frac{V(s)}{s} + 0.5sV(s)$ and solving for $V(s)$ yields $V(s) = \frac{2/s}{7(1/s + 1/s + 0.5s)} = \frac{4}{7s^2+2s+14}$ after simplification.,3,custom
 206-5,2,,"Solve for the inductor current in the s-domain, $I_L(s)$, given $V(s) = \frac{4}{7s^2+2s+14}$.",$I_L(s) = \frac{4s^2}{7s^2+2s+14}$,$I_L(s) = \frac{4}{s(7s^2+2s+14)}$,$I_L(s) = \frac{4s}{7s^2+2s+14}$,$I_L(s) = \frac{4}{7s^2+2s+14}$,optionB,"https://raw.githubusercontent.com/jlohix/Duolingo-for-CA/main/question-bank/laplaceCA/laplaceCAq6.png","Since $V(s) = I_L(s) \cdot Z_L$ and $Z_L = s$, we have $I_L(s) = \frac{V(s)}{s}$. Substituting $V(s)$, we get $I_L(s) = \frac{4}{s(7s^2+2s+14)}$.",3,custom
-206-6,2,,Perform a partial fraction expansion on $I_L(s)$ and apply the inverse Laplace transform to determine the time-domain expression for $i_L(t)$.,$i_L(t) = \frac{2}{7} + \frac{2}{7}e^{-t/7} \cos(\frac{\sqrt{97}}{7}t) + \frac{2}{7\sqrt{97}}e^{-t/7} \sin(\frac{\sqrt{97}}{7}t)$,$i_L(t) = \frac{2}{7}e^{-t/7} \cos(\frac{\sqrt{97}}{7}t)$,$i_L(t) = \frac{2}{7} - \frac{2}{7}e^{-t/7} \sin(\frac{\sqrt{97}}{7}t)$,$i_L(t) = \frac{2}{7} - \frac{2}{7}e^{-t/7} \cos(\frac{\sqrt{97}}{7}t) - \frac{2}{7\sqrt{97}}e^{-t/7} \sin(\frac{\sqrt{97}}{7}t)$,optionD,"https://raw.githubusercontent.com/jlohix/Duolingo-for-CA/main/question-bank/laplaceCA/laplaceCAq6.png","$\text{Starting from }I_L(s)=\frac{4}{s(7s^2+2s+14)},\text{ use partial fractions: }I_L(s)=\frac{2}{7s}+\frac{-2s-\frac{4}{7}}{7s^2+2s+14}.
-\\
-\text{Complete the square in the quadratic denominator: }7s^2+2s+14=7\left[\left(s+\frac{1}{7}\right)^2+\frac{97}{49}\right].
-\\
-\text{Rewrite the numerator as }-2s-\frac{4}{7}=-2\left(s+\frac{1}{7}\right)-\frac{2}{7}.
-\\
-\text{Hence, }I_L(s)=\frac{2}{7s}-\frac{2}{7}\frac{s+\frac{1}{7}}{\left(s+\frac{1}{7}\right)^2+\left(\frac{\sqrt{97}}{7}\right)^2}-\frac{2}{49}\frac{1}{\left(s+\frac{1}{7}\right)^2+\left(\frac{\sqrt{97}}{7}\right)^2}.
-\\
-\text{Using }\mathcal{L}^{-1}\left\{\frac{s+a}{(s+a)^2+\omega^2}\right\}=e^{-at}\cos(\omega t)\text{ and }\mathcal{L}^{-1}\left\{\frac{\omega}{(s+a)^2+\omega^2}\right\}=e^{-at}\sin(\omega t),
-\\
-\text{with }a=\frac{1}{7}\text{ and }\omega=\frac{\sqrt{97}}{7},\text{ the result is }
-\boxed{i_L(t)=\frac{2}{7}-\frac{2}{7}e^{-t/7}\cos\left(\frac{\sqrt{97}}{7}t\right)-\frac{2}{7\sqrt{97}}e^{-t/7}\sin\left(\frac{\sqrt{97}}{7}t\right)}.$",3,custom
+206-6,2,,Perform a partial fraction expansion on $I_L(s)$ and apply the inverse Laplace transform to determine the time-domain expression for $i_L(t)$.,$i_L(t) = \frac{2}{7} + \frac{2}{7}e^{-t/7} \cos(\frac{\sqrt{97}}{7}t) + \frac{2}{7\sqrt{97}}e^{-t/7} \sin(\frac{\sqrt{97}}{7}t)$,$i_L(t) = \frac{2}{7}e^{-t/7} \cos(\frac{\sqrt{97}}{7}t)$,$i_L(t) = \frac{2}{7} - \frac{2}{7}e^{-t/7} \sin(\frac{\sqrt{97}}{7}t)$,$i_L(t) = \frac{2}{7} - \frac{2}{7}e^{-t/7} \cos(\frac{\sqrt{97}}{7}t) - \frac{2}{7\sqrt{97}}e^{-t/7} \sin(\frac{\sqrt{97}}{7}t)$,optionD,"https://raw.githubusercontent.com/jlohix/Duolingo-for-CA/main/question-bank/laplaceCA/laplaceCAq6.png","Start with:
+
+$$
+I_L(s)=\frac{4}{s(7s^2+2s+14)}
+$$
+
+Using partial fractions:
+
+$$
+I_L(s)=\frac{2}{7s}+\frac{-2s-\frac{4}{7}}{7s^2+2s+14}
+$$
+
+Complete the square in the quadratic denominator:
+
+$$
+7s^2+2s+14
+=
+7\left[
+\left(s+\frac{1}{7}\right)^2+\frac{97}{49}
+\right]
+$$
+
+Rewrite the numerator:
+
+$$
+-2s-\frac{4}{7}
+=
+-2\left(s+\frac{1}{7}\right)-\frac{2}{7}
+$$
+
+Hence,
+
+$$
+I_L(s)
+=
+\frac{2}{7s}
+-\frac{2}{7}
+\frac{s+\frac{1}{7}}
+{\left(s+\frac{1}{7}\right)^2+\left(\frac{\sqrt{97}}{7}\right)^2}
+-\frac{2}{49}
+\frac{1}
+{\left(s+\frac{1}{7}\right)^2+\left(\frac{\sqrt{97}}{7}\right)^2}
+$$
+
+Let
+
+$$
+a=\frac{1}{7},
+\qquad
+\omega=\frac{\sqrt{97}}{7}
+$$
+
+Use the inverse Laplace formulas:
+
+$$
+\mathcal{L}^{-1}
+\left\{
+\frac{s+a}{(s+a)^2+\omega^2}
+\right\}
+=
+e^{-at}\cos(\omega t)
+$$
+
+and
+
+$$
+\mathcal{L}^{-1}
+\left\{
+\frac{\omega}{(s+a)^2+\omega^2}
+\right\}
+=
+e^{-at}\sin(\omega t)
+$$
+
+Therefore,
+
+$$
+\boxed{
+i_L(t)
+=
+\frac{2}{7}
+-\frac{2}{7}e^{-t/7}
+\cos\left(\frac{\sqrt{97}}{7}t\right)
+-\frac{2}{7\sqrt{97}}e^{-t/7}
+\sin\left(\frac{\sqrt{97}}{7}t\right)
+}
+$$",3,custom
 207-1,2,,"What is the Laplace transform of the input voltage source containing the impulse function $v_s(t) = 50\delta(t)\,\text{V}$?",$V_s(s) = 50s$,$V_s(s) = \frac{50}{s^2}$,$V_s(s) = 50$,$V_s(s) = \frac{50}{s}$,optionC,"https://raw.githubusercontent.com/jlohix/Duolingo-for-CA/main/question-bank/laplaceCA/laplaceCAq7.png","The input voltage is given as $v_s(t) = 50\delta(t)$. Since the Laplace transform of the unit impulse function is $\mathcal{L}\{\delta(t)\} = 1$, the s-domain voltage is $V_s(s) = 50(1) = 50$.",1,custom
 207-2,2,,"How do you express the impedances of the resistor $R = 200\,\Omega$ and capacitors $C_1 = 1\,\text{mF}$ and $C_2 = 5\,\text{mF}$ in the s-domain?","$Z_R = 200$, $Z_{C_1} = \frac{1000}{s}$, $Z_{C_2} = \frac{200}{s}$","$Z_R = \frac{200}{s}$, $Z_{C_1} = \frac{1000}{s}$, $Z_{C_2} = \frac{200}{s}$","$Z_R = 200$, $Z_{C_1} = \frac{500}{s}$, $Z_{C_2} = \frac{100}{s}$","$Z_R = 200$, $Z_{C_1} = \frac{1000}{s}$, $Z_{C_2} = \frac{500}{s}$",optionA,"https://raw.githubusercontent.com/jlohix/Duolingo-for-CA/main/question-bank/laplaceCA/laplaceCAq7.png","The resistor impedance is simply $Z_R = R = 200\,\Omega$. The capacitor impedances are given by $Z_C = \frac{1}{sC}$. Thus, for $C_1 = 1\,\text{mF} = 0.001\,\text{F}$, $Z_{C_1} = \frac{1}{0.001s} = \frac{1000}{s}$. For $C_2 = 5\,\text{mF} = 0.005\,\text{F}$, $Z_{C_2} = \frac{1}{0.005s} = \frac{200}{s}$.",1,custom
 207-3,2,,What is the total equivalent series impedance $Z_\text{total}(s)$ of the circuit in the s-domain?,$Z_\text{total}(s) = 200 + \frac{1200}{s}$,$Z_\text{total}(s) = 200 + \frac{1000}{s}$,$Z_\text{total}(s) = 200 + \frac{200}{s}$,$Z_\text{total}(s) = \frac{200}{s} + \frac{1200}{s^2}$,optionA,"https://raw.githubusercontent.com/jlohix/Duolingo-for-CA/main/question-bank/laplaceCA/laplaceCAq7.png","The components are connected in series, so the total impedance is the sum of the individual impedances: $Z_\text{total}(s) = Z_R + Z_{C_1} + Z_{C_2} = 200 + \frac{1000}{s} + \frac{200}{s} = 200 + \frac{1200}{s}$.",1,custom
@@ -60,7 +135,7 @@
 208-4,2,,What are the roots of the characteristic equation obtained from the denominator of $I_L(s)$?,$s = -2 \pm \sqrt{2}$,$s = -1 \pm \sqrt{3}$,$s = -2 \pm 2\sqrt{2}$,$s = -1 \pm \sqrt{2}$,optionA,"https://raw.githubusercontent.com/jlohix/Duolingo-for-CA/main/question-bank/laplaceCA/laplaceCAq8.png","The denominator is $s^2 + 4s + 2 = 0$. Using the quadratic formula $s = \frac{-b \pm \sqrt{b^2 - 4ac}}{2a}$, we get $s = \frac{-4 \pm \sqrt{16 - 8}}{2} = \frac{-4 \pm \sqrt{8}}{2} = -2 \pm \sqrt{2}$.",3,custom
 208-5,2,,How do you perform the partial fraction expansion for the inductor current $I_L(s)$?,$I_L(s) = \frac{7(1 + \sqrt{2})}{8} \frac{1}{s + 2 - \sqrt{2}} + \frac{7(1 - \sqrt{2})}{8} \frac{1}{s + 2 + \sqrt{2}}$,$I_L(s) = \frac{1}{s + 2 - \sqrt{2}} + \frac{1}{s + 2 + \sqrt{2}}$,$I_L(s) = \frac{1.75}{s + 2 - \sqrt{2}} + \frac{7}{s + 2 + \sqrt{2}}$,$I_L(s) = \frac{7}{8(s + 2 - \sqrt{2})} + \frac{7}{8(s + 2 + \sqrt{2})}$,optionA,"https://raw.githubusercontent.com/jlohix/Duolingo-for-CA/main/question-bank/laplaceCA/laplaceCAq8.png","By factoring the denominator into $(s + 2 - \sqrt{2})(s + 2 + \sqrt{2})$ and finding the residues via partial fraction expansion, we obtain $I_L(s) = \frac{7(1 + \sqrt{2})}{8} \frac{1}{s + 2 - \sqrt{2}} + \frac{7(1 - \sqrt{2})}{8} \frac{1}{s + 2 + \sqrt{2}}$.",3,custom
 208-6,2,,What is the final time-domain response for the inductor current $i_L(t)$?,$i_L(t) = \frac{7(1+\sqrt{2})}{8}e^{(-2+\sqrt{2})t} + \frac{7(1-\sqrt{2})}{8}e^{(-2-\sqrt{2})t}\text{ A}$,$i_L(t) = \frac{7(1+\sqrt{2})}{8}e^{(-2-\sqrt{2})t} + \frac{7(1-\sqrt{2})}{8}e^{(-2+\sqrt{2})t}\text{ A}$,$i_L(t) = \frac{7(1+\sqrt{2})}{8}e^{(2-\sqrt{2})t} + \frac{7(1-\sqrt{2})}{8}e^{(2+\sqrt{2})t}\text{ A}$,$i_L(t) = \frac{7(1+\sqrt{2})}{8}e^{(-2+\sqrt{2})t} - \frac{7(1-\sqrt{2})}{8}e^{(-2-\sqrt{2})t}\text{ A}$,optionA,"https://raw.githubusercontent.com/jlohix/Duolingo-for-CA/main/question-bank/laplaceCA/laplaceCAq8.png",Applying the inverse Laplace transform yields the exact analytical form for the inductor current response $i_L(t)$.,3,custom
-209-1,2,,How do you represent the source voltage $v_s(t) = 3u(t)\text{ V}$ and the inductor impedance $Z_L$ in the s-domain given $L = 2\text{ H}$?,"$V_s(s) = \frac{3}{s^2}, \; Z_L = 2s$","$V_s(s) = \frac{3}{s}, \; Z_L = 2s$","$V_s(s) = \frac{3}{s}, \; Z_L = s$ മറ്റൊരു രൂപം","$V_s(s) = 3, \; Z_L = \frac{2}{s}$",optionB,"https://raw.githubusercontent.com/jlohix/Duolingo-for-CA/main/question-bank/laplaceCA/laplaceCAq9.png","Given $v_s(t) = 3u(t)\text{ V}$, its Laplace transform is $V_s(s) = \frac{3}{s}$. For an inductor with $L = 2\text{ H}$ and zero initial current $i_x(0^-) = 0$, the s-domain impedance is $Z_L = sL = 2s$.",1,custom
+209-1,2,,How do you represent the source voltage $v_s(t) = 3u(t)\text{ V}$ and the inductor impedance $Z_L$ in the s-domain given $L = 2\text{ H}$?,"$V_s(s) = \frac{3}{s^2}, \; Z_L = 2s$","$V_s(s) = \frac{3}{s}, \; Z_L = 2s$","$V_s(s) = \frac{3}{s}, \; Z_L = s$","$V_s(s) = 3, \; Z_L = \frac{2}{s}$",optionB,"https://raw.githubusercontent.com/jlohix/Duolingo-for-CA/main/question-bank/laplaceCA/laplaceCAq9.png","Given $v_s(t) = 3u(t)\text{ V}$, its Laplace transform is $V_s(s) = \frac{3}{s}$. For an inductor with $L = 2\text{ H}$ and zero initial current $i_x(0^-) = 0$, the s-domain impedance is $Z_L = sL = 2s$.",1,custom
 209-2,2,,"Using KCL at the inductor node, how can you express the relationship between the input voltage source, resistor $R_1$, the inductor voltage $V_1(s)$, and the current $I_x(s)$?",$\frac{V_s(s) - V_1(s)}{R_1} = I_x(s) + 2I_x(s)$,$\frac{V_s(s)}{R_1} = I_x(s) + 2I_x(s)$,$\frac{V_1(s)}{R_1} = I_x(s) + 2I_x(s)$,$\frac{V_s(s) - V_1(s)}{R_1} = I_x(s) - 2I_x(s)$,optionA,"https://raw.githubusercontent.com/jlohix/Duolingo-for-CA/main/question-bank/laplaceCA/laplaceCAq9.png","Applying KCL at the inductor node (top node), the current entering from resistor $R_1$ is $\frac{V_s(s) - V_1(s)}{R_1}$. The currents leaving are the inductor current $I_x(s)$ and the dependent source current $2I_x(s)$. Thus, $\frac{V_s(s) - V_1(s)}{R_1} = I_x(s) + 2I_x(s)$.",1,custom
 209-3,2,,"By substituting $V_1(s) = 2sI_x(s)$ into your KCL equation, what is the resulting expression for the current $I_x(s)$ in the s-domain?",$I_x(s) = \frac{3}{s(s+6)}$,$I_x(s) = \frac{1.5}{s(s+3)}$,$I_x(s) = \frac{3}{2s(s+6)}$,$I_x(s) = \frac{6}{s(s+12)}$,optionC,"https://raw.githubusercontent.com/jlohix/Duolingo-for-CA/main/question-bank/laplaceCA/laplaceCAq9.png","Substitute $V_1(s) = 2sI_x(s)$ and $R_1 = 4\,\Omega$ into the KCL equation: $\frac{\frac{3}{s} - 2sI_x(s)}{4} = 3I_x(s)$. Multiplying by $4$ gives $\frac{3}{s} - 2sI_x(s) = 12I_x(s)$, which simplifies to $\frac{3}{s} = (2s + 12)I_x(s)$. Solving for $I_x(s)$ yields $I_x(s) = \frac{3}{s(2s+12)} = \frac{3}{2s(s+6)}$.",1,custom
 209-4,2,,How can you relate the output voltage $V_{\text{output}}(s)$ across resistor $R_2$ to the dependent source current $2I_x(s)$ and resistor $R_2$?,$V_{\text{out}}(s) = 2 R_2 I_x(s)$,$V_{\text{out}}(s) = R_2 I_x(s)$,$V_{\text{out}}(s) = \frac{R_2}{2} I_x(s)$,$V_{\text{out}}(s) = 20 s I_x(s)$,optionA,"https://raw.githubusercontent.com/jlohix/Duolingo-for-CA/main/question-bank/laplaceCA/laplaceCAq9.png","At the output node, the dependent source supplies a current of $2I_x(s)$ which flows directly through resistor $R_2$. Therefore, by Ohm's law, $V_{\text{out}}(s) = (2I_x(s)) R_2 = 2R_2 I_x(s)$. Given $R_2 = 10\,\Omega$, $V_{\text{out}}(s) = 20I_x(s) = \frac{30}{s(s+6)}$.",1,custom
@@ -145,6 +220,6 @@ $$v_o(0^+) = e^0 [4(1) + 0] = 4\text{ V} = v_C(0^-)$$, which verifies continuity
 217-5,2,,How do you perform partial fraction expansion and take the inverse Laplace transform of Vo(s) to obtain vo(t)?,$v_o(t) = \left(\frac{20}{3} + \frac{10}{3}e^{-t/2}\right)u(t)\text{ V}$,$v_o(t) = \left(10 + \frac{20}{3}e^{-3t/8}\right)u(t)\text{ V}$,$v_o(t) = \left(\frac{40}{3} + \frac{5}{3}e^{-3t/8}\right)u(t)\text{ V}$,$v_o(t) = \left(15 + 5e^{-3t/4}\right)u(t)\text{ V}$,optionC,"https://raw.githubusercontent.com/jlohix/Duolingo-for-CA/main/question-bank/laplace/laplaceq8.png",Expanding $V_o(s) = \frac{15(s + 1/3)}{s(s + 3/8)}$ using partial fractions yields $V_o(s) = \frac{40/3}{s} + \frac{5/3}{s + 3/8}$. Taking the inverse Laplace transform term by term using standard transform pairs gives $v_o(t) = \left(\frac{40}{3} + \frac{5}{3}e^{-3t/8}\right)u(t)\text{ V}$.,3,custom
 218-1,2,,"Given the initial condition $V_o(0) = 0$, what are the s-domain representations of the independent voltage source $24\delta(t)\text{ V}$, the $3\ \Omega$ resistor, the $0.5\text{ F}$ capacitor, and the $2\ \Omega$ resistor?","$V_s(s) = 24$, $Z_R = \frac{3}{s}$, $Z_C = \frac{2}{s}$, $Z_{R2} = \frac{2}{s}$","$V_s(s) = \frac{24}{s}$, $Z_R = 3$, $Z_C = \frac{0.5}{s}$, $Z_{R2} = 2$","$V_s(s) = 24$, $Z_R = 3$, $Z_C = \frac{2}{s}$, $Z_{R2} = 2$","$V_s(s) = 24s$, $Z_R = 3$, $Z_C = \frac{1}{2s}$, $Z_{R2} = 2$",optionC,"https://raw.githubusercontent.com/jlohix/Duolingo-for-CA/main/question-bank/laplace/laplaceq9.png",The impulse function $24\delta(t)$ transforms to $24$. The resistor impedance remains $3\ \Omega$ and $2\ \Omega$. The capacitor impedance with $C = 0.5\text{ F}$ and zero initial condition is $Z_C = \frac{1}{sC} = \frac{1}{0.5s} = \frac{2}{s}$.,3,custom
 218-2,2,,Express the controlling current $I(s)$ (which is the current flowing from left to right through the $3\ \Omega$ resistor) in terms of the source voltage $V_s(s) = 24$ and the output node voltage $V_o(s)$.,$I(s) = \frac{24}{3} - sV_o(s)$,$I(s) = \frac{24 - V_o(s)}{3}$,$I(s) = \frac{V_s(s) + V_o(s)}{3}$,$I(s) = \frac{V_o(s) - 24}{3}$,optionB,"https://raw.githubusercontent.com/jlohix/Duolingo-for-CA/main/question-bank/laplace/laplaceq9.png","Applying Ohm's law to the left branch, the current flows from the source potential $V_s(s) = 24$ to the node voltage $V_o(s)$ through the $3\ \Omega$ resistor: $I(s) = \frac{24 - V_o(s)}{3}$.",3,custom
-218-3,2,,"Write the Kirchhoff's Current Law (KCL) equation at the top middle node where the voltage is $V_o(s)$, considering currents leaving the node.",optionA,$\frac{V_o(s)}{3} + \frac{s}{2}V_o(s) - 5I(s) = 24$,$\frac{24 - V_o(s)}{3} + \frac{s}{2}V_o(s) = 5I(s)$,$\frac{V_o(s) - 24}{3} + \frac{2}{s}V_o(s) + 5I(s) = 0$,optionA,"https://raw.githubusercontent.com/jlohix/Duolingo-for-CA/main/question-bank/laplace/laplaceq9.png","The sum of currents leaving the node equals zero: current to the left through the $3\ \Omega$ resistor is $\frac{V_o(s) - 24}{3}$, current downward through the capacitor admittance ($Y_C = \frac{s}{2}$) is $\frac{s}{2}V_o(s)$, and current from the dependent source entering the node is $-5I(s)$ (hence $-5I(s)$ leaving). Thus, $\frac{V_o(s) - 24}{3} + \frac{s}{2}V_o(s) - 5I(s) = 0$.",3,custom
+218-3,2,,"Write the Kirchhoff's Current Law (KCL) equation at the top middle node where the voltage is $V_o(s)$, considering currents leaving the node.",$\frac{V_o(s)-24}{3}+\frac{s}{2}V_o(s)-5I(s)=0$,$\frac{V_o(s)}{3} + \frac{s}{2}V_o(s) - 5I(s) = 24$,$\frac{24 - V_o(s)}{3} + \frac{s}{2}V_o(s) = 5I(s)$,$\frac{V_o(s) - 24}{3} + \frac{2}{s}V_o(s) + 5I(s) = 0$,optionA,"https://raw.githubusercontent.com/jlohix/Duolingo-for-CA/main/question-bank/laplace/laplaceq9.png","The sum of currents leaving the node equals zero: current to the left through the $3\ \Omega$ resistor is $\frac{V_o(s) - 24}{3}$, current downward through the capacitor admittance ($Y_C = \frac{s}{2}$) is $\frac{s}{2}V_o(s)$, and current from the dependent source entering the node is $-5I(s)$ (hence $-5I(s)$ leaving). Thus, $\frac{V_o(s) - 24}{3} + \frac{s}{2}V_o(s) - 5I(s) = 0$.",3,custom
 218-4,2,,Substitute $I(s) = \frac{24 - V_o(s)}{3}$ into the KCL equation and solve for the output voltage $V_o(s)$.,$V_o(s) = \frac{48}{s + 2}$,$V_o(s) = \frac{48}{s + 4}$,$V_o(s) = \frac{24}{s + 4}$,$V_o(s) = \frac{12}{s + 2}$,optionB,"https://raw.githubusercontent.com/jlohix/Duolingo-for-CA/main/question-bank/laplace/laplaceq9.png","Substitute $I(s)$: $\frac{V_o(s) - 24}{3} + \frac{s}{2}V_o(s) - 5\left(\frac{24 - V_o(s)}{3}\right) = 0$. Expanding gives $\frac{V_o(s)-24}{3} + \frac{s}{2}V_o(s) - \frac{120 - 5V_o(s)}{3} = 0$. Combining terms: $(1+5)V_o(s) - 144 + \frac{3s}{2}V_o(s) = 0 \Rightarrow \left(6 + \frac{3s}{2}\right)V_o(s) = 144$. Solving for $V_o(s)$ yields $V_o(s) = \frac{144}{6 + \frac{3s}{2}} = \frac{48}{s + 4}$.",3,custom
 218-5,2,,Apply the inverse Laplace transform to $V_o(s) = \frac{48}{s + 4}$ to find the time-domain voltage $V_o(t)$ for $t \ge 0$.,$V_o(t) = 48e^{-4t}u(t)\text{ V}$,$V_o(t) = 24e^{-4t}u(t)\text{ V}$,$V_o(t) = 12e^{-4t}u(t)\text{ V}$,$V_o(t) = 48e^{-2t}u(t)\text{ V}$,optionA,"https://raw.githubusercontent.com/jlohix/Duolingo-for-CA/main/question-bank/laplace/laplaceq9.png","Using the standard Laplace transform pair $\mathcal{L}^{-1}\left\{\frac{1}{s + a}\right\} = e^{-at}u(t)$, the inverse transform of $V_o(s) = \frac{48}{s + 4}$ is $V_o(t) = 48e^{-4t}u(t)\text{ V}$.",3,custom

@@ -95,7 +95,69 @@ $$v_o(t) = 8(1)\cos(2000t + 0^\circ) = 8\cos(2000t)\text{ V}$$",1,custom
 207-1,2,,"What is the expression for the transfer function $H(s)$ relating the output voltage across the inductor to the input voltage in terms of $s$, the resistor $R$, the capacitor $C$, and the inductor $L$?",$H(s) = \frac{R}{R + \frac{1}{sC} + sL}$,$H(s) = \frac{\frac{1}{sC}}{R + \frac{1}{sC} + sL}$,$H(s) = \frac{sL}{R + sL}$,$H(s) = \frac{sL}{R + \frac{1}{sC} + sL}$,optionD,"https://raw.githubusercontent.com/jlohix/Duolingo-for-CA/main/question-bank/poles/polesq3.png","The circuit is a series RLC circuit. Using voltage division, the output voltage across the inductor $V_o(s)$ is given by $V_o(s) = V_g(s) \cdot \frac{sL}{R + \frac{1}{sC} + sL}$. Thus, the transfer function is $H(s) = \frac{V_o(s)}{V_g(s)} = \frac{sL}{R + \frac{1}{sC} + sL}$.",3,custom
 207-2,2,,What is the numerical value of the input frequency $\omega$ given in the problem statement where $v_g(t) = 12 \cos(2000t)$?,$12\text{ rad/s}$,$2500\text{ rad/s}$,$2000\text{ rad/s}$,$1000\text{ rad/s}$,optionC,"https://raw.githubusercontent.com/jlohix/Duolingo-for-CA/main/question-bank/poles/polesq3.png","The sinusoidal input voltage is given in the general form $v_g(t) = V_m \cos(\omega t)$. Comparing this with $v_g(t) = 12 \cos(2000t)$, we directly identify the angular frequency $\omega = 2000\text{ rad/s}$.",3,custom
 207-3,2,,"How do you evaluate the frequency response $H(j\omega)$ at the input frequency using your transfer function, given $R = 20\,\Omega$, $C = 25\,\mu\text{F}$, $L = 10\,\text{mH}$, and $\omega = 2000\text{ rad/s}$?",$H(j\omega) = \frac{-20}{20 + j20}$,$H(j\omega) = \frac{j20}{20 - j20}$,$H(j\omega) = \frac{20}{20 + j20}$,$H(j\omega) = \frac{j20}{20 + j20}$,optionB,"https://raw.githubusercontent.com/jlohix/Duolingo-for-CA/main/question-bank/poles/polesq3.png","Substitute $s = j\omega = j2000$ into $H(s) = \frac{sL}{R + \frac{1}{sC} + sL}$. Calculate $sL = j(2000)(10 \times 10^{-3}) = j20$ and $\frac{1}{sC} = \frac{1}{j(2000)(25 \times 10^{-6})} = \frac{1}{j0.05} = -j20$. Thus, $H(j\omega) = \frac{j20}{20 - j20 + j20} = \frac{j20}{20} = j1$, or more generally with the full denominator $H(j\omega) = \frac{j20}{20 - j20}$.",3,custom
-207-4,2,,What is the magnitude and phase of the sinusoidal steady-state output voltage $v_o(t)$?,"$v_o(t) = 8.49 \cos(2000t + 45^\circ)\,\text{V}$","$v_o(t) = 8.49 \cos(2000t - 45^\circ)\,\text{V}$","$v_o(t) = 12 \cos(2000t + 90^\circ)\,\text{V}$","$v_o(t) = 12 \cos(2000t - 90^\circ)\,\text{V}$",optionC,"https://raw.githubusercontent.com/jlohix/Duolingo-for-CA/main/question-bank/poles/polesq3.png","From step 3, $H(j2000) = \frac{j20}{20 - j20} = \frac{j20}{20\sqrt{2}\angle -45^\circ} = \frac{20\angle 90^\circ}{20\sqrt{2}\angle -45^\circ} = \frac{1}{\sqrt{2}}\angle 135^\circ$ wait, let's re-evaluate: denominator is $20 + j(\omega L - \frac{1}{\omega C}) = 20 + j(20 - 20) = 20$. Thus $H(j2000) = \frac{j20}{20} = j1 = 1\angle 90^\circ$. Multiplying by input phasor $V_g = 12\angle 0^\circ$ gives $V_o = 12\angle 90^\circ\,\text{V}$, so $v_o(t) = 12 \cos(2000t + 90^\circ)\,\text{V}$.",3,custom
+207-4,2,,What is the magnitude and phase of the sinusoidal steady-state output voltage $v_o(t)$?,"$v_o(t) = 8.49 \cos(2000t + 45^\circ)\,\text{V}$","$v_o(t) = 8.49 \cos(2000t - 45^\circ)\,\text{V}$","$v_o(t) = 12 \cos(2000t + 90^\circ)\,\text{V}$","$v_o(t) = 12 \cos(2000t - 90^\circ)\,\text{V}$",optionC,"https://raw.githubusercontent.com/jlohix/Duolingo-for-CA/main/question-bank/poles/polesq3.png","At the input frequency,
+
+$$
+\omega=2000\ \text{rad/s}
+$$
+
+The inductor and capacitor reactances are:
+
+$$
+\omega L=(2000)(10\,\text{mH})=20\ \Omega
+$$
+
+$$
+\frac{1}{\omega C}
+=
+\frac{1}{(2000)(25\,\mu\text{F})}
+=
+20\ \Omega
+$$
+
+Therefore, the reactive terms cancel:
+
+$$
+Z_{\text{total}}
+=
+20+j20-j20
+=
+20\ \Omega
+$$
+
+The transfer function at this frequency is:
+
+$$
+H(j2000)
+=
+\frac{j\omega L}{Z_{\text{total}}}
+=
+\frac{j20}{20}
+=
+j
+=
+1\angle 90^\circ
+$$
+
+The input phasor is:
+
+$$
+V_g=12\angle 0^\circ
+$$
+
+Hence,
+
+$$
+V_o
+=
+H(j2000)V_g
+=
+(1\angle90^\circ)(12\angle0^\circ)
+=
+12\angle90^\circ\ \text{V}
+$$
+
+Therefore, the output magnitude is $12\ \text{V}$ and the phase is $+90^\circ$.",3,custom
 207-5,2,,"What is the steady-state output voltage across the inductor when the input is changed to a DC voltage of $v_g(t) = 8\,\text{V}$?","$12\,\text{V}$","$4\,\text{V}$","$8\,\text{V}$","$0\,\text{V}$",optionD,"https://raw.githubusercontent.com/jlohix/Duolingo-for-CA/main/question-bank/poles/polesq3.png","In steady state under DC excitation ($\omega = 0$), the capacitor acts as an open circuit and the inductor acts as a short circuit (zero impedance, $sL = 0$). Since the inductor is a short circuit in DC steady state, the voltage across it is $0\,\text{V}$.",3,custom
 208-1,2,,How can you express the total admittance of the parallel RLC circuit in the s-domain to set up the transfer function $H(s) = \frac{V_o(s)}{I_g(s)}$?,$Y(s) = \frac{1}{R} + sC + \frac{1}{sL}$,$Y(s) = \frac{1}{R} + \frac{1}{sC} + sL$,$Y(s) = R + \frac{1}{sC} + sL$,$Y(s) = R + sC + \frac{1}{sL}$,optionA,"https://raw.githubusercontent.com/jlohix/Duolingo-for-CA/main/question-bank/poles/polesq4.png","In a parallel RLC circuit, the total admittance $Y(s)$ is the sum of the individual admittances of the resistor, capacitor, and inductor. The resistor admittance is $\frac{1}{R}$, the capacitor admittance is $sC$, and the inductor admittance is $\frac{1}{sL}$. Thus, $Y(s) = \frac{1}{R} + sC + \frac{1}{sL}$.",3,custom
 208-2,2,,"What is the simplified algebraic expression for the transfer function $H(s)$ after substituting the component values $R = 50\,\Omega$, $C = 100\,\mu\text{F}$, and $L = 10\,\text{mH}$?",$H(s) = \frac{20000s}{s^2 + 400s + 2\times 10^6}$,$H(s) = \frac{1000s}{s^2 + 100s + 10^5}$,$H(s) = \frac{10000s}{s^2 + 200s + 10^6}$,$H(s) = \frac{500s}{s^2 + 50s + 10^4}$,optionC,"https://raw.githubusercontent.com/jlohix/Duolingo-for-CA/main/question-bank/poles/polesq4.png","Starting with $H(s) = \frac{1}{Y(s)} = \frac{1}{\frac{1}{R} + sC + \frac{1}{sL}}$, multiplying numerator and denominator by $sL$ gives $H(s) = \frac{sL}{\frac{sL}{R} + LCs^2 + 1}$. Substituting $R = 50$, $LC = 10^{-6}$, and $\frac{L}{R} = 2\times 10^{-4}$ yields $H(s) = \frac{0.01s}{10^{-6}s^2 + 2\times 10^{-4}s + 1}$. Multiplying by $10^6$ gives $\frac{10000s}{s^2 + 200s + 10^6}$.",3,custom
