@@ -98,16 +98,72 @@ export function ResistorV({ x, y1, y2 }) {
   return <path d={d} />;
 }
 
-export function SwitchH({ x1, x2, y, open }) {
+export function InductorV({ x, y1, y2 }) {
+  const lead = 10;
+  const a = y1 + lead;
+  const span = y2 - lead - a;
+  const r = span / 8;
+  let d = `M${x} ${y1} V${a}`;
+  for (let i = 0; i < 4; i += 1) {
+    const y0 = a + i * 2 * r;
+    d += ` A${r} ${r} 0 0 1 ${x} ${y0 + 2 * r}`;
+  }
+  d += ` V${y2}`;
+  return <path d={d} />;
+}
+
+export function CapacitorV({ x, y1, y2 }) {
+  const mid = (y1 + y2) / 2;
+  const gap = 7;
+  const top = mid - gap;
+  const bot = mid + gap;
   return (
     <g>
-      <Node x={x1} y={y} />
-      <Node x={x2} y={y} />
+      <Wire x1={x} y1={y1} x2={x} y2={top} />
+      <line x1={x - 16} y1={top} x2={x + 16} y2={top} />
+      <line x1={x - 16} y1={bot} x2={x + 16} y2={bot} />
+      <Wire x1={x} y1={bot} x2={x} y2={y2} />
+    </g>
+  );
+}
+
+export function CurrentArrowV({ x, y, len = 22, label, side = "right", weak }) {
+  const tip = y + len;
+  const labelX = side === "left" ? x - 11 : x + 11;
+  return (
+    <g className={`walk-current ${weak ? "is-weak" : ""}`}>
+      <path d={`M${x} ${y} V${tip - 4}`} />
+      <path d={`M${x - 6} ${tip - 10} L${x} ${tip + 2} L${x + 6} ${tip - 10}`} />
+      <text
+        x={labelX}
+        y={y + len / 2 + 4}
+        textAnchor={side === "left" ? "end" : "start"}
+        className="walk-i-label"
+      >
+        {label}
+      </text>
+    </g>
+  );
+}
+
+export function SwitchH({ x1, x2, y, open, hollow = false }) {
+  const contact = (x) =>
+    hollow ? (
+      <circle cx={x} cy={y} r="3.6" className="walk-contact" />
+    ) : (
+      <Node x={x} y={y} />
+    );
+  return (
+    <g>
+      {hollow ? null : contact(x1)}
+      {hollow ? null : contact(x2)}
       {open ? (
         <Wire x1={x1} y1={y} x2={x2 - 2} y2={y - 20} />
       ) : (
         <Wire x1={x1} y1={y} x2={x2} y2={y} />
       )}
+      {hollow ? contact(x1) : null}
+      {hollow ? contact(x2) : null}
     </g>
   );
 }

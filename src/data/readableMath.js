@@ -10,9 +10,15 @@ function escapeHtml(value) {
     .replaceAll(">", "&gt;");
 }
 
+function normalizeTex(tex) {
+  // Collapsed \\frac / \\sigma from doubled JSX or CSV escapes. KaTeX reads
+  // \\ as a line break, so the command name otherwise shows as plain text.
+  return String(tex ?? "").replace(/\\\\(?=[a-zA-Z])/g, "\\");
+}
+
 function renderMath(tex, display) {
   try {
-    return katex.renderToString(String(tex ?? ""), {
+    return katex.renderToString(normalizeTex(tex), {
       displayMode: display,
       throwOnError: false,
       output: "html",

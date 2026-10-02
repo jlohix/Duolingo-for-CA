@@ -2699,9 +2699,23 @@ html[data-theme="dark"] .labs-egg-b {
 }
 
 .circuit-label {
+  font-family: "Segoe UI", system-ui, sans-serif;
   font-size: 18px;
   font-weight: 800;
   fill: currentColor;
+}
+
+.circuit-svg.lab-teach .circuit-label,
+.circuit-svg.lab-teach .s-plane-label {
+  font-weight: 500;
+  font-size: 14px;
+  stroke: none;
+}
+
+.circuit-svg .s-plane-label {
+  font-size: 11px;
+  font-weight: 500;
+  stroke: none;
 }
 
 .slide-math {
@@ -2716,6 +2730,21 @@ html[data-theme="dark"] .labs-egg-b {
   line-height: 1.15;
 }
 
+.page.opamp-lab .circuit-svg.lab-teach .slide-math {
+  overflow: visible;
+}
+
+.page.opamp-lab .circuit-svg.lab-teach .slide-math .katex-display,
+.page.opamp-lab .circuit-svg.lab-teach .katex-display {
+  margin: 0;
+  overflow: visible;
+}
+
+.page.opamp-lab .circuit-svg.lab-teach .slide-math .katex-display > .katex,
+.page.opamp-lab .circuit-svg.lab-teach .katex-display > .katex {
+  font-size: 1em;
+}
+
 .slide-math .katex-display {
   margin: 0;
 }
@@ -2723,6 +2752,7 @@ html[data-theme="dark"] .labs-egg-b {
 .slide-math .katex {
   font-size: 1.08em;
   color: inherit;
+  white-space: nowrap;
 }
 
 .circuit-svg.lab-teach .hot .slide-math,
@@ -2993,6 +3023,271 @@ html[data-theme="dark"] .labs-egg-b {
 .circuit-svg.lab-teach .slide-math.board-formula-near,
 .circuit-svg.lab-teach .slide-math.box-math-lg {
   color: #58cc02;
+  overflow: visible;
+}
+
+.circuit-svg.lab-teach .slide-math.board-formula .katex,
+.circuit-svg.lab-teach .slide-math.board-formula-near .katex {
+  font-size: 1em;
+}
+
+.circuit-svg.lab-teach .slide-math .katex-display > .katex,
+.page.opamp-lab .circuit-svg.lab-teach .slide-math .katex-display > .katex {
+  font-size: 1em;
+}
+
+.circuit-svg.lab-teach .slide-math.hot {
+  overflow: hidden;
+}
+
+.circuit-svg.lab-teach .flow-panel-title {
+  fill: #58cc02;
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: 0.03em;
+}
+
+.circuit-svg.lab-teach .flow-arrow-label,
+.circuit-svg.lab-teach .flow-panel-note {
+  fill: #58cc02;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.circuit-board:has(.concept-flow) {
+  overflow: visible;
+}
+
+.concept-board {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.concept-flow-caption {
+  margin: 0;
+  padding: 0 16px 12px;
+  text-align: center;
+  color: #58cc02;
+}
+
+.concept-flow-caption .katex {
+  font-size: 1.05em;
+}
+
+.concept-flow-caption.is-plain,
+.concept-flow-kicker {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  color: #58cc02;
+  opacity: 0.8;
+}
+
+.concept-flow-kicker {
+  margin: 8px 0 0;
+  text-align: center;
+}
+
+.concept-flow {
+  box-sizing: border-box;
+  width: 100%;
+  padding: 16px 14px 14px;
+  color: #58cc02;
+}
+
+.concept-flow-track {
+  display: flex;
+  align-items: stretch;
+  justify-content: center;
+  gap: 0;
+  min-height: 176px;
+}
+
+.concept-flow.is-stacked .concept-flow-track {
+  flex-direction: column;
+  align-items: center;
+  min-height: 0;
+  gap: 0;
+}
+
+.concept-flow.is-compact .concept-flow-track {
+  min-height: 92px;
+}
+
+.concept-flow.is-compact .concept-flow-body {
+  min-height: 40px;
+}
+
+.concept-flow-chunk {
+  display: contents;
+}
+
+.concept-flow-panel {
+  flex: 1 1 0;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  padding: 12px 12px 14px;
+  border: 3px solid currentColor;
+  border-radius: 14px;
+  background: transparent;
+}
+
+.concept-flow.is-stacked .concept-flow-panel {
+  flex: 0 0 auto;
+  width: 100%;
+  max-width: 440px;
+}
+
+.concept-flow-title {
+  margin: 0 0 8px;
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  line-height: 1.2;
+  text-align: center;
+  color: inherit;
+}
+
+.concept-flow-body {
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  width: 100%;
+  min-height: 72px;
+}
+
+.concept-flow-math {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  color: inherit;
+}
+
+.concept-flow-math .math-text,
+.concept-flow-math .katex,
+.concept-flow-math .katex-display {
+  color: inherit;
+}
+
+.concept-flow-math .katex {
+  font-size: 1.12em;
+}
+
+.concept-flow-math.is-display .katex-display {
+  margin: 0;
+}
+
+.concept-flow-math.is-display .katex {
+  font-size: 1.05em;
+}
+
+.concept-flow-notes {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  margin-top: 8px;
+}
+
+.concept-flow-note {
+  margin: 0;
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1.25;
+  text-align: center;
+  color: inherit;
+  opacity: 0.78;
+}
+
+.concept-flow-arrow {
+  flex: 0 0 72px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  padding: 0 4px;
+  color: inherit;
+}
+
+.concept-flow-arrow.is-dual {
+  flex-basis: 84px;
+  gap: 6px;
+}
+
+.concept-flow-arrow.is-vertical {
+  flex: 0 0 auto;
+  width: 100%;
+  padding: 8px 0;
+}
+
+.concept-flow-arrow-label {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  line-height: 1.1;
+  white-space: nowrap;
+  text-align: center;
+}
+
+.concept-flow-arrow-svg {
+  display: block;
+  width: 48px;
+  height: 16px;
+  overflow: visible;
+}
+
+.concept-flow-arrow.is-vertical .concept-flow-arrow-svg {
+  transform: rotate(90deg);
+}
+
+@media (max-width: 640px) {
+  .concept-flow-track {
+    flex-direction: column;
+    align-items: stretch;
+    min-height: 0;
+    gap: 4px;
+  }
+
+  .concept-flow-arrow {
+    flex: 0 0 auto;
+    width: 100%;
+    padding: 6px 0;
+  }
+
+  .concept-flow-arrow-svg {
+    transform: rotate(90deg);
+  }
+
+  .concept-flow-arrow.is-dual .concept-flow-arrow-svg {
+    transform: rotate(90deg);
+  }
+
+  .concept-flow-body {
+    min-height: 56px;
+  }
+}
+
+.s56-split {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  padding: 8px;
+  min-width: 0;
+}
+
+.s56-split .circuit-svg.lab-teach {
+  width: 100%;
+  min-width: 0;
+  max-height: 220px;
 }
 
 .circuit-svg .board-title,
@@ -3050,13 +3345,23 @@ html[data-theme="dark"] .circuit-svg .board-step {
 
 .page.opamp-lab .katex-display {
   max-width: 100%;
-  overflow-x: hidden;
+  overflow-x: auto;
+  overflow-y: hidden;
 }
 
 .page.opamp-lab .katex-display > .katex {
-  max-width: 100%;
-  white-space: normal;
-  font-size: clamp(0.92em, 3.2vw, 1.2em);
+  white-space: nowrap;
+  font-size: clamp(0.95em, 3vw, 1.22em);
+}
+
+.page.opamp-lab .katex {
+  white-space: nowrap;
+}
+
+.page.opamp-lab .option .katex,
+.page.opamp-lab .option .math-text .katex {
+  overflow-wrap: normal;
+  word-break: normal;
 }
 
 .teach-copy {
@@ -3094,10 +3399,10 @@ html[data-theme="dark"] .circuit-svg .board-step {
 
 .focus-eq {
   margin: 0;
-  padding: 12px 8px;
+  padding: 14px 10px;
   font-weight: 800;
   text-align: center;
-  overflow-x: hidden;
+  overflow-x: auto;
   max-width: 100%;
   color: #58cc02;
 }
@@ -3113,6 +3418,11 @@ html[data-theme="dark"] .circuit-svg .board-step {
 
 .focus-eq .katex-display {
   margin: 0.15em 0;
+}
+
+.circuit-board .lab-board-eq {
+  margin: 0;
+  padding: 2px 12px 14px;
 }
 
 .opamp-check {
@@ -3476,6 +3786,12 @@ html[data-theme="dark"] .circuit-svg .board-step {
   stroke: none;
 }
 
+.walk-circuit .walk-contact {
+  fill: #101614;
+  stroke: #e7eee8;
+  stroke-width: 2;
+}
+
 .walk-part,
 .walk-tiny,
 .walk-i-label,
@@ -3614,6 +3930,17 @@ html[data-theme="dark"] .circuit-svg .board-step {
   font-weight: 650;
   text-transform: capitalize;
   letter-spacing: 0.04em;
+}
+
+.practice-part {
+  justify-self: start;
+  margin: 0;
+  padding: 4px 12px;
+  border: 2px solid var(--green);
+  border-radius: 999px;
+  color: var(--green);
+  font-size: 0.9rem;
+  font-weight: 800;
 }
 
 .practice-card,

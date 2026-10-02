@@ -19,6 +19,9 @@ export default function QuestionCard({
           className="circuit-image"
           src={question.image}
           alt="Circuit for this question"
+          onError={(event) => {
+            event.currentTarget.remove();
+          }}
         />
       ) : null}
       <div className="options">

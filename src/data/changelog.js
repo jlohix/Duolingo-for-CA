@@ -1,5 +1,65 @@
 export const BUILT_IN_LOGS = [
   {
+    id: "built-2026-10-02-unit-circle-1j",
+    date: "2026-10-02",
+    title: "Unit circle 1 and j",
+    body: "On the unit-circle graphs, 1, −1, j, and −j now sit beside the axes instead of on the arrows.",
+  },
+  {
+    id: "built-2026-10-02-unit-circle-labels",
+    date: "2026-10-02",
+    title: "Unit circle labels",
+    body: "On Complex Numbers and Phase Angles, the unit-circle caption no longer sits on top of −j.",
+  },
+  {
+    id: "built-2026-10-02-splane-labels",
+    date: "2026-10-02",
+    title: "Clearer s-plane labels",
+    body: "Axis labels on walkthrough graphs are thinner and easier to read, instead of looking stamped over the axes.",
+  },
+  {
+    id: "built-2026-10-02-poles-board",
+    date: "2026-10-02",
+    title: "Poles walkthrough diagram",
+    body: "The Zeros, Poles, and Stability board now shows the H(s) fraction and s-plane labels clearly, instead of overlapping raw math.",
+  },
+  {
+    id: "built-2026-10-02-poles-practice",
+    date: "2026-10-02",
+    title: "Poles practice nodes",
+    body: "After Zeros, Poles, and Stability, you can now practise Easy, Average, and Challenging step-by-step questions.",
+  },
+  {
+    id: "built-2026-10-02-laplace-ca-csv",
+    date: "2026-10-02",
+    title: "Laplace circuit questions",
+    body: "Laplace Circuit Application practice has an updated question set. Easy, Average, and Challenging stay as their own nodes after the walkthrough.",
+  },
+  {
+    id: "built-2026-10-02-transfer-diagrams",
+    date: "2026-10-02",
+    title: "Transfer function diagrams",
+    body: "Circuit diagrams on Transfer Functions practice now show with the questions.",
+  },
+  {
+    id: "built-2026-10-02-laplace-topic-banks",
+    date: "2026-10-02",
+    title: "Laplace practice nodes",
+    body: "Laplace Basics, Circuit Application, and Transfer Functions each have their own Easy, Average, and Challenging step-by-step practice right after the walkthrough.",
+  },
+  {
+    id: "built-2026-10-02-laplace-circuit-bank",
+    date: "2026-10-02",
+    title: "Laplace circuit practice",
+    body: "After Laplace Circuit Application, you can now practise Easy, Average, and Challenging step-by-step questions.",
+  },
+  {
+    id: "built-2026-10-02-s4-s6-walks",
+    date: "2026-10-02",
+    title: "Laplace and poles walks",
+    body: "First-order now has extra tests after three walkthroughs. Laplace Transform and Poles and Zeros are open, with step-by-step walkthroughs.",
+  },
+  {
     id: "built-2026-09-23-tutor-question-context",
     date: "2026-09-23",
     title: "Tutor sees your question",
@@ -16,6 +76,18 @@ export const BUILT_IN_LOGS = [
     date: "2026-09-23",
     title: "Tutor remembers your chat",
     body: "Closing the tutor now just hides it, so your conversation stays until you close the tab or tap Clear. Reopening picks up right where you left off.",
+  },
+  {
+    id: "built-2026-09-23-opamp-power-csv",
+    date: "2026-09-23",
+    title: "Op-amp and power banks",
+    body: "Op-amp and Power practice now use the latest step-by-step questions and answers.",
+  },
+  {
+    id: "built-2026-09-23-opamp-gain-choice",
+    date: "2026-09-23",
+    title: "Op-amp gain choices",
+    body: "One Average op-amp practice step now uses the latest gain formula choices.",
   },
   {
     id: "built-2026-09-23-opamp-csv",

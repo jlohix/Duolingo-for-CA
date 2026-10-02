@@ -9,6 +9,206 @@ function looksMath(value) {
   return /\$|\\[a-zA-Z]/.test(String(value ?? ""));
 }
 
+function needsDisplayMath(value) {
+  return /\\(?:d?frac|displaystyle|lim|sum|int|sqrt|left|right)/.test(
+    String(value ?? "")
+  );
+}
+
+function asItemList(items) {
+  return (items || []).map((item) =>
+    typeof item === "string" ? { tex: item } : item
+  );
+}
+
+export function ConceptPanel({ title, items, footer }) {
+  const lines = asItemList(items);
+  const notes = footer == null ? [] : Array.isArray(footer) ? footer : [footer];
+  return (
+    <div className="concept-flow-panel">
+      {title ? <p className="concept-flow-title">{title}</p> : null}
+      <div className="concept-flow-body">
+        {lines.map((item, i) => (
+          <div
+            key={`${item.tex}-${i}`}
+            className={`concept-flow-math${item.display || needsDisplayMath(item.tex) ? " is-display" : ""}`}
+          >
+            <MathText text={item.tex} />
+          </div>
+        ))}
+      </div>
+      {notes.length ? (
+        <div className="concept-flow-notes">
+          {notes.map((note) => (
+            <p key={note} className="concept-flow-note">
+              {note}
+            </p>
+          ))}
+        </div>
+      ) : null}
+    </div>
+  );
+}
+
+function ConceptArrowMark({ back = false }) {
+  return (
+    <svg
+      className="concept-flow-arrow-svg"
+      viewBox="0 0 48 16"
+      aria-hidden="true"
+    >
+      {back ? (
+        <path
+          d="M46 8 H10 M18 2 L2 8 L18 14"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="3"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+      ) : (
+        <path
+          d="M2 8 H38 M30 2 L46 8 L30 14"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="3"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+      )}
+    </svg>
+  );
+}
+
+export function ConceptArrow({ label, back, vertical = false }) {
+  return (
+    <div
+      className={`concept-flow-arrow${vertical ? " is-vertical" : ""}${back ? " is-dual" : ""}`}
+    >
+      {label ? <span className="concept-flow-arrow-label">{label}</span> : null}
+      <ConceptArrowMark />
+      {back ? (
+        <>
+          <ConceptArrowMark back />
+          <span className="concept-flow-arrow-label">{back}</span>
+        </>
+      ) : null}
+    </div>
+  );
+}
+
+export function ConceptFlow({
+  steps = [],
+  dual = false,
+  stacked = false,
+  compact = false,
+}) {
+  return (
+    <div
+      className={`concept-flow${stacked ? " is-stacked" : ""}${dual ? " is-dual" : ""}${compact ? " is-compact" : ""}`}
+      role="img"
+    >
+      <div className="concept-flow-track">
+        {steps.map((step, i) => {
+          const showArrow = Boolean(
+            step.arrow || (dual && step.back) || (i > 0 && !stacked)
+          );
+          return (
+            <div key={`${step.title || step.arrow || "step"}-${i}`} className="concept-flow-chunk">
+              {showArrow ? (
+                <ConceptArrow
+                  label={step.arrow}
+                  back={dual ? step.back : null}
+                  vertical={stacked}
+                />
+              ) : null}
+              {step.title || step.items || step.footer ? (
+                <ConceptPanel
+                  title={step.title}
+                  items={step.items}
+                  footer={step.footer}
+                />
+              ) : null}
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+export function FlowPanel({ x, y, w, h, title, children }) {
+  return (
+    <g className="hot">
+      <rect
+        x={x}
+        y={y}
+        width={w}
+        height={h}
+        rx="14"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="3"
+      />
+      {title ? (
+        <text
+          x={x + w / 2}
+          y={y + 20}
+          textAnchor="middle"
+          className="flow-panel-title"
+        >
+          {title}
+        </text>
+      ) : null}
+      {children}
+    </g>
+  );
+}
+
+export function FlowArrow({ x1, x2, y, label, cls = "hot" }) {
+  const mid = (x1 + x2) / 2;
+  return (
+    <g>
+      <Arrow x1={x1} y={y} x2={x2} cls={cls} />
+      {label ? (
+        <text
+          x={mid}
+          y={y - 10}
+          textAnchor="middle"
+          className="flow-arrow-label"
+        >
+          {label}
+        </text>
+      ) : null}
+    </g>
+  );
+}
+
+export function MathPanel({ x, y, w, h, tex, cls = "hot" }) {
+  return (
+    <g className={cls}>
+      <rect
+        x={x}
+        y={y}
+        width={w}
+        height={h}
+        rx="14"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="3"
+      />
+      <MathLabel
+        x={x + 10}
+        y={y + 8}
+        w={w - 20}
+        h={h - 16}
+        tex={tex}
+        cls={`${cls} board-formula`}
+      />
+    </g>
+  );
+}
+
 function asDisplayMath(value) {
   const raw = String(value ?? "").trim();
   if (!raw) return raw;
@@ -37,16 +237,29 @@ export function MathLabel({ x, y, w, h, tex, cls = "", inline = false }) {
   );
 }
 
-export function Frame({ label, children, height = 300 }) {
+export function Frame({ label, children, height = 300, width = 560 }) {
   return (
     <svg
       className="circuit-svg lab-teach"
-      viewBox={`0 0 560 ${height}`}
+      viewBox={`0 0 ${width} ${height}`}
       role="img"
       aria-label={label}
     >
       {children}
     </svg>
+  );
+}
+
+export function SplitFrame({ label, left, right, height = 236 }) {
+  return (
+    <div className="s56-split" role="img" aria-label={label}>
+      <Frame label={`${label} left`} height={height} width={272}>
+        {left}
+      </Frame>
+      <Frame label={`${label} right`} height={height} width={272}>
+        {right}
+      </Frame>
+    </div>
   );
 }
 
@@ -110,8 +323,13 @@ export function Box({ x, y, w, h, cls, title, sub, titleSize = 20, subSize = 12,
   const mathSub = looksMath(sub);
   if (mathTitle || mathSub) {
     const pad = 8;
-    const subBand = sub ? (mathSub ? 40 : 22) : 0;
-    const mathCls = `${cls} ${titleCls}`.trim();
+    const subBand = sub
+      ? mathSub && needsDisplayMath(sub)
+        ? 40
+        : 22
+      : 0;
+    const mathCls = `${cls} ${titleCls} board-formula`.trim();
+    const displayTitle = needsDisplayMath(title);
     return (
       <g className={cls}>
         <rect
@@ -132,7 +350,7 @@ export function Box({ x, y, w, h, cls, title, sub, titleSize = 20, subSize = 12,
             h={Math.max(28, h - subBand - pad * 2)}
             tex={title}
             cls={mathCls}
-            inline
+            inline={!displayTitle}
           />
         ) : (
           wrapLabel(title, w - 16, titleSize).map((line, i) => (
@@ -157,6 +375,7 @@ export function Box({ x, y, w, h, cls, title, sub, titleSize = 20, subSize = 12,
             h={subBand - 4}
             tex={sub}
             cls={cls}
+            inline={!needsDisplayMath(sub)}
           />
         ) : sub ? (
           <text
@@ -234,6 +453,24 @@ export function Arrow({ x1, y, x2, cls }) {
     <g className={cls} fill="none" stroke="currentColor" strokeWidth="3">
       <path d={`M${x1} ${y} H${x2}`} />
       <path d={`M${x2 - 12} ${y - 8} L${x2} ${y} L${x2 - 12} ${y + 8}`} />
+    </g>
+  );
+}
+
+export function LeftArrow({ x1, y, x2, cls }) {
+  return (
+    <g className={cls} fill="none" stroke="currentColor" strokeWidth="3">
+      <path d={`M${x1} ${y} H${x2}`} />
+      <path d={`M${x2 + 12} ${y - 8} L${x2} ${y} L${x2 + 12} ${y + 8}`} />
+    </g>
+  );
+}
+
+export function DualArrows({ x1, x2, y, cls }) {
+  return (
+    <g>
+      <Arrow x1={x1} y={y - 12} x2={x2} cls={cls} />
+      <LeftArrow x1={x2} y={y + 12} x2={x1} cls={cls} />
     </g>
   );
 }

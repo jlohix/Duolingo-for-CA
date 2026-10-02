@@ -24,9 +24,10 @@ export const CHAT_TOPICS = [
   { id: 2, name: "Op-amps" },
   { id: 3, name: "Transients" },
   { id: 4, name: "First-order circuits" },
-  { id: 5, name: "Laplace transforms" },
-  { id: 6, name: "Network functions" },
-  { id: 7, name: "Frequency domain" },
+  { id: 5, name: "Laplace Transform" },
+  { id: 6, name: "Poles and Zeros" },
+  { id: 7, name: "Network functions" },
+  { id: 8, name: "Frequency domain" },
   // Future topics go here, e.g.:
   // { id: 8, name: "Two-port networks" },
 ];
@@ -35,8 +36,9 @@ export const CHAT_TOPICS = [
 // Kept here for reference / potential client-side reuse. Ordered by specificity.
 export const KEYWORD_RULES = [
   [/\b(op[-\s]?amp|opamp|operational amplifier|inverting|non[-\s]?inverting|feedback)\b/i, "Op-amps"],
-  [/\b(laplace|s[-\s]?domain|partial fraction|inverse transform)\b/i, "Laplace transforms"],
-  [/\b(network function|transfer function|two[-\s]?port|one[-\s]?port|pole|zero|stability)\b/i, "Network functions"],
+  [/\b(pole|zero|stability|left half plane|right half plane|complex plane|phase angle|euler|sigma\s*\+\s*j\s*omega)\b/i, "Poles and Zeros"],
+  [/\b(laplace|s[-\s]?domain|inverse transform|partial fraction|initial condition|transfer function)\b/i, "Laplace Transform"],
+  [/\b(network function|two[-\s]?port|one[-\s]?port|transfer parameter|network parameter)\b/i, "Network functions"],
   [/\b(phasor|sinusoid|impedance|admittance|reactance|ac power|rms|power factor|three[-\s]?phase|frequency[-\s]?domain)\b/i, "Frequency domain"],
   [/\b(first[-\s]?order|source[-\s]?free|natural response|time constant|charging|discharging)\b/i, "First-order circuits"],
   [/\b(transient|capacitor|inductor|second[-\s]?order|rc circuit|rl circuit|rlc)\b/i, "Transients"],

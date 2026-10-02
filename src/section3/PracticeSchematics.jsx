@@ -47,7 +47,7 @@ export function MiniGraph({ kind, yTop, yBot, yLabel, className = "" }) {
   );
 }
 
-function StateCard({ title, children }) {
+export function StateCard({ title, children }) {
   return (
     <figure className="walk-state">
       <figcaption className="walk-state-label">{title}</figcaption>
@@ -56,7 +56,7 @@ function StateCard({ title, children }) {
   );
 }
 
-function PairBoard({ left, right, caption }) {
+export function PairBoard({ left, right, caption }) {
   return (
     <div className="practice-schematic">
       <div className={`walk-board-states practice-pair${right ? "" : " is-single"}`}>

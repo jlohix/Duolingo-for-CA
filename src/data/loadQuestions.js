@@ -8,16 +8,27 @@ function clean(value) {
   return String(value ?? "").trim();
 }
 
+const IMAGE_EXT = /\.(png|jpe?g|gif|webp|svg)$/i;
+
 function normalizeImage(url) {
   const src = clean(url);
   if (!src) return "";
   const blob = src.match(
     /^https:\/\/github\.com\/([^/]+)\/([^/]+)\/blob\/([^/]+)\/(.+?)(?:\?.*)?$/
   );
+  let out = src;
   if (blob) {
-    return `https://raw.githubusercontent.com/${blob[1]}/${blob[2]}/${blob[3]}/${blob[4]}`;
+    out = `https://raw.githubusercontent.com/${blob[1]}/${blob[2]}/${blob[3]}/${blob[4]}`;
   }
-  return src;
+  const path = out.split("?")[0];
+  // Some CSVs omit .png even though the GitHub files are stored as PNGs.
+  if (
+    /^https:\/\/raw\.githubusercontent\.com\//i.test(out) &&
+    !IMAGE_EXT.test(path)
+  ) {
+    return `${path}.png`;
+  }
+  return out;
 }
 
 function parseDifficulty(value) {
@@ -129,6 +140,7 @@ function parseQuestionRows(text, { withPaper = false } = {}) {
       image,
       explanation: dressLatex(cell(row, "explanation")),
       difficulty: parseDifficulty(cell(row, "difficulty")),
+      walkthroughTag: clean(cell(row, "walkthrough_tag", "walkthroughTag")),
     };
     if (withPaper) {
       item.paper =

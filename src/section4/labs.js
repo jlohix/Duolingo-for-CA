@@ -264,6 +264,7 @@ export const STEPRC = {
         "Capacitor voltage cannot jump: $v(0^-)=v(0^+)=V_0$.",
         "Final: C is open, so $v(\\infty)=V_s$.",
         "$\\tau=RC$ (use Thevenin $R$ seen by C if needed).",
+        "For a general RC network, first find $v_C(\\infty)$ from the $t\\to\\infty$ DC circuit, where C is an open circuit. Then use the resistance $R_{th}$ seen by C: $\\tau=R_{th}C$.",
       ],
       check: {
         prompt: "In an RC circuit at $t=0$, what cannot jump?",
@@ -282,10 +283,14 @@ export const STEPRC = {
       highlight: "curve",
       boardHint: "",
       title: "Complete response",
-      body: "Natural piece from stored energy, forced piece from $V_s$. Together:",
+      body: [
+        "Natural piece from stored energy, forced piece from $V_s$. Together:",
+        "When C charges directly to the source, $v_C(\\infty)=V_s$, so the first formula below is a special case of the general form.",
+      ],
       eq: [
         "$$v(t)=V_s+(V_0-V_s)e^{-t/\\tau}\\quad(t\\ge 0)$$",
         "$$v(t)=V_0\\quad(t<0)$$",
+        "$$\\text{General: }v_C(t)=v_C(\\infty)+[v_C(0^+)-v_C(\\infty)]e^{-t/\\tau}$$",
       ],
       check: {
         prompt: "An RC circuit starts with $v_C(0)=0$. At $t=0$ a DC source $V_s$ is switched on. What happens to $v_C$?",
@@ -380,6 +385,8 @@ export const STEPRL = {
         "Inductor current cannot jump: $i(0^-)=i(0^+)=I_0$.",
         "Final: $L$ shorts, $i(\\infty)=V_s/R$.",
         "$\\tau=L/R$.",
+        "General RL network: (1) $i_L(0^+)=i_L(0^-)$ by continuity. (2) $i_L(\\infty)$ from the final DC circuit, with L as a short. (3) $R_{th}$ seen by L with independent sources deactivated. (4) $\\tau=L/R_{th}$.",
+        "$i(\\infty)=V_s/R$ is the simple single-resistor special case.",
       ],
       eq: "$$V_s=Ri+L\\dfrac{di}{dt}$$",
     },
@@ -405,7 +412,10 @@ export const STEPRL = {
       highlight: "curve",
       boardHint: "",
       title: "Complete response",
-      eq: "$$i(t)=\\dfrac{V_s}{R}+\\left(I_0-\\dfrac{V_s}{R}\\right)e^{-t/\\tau}\\quad(t\\ge 0)$$",
+      eq: [
+        "$$i(t)=\\dfrac{V_s}{R}+\\left(I_0-\\dfrac{V_s}{R}\\right)e^{-t/\\tau}\\quad(t\\ge 0)$$",
+        "$$\\text{General: }i_L(t)=i_L(\\infty)+[i_L(0^+)-i_L(\\infty)]e^{-t/\\tau}$$",
+      ],
     },
     {
       id: "sol-check",

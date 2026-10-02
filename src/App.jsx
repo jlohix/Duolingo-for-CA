@@ -56,7 +56,6 @@ import DragCircuitLab from "./pages/DragCircuitLab";
 import InvertingOpAmpLesson from "./pages/InvertingOpAmpLesson";
 import NonInvertingOpAmpLesson from "./pages/NonInvertingOpAmpLesson";
 import SourceTransformationLesson from "./pages/SourceTransformationLesson";
-import LaplaceLesson from "./section5/LaplaceLesson";
 import { SECTION_WALKS } from "./walks";
 import Results from "./pages/Results";
 
@@ -88,7 +87,6 @@ const MODULE_SCREENS = new Set([
   "sourcetransform",
   "invopamp",
   "ninvopamp",
-  "laplacelab",
   "secwalk",
   "paper",
 ]);
@@ -150,7 +148,6 @@ function AppBody({ onGateChange }) {
   const [screen, setScreen] = useState("home");
   const [lesson, setLesson] = useState(null);
   const [paperPack, setPaperPack] = useState(null);
-  const [laplaceLabId, setLaplaceLabId] = useState(null);
   const [secWalk, setSecWalk] = useState(null);
   const [skipTarget, setSkipTarget] = useState(null);
   const [summary, setSummary] = useState(null);
@@ -253,8 +250,6 @@ function AppBody({ onGateChange }) {
       : `${lesson.topicId}-${lesson.difficulty}`
     : secWalk
     ? String(secWalk)
-    : laplaceLabId
-    ? String(laplaceLabId)
     : paperPack?.id
     ? String(paperPack.id)
     : skipTarget
@@ -410,7 +405,6 @@ function AppBody({ onGateChange }) {
       "sourcetransform",
       "invopamp",
       "ninvopamp",
-      "laplacelab",
       "secwalk",
       "paper",
     ].includes(screen);
@@ -589,7 +583,6 @@ function AppBody({ onGateChange }) {
     onExit: () => setScreen("home"),
     onFinished: (result) => {
       setSecWalk(null);
-      setLaplaceLabId(null);
       setSummary(result);
       setScreen("results");
     },
@@ -834,23 +827,6 @@ function AppBody({ onGateChange }) {
     }
   }
 
-  if (screen === "laplacelab" && laplaceLabId) {
-    return (
-      <LaplaceLesson
-        key={laplaceLabId}
-        labId={laplaceLabId}
-        progress={progress}
-        setProgress={setProgress}
-        preview={preview}
-        onExit={() => {
-          setLaplaceLabId(null);
-          setScreen("home");
-        }}
-        onFinished={labXp.onFinished}
-      />
-    );
-  }
-
   if (screen === "paper" && paperPack) {
     return (
       <Lesson
@@ -955,10 +931,6 @@ function AppBody({ onGateChange }) {
       onSectionWalk={(section, id) => {
         setSecWalk({ section, id });
         setScreen("secwalk");
-      }}
-      onLaplaceLab={(id) => {
-        setLaplaceLabId(id);
-        setScreen("laplacelab");
       }}
       allOpen={isAdmin(session)}
     />
