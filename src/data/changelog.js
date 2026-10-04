@@ -1,5 +1,11 @@
 export const BUILT_IN_LOGS = [
   {
+    id: "built-2026-10-03-weekly-leaderboard",
+    date: "2026-10-03",
+    title: "Weekly leaderboards",
+    body: "Leaderboards now default to a weekly ranking (XP earned this week) with a countdown to the next reset, and you can switch to the all-time ranking with the Weekly/Lifetime toggle. Your total XP is never lost.",
+  },
+  {
     id: "built-2026-10-03-malayalam-option",
     date: "2026-10-03",
     title: "Fixed a garbled option",

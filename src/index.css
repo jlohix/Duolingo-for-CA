@@ -4707,3 +4707,37 @@ html[data-theme="dark"] .circuit-svg .board-step {
   z-index: 1;
   background: var(--letter-bg);
 }
+
+
+/* ---------- Leaderboard weekly/lifetime toggle ---------- */
+.board-mode {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin: 4px 0 14px;
+}
+.board-mode-switch {
+  display: inline-flex;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  overflow: hidden;
+}
+.board-mode-switch button {
+  border: 0;
+  background: transparent;
+  color: var(--ink);
+  font-size: 14px;
+  font-weight: 700;
+  padding: 7px 16px;
+  cursor: pointer;
+}
+.board-mode-switch button.on {
+  background: var(--green);
+  color: #fff;
+}
+.board-reset {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--green);
+}

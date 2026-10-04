@@ -1,5 +1,6 @@
 import { listStudents } from "../state/roster";
 import { syncLeagueSeason } from "../state/league";
+import { weeklyXpFor } from "../state/leaderboardPeriod";
 import { trophyFromIndex } from "./trophies";
 import { CLASS_IDS, DEFAULT_CLASS, normalizeClassId } from "./classes";
 
@@ -9,6 +10,7 @@ function decorate(row, leagues, youName) {
     display: row.display,
     classId: normalizeClassId(row.classId),
     xp: Number(row.xp) || 0,
+    weeklyXp: weeklyXpFor(row.username),
     streak: Number(row.streak) || 0,
     avatarUrl: String(row.avatarUrl || "").trim(),
     live: Boolean(row.live),
@@ -23,10 +25,18 @@ function decorate(row, leagues, youName) {
   };
 }
 
-function rankRows(rows) {
+// The XP value a given leaderboard mode ranks by.
+//   "weekly"   -> XP earned this period (falls back to total for tie-breaking)
+//   "lifetime" -> total XP
+function metricXp(row, mode) {
+  return mode === "weekly" ? Number(row.weeklyXp) || 0 : Number(row.xp) || 0;
+}
+
+function rankRows(rows, mode = "lifetime") {
   return [...rows]
     .sort(
       (a, b) =>
+        metricXp(b, mode) - metricXp(a, mode) ||
         b.xp - a.xp ||
         b.streak - a.streak ||
         a.display.localeCompare(b.display)
@@ -43,14 +53,15 @@ export function studentClassId(user, progress) {
   return normalizeClassId(progress.classId);
 }
 
-export function buildClassLeaderboard(user, progress, classId) {
+export function buildClassLeaderboard(user, progress, classId, mode = "lifetime") {
   const youName = youNameOf(user);
   const leagues = syncLeagueSeason(progress, user).state.leagueIndex;
   const focus = normalizeClassId(classId || studentClassId(user, progress));
   const ranked = rankRows(
     listStudents(progress, { user })
       .map((row) => decorate(row, leagues, youName))
-      .filter((row) => row.classId === focus)
+      .filter((row) => row.classId === focus),
+    mode
   );
   const you = ranked.find((row) => row.isYou);
   return {
@@ -61,7 +72,7 @@ export function buildClassLeaderboard(user, progress, classId) {
   };
 }
 
-export function buildCohortLeaderboard(user, progress) {
+export function buildCohortLeaderboard(user, progress, mode = "lifetime") {
   const youName = youNameOf(user);
   const leagues = syncLeagueSeason(progress, user).state.leagueIndex;
   const people = listStudents(progress, { user }).map((row) =>
@@ -78,7 +89,7 @@ export function buildCohortLeaderboard(user, progress) {
     const bucket = buckets[row.classId];
     if (!bucket) continue;
     bucket.members += 1;
-    bucket.xp += row.xp;
+    bucket.xp += metricXp(row, mode);
   }
   const rows = Object.values(buckets)
     .map((row) => ({
@@ -99,13 +110,14 @@ export function buildCohortLeaderboard(user, progress) {
   };
 }
 
-export function buildIndividualLeaderboard(user, progress) {
+export function buildIndividualLeaderboard(user, progress, mode = "lifetime") {
   const youName = youNameOf(user);
   const leagues = syncLeagueSeason(progress, user).state.leagueIndex;
   const ranked = rankRows(
     listStudents(progress, { user }).map((row) =>
       decorate(row, leagues, youName)
-    )
+    ),
+    mode
   );
   const you = ranked.find((row) => row.isYou) || null;
   return {

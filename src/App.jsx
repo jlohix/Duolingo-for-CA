@@ -33,6 +33,7 @@ import {
   scheduleProgressPush,
 } from "./state/progressSync";
 import { pullLeagueSeason, syncLeagueSeason } from "./state/league";
+import { refreshLeaderboardPeriod } from "./state/leaderboardPeriod";
 import { loadSession, logout, isAdmin } from "./state/auth";
 import { useSessionTime } from "./hooks/useSessionTime";
 import { useModuleTime } from "./hooks/useModuleTime";
@@ -181,6 +182,8 @@ function AppBody({ onGateChange }) {
         if (cancelled) return;
         setProgress(synced);
         await bootstrapRemoteRoster();
+        // Refresh the weekly leaderboard period (independent of league season).
+        refreshLeaderboardPeriod();
       } catch {
         if (!cancelled) {
           setProgress(

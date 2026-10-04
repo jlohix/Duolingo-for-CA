@@ -9,6 +9,7 @@ import {
 } from "../state/roster";
 import TopicInsight from "../components/TopicInsight";
 import TutorUsage from "../components/TutorUsage";
+import LeaderboardSchedule from "../components/LeaderboardSchedule";
 import ProgressPage from "./Progress";
 import { CLASS_IDS, DEFAULT_CLASS, isPartTimeClass } from "../data/classes";
 import { trophyFromIndex } from "../data/trophies";
@@ -235,6 +236,7 @@ export default function Admin({ progress, setProgress, counts, bankCounts = {} }
         </div>
       </div>
       <WalkFeedbackTable students={students} />
+      <LeaderboardSchedule />
       <TutorUsage totalStudents={students.length} />
       <QuestionReportsTable />
       {student ? (
