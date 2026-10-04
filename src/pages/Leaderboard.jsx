@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   buildClassLeaderboard,
   buildCohortLeaderboard,
@@ -9,8 +9,58 @@ import { CLASS_IDS, DEFAULT_CLASS, isPartTimeClass } from "../data/classes";
 import { avatarSrc, isDefaultAvatar } from "../data/avatars";
 import { isAdmin } from "../state/auth";
 import { useRemoteRosterTick } from "../hooks/useRemoteRosterTick";
+import {
+  subscribeLeaderboardPeriod,
+  nextResetAt,
+} from "../state/leaderboardPeriod";
 
-function StudentRows({ rows }) {
+// Format "time until the weekly reset", e.g. "3d 4h".
+function formatCountdown(ms) {
+  const v = Math.max(0, ms);
+  const d = Math.floor(v / 86400000);
+  const h = Math.floor((v % 86400000) / 3600000);
+  const m = Math.floor((v % 3600000) / 60000);
+  if (d > 0) return `${d}d ${h}h`;
+  if (h > 0) return `${h}h ${m}m`;
+  return `${m}m`;
+}
+
+// Weekly/Lifetime toggle + the reset countdown (shown in weekly mode).
+function ModeToggle({ mode, setMode, resetAt }) {
+  const [, tick] = useState(0);
+  // Re-render once a minute so the countdown stays current.
+  useEffect(() => {
+    const id = setInterval(() => tick((n) => n + 1), 60000);
+    return () => clearInterval(id);
+  }, []);
+  return (
+    <div className="board-mode">
+      <div className="board-mode-switch" role="group" aria-label="Ranking period">
+        <button
+          type="button"
+          className={mode === "weekly" ? "on" : ""}
+          onClick={() => setMode("weekly")}
+        >
+          Weekly
+        </button>
+        <button
+          type="button"
+          className={mode === "lifetime" ? "on" : ""}
+          onClick={() => setMode("lifetime")}
+        >
+          Lifetime
+        </button>
+      </div>
+      {mode === "weekly" && resetAt > 0 ? (
+        <span className="board-reset">
+          Resets in {formatCountdown(resetAt - Date.now())}
+        </span>
+      ) : null}
+    </div>
+  );
+}
+
+function StudentRows({ rows, mode }) {
   return (
     <ol className="board">
       {rows.map((row) => {
@@ -45,7 +95,10 @@ function StudentRows({ rows }) {
                 {row.league.name}
               </span>
             </span>
-            <span className="board-xp">{row.xp} XP</span>
+            <span className="board-xp">
+              {mode === "weekly" ? row.weeklyXp : row.xp} XP
+              {mode === "weekly" ? " this week" : ""}
+            </span>
             <span
               className={`streak-chip board-streak ${days > 0 ? "hot" : ""}`}
               title="Days practiced in a row"
@@ -64,13 +117,24 @@ export default function Leaderboard({ user, progress, mode = "class" }) {
   useRemoteRosterTick();
   const yourClass = studentClassId(user, progress);
   const [classId, setClassId] = useState(yourClass || DEFAULT_CLASS);
+  // Ranking period: weekly (this period's XP) or lifetime (total XP).
+  // Defaults to weekly.
+  const [rankMode, setRankMode] = useState("weekly");
+  // Re-render when the weekly period data arrives/updates.
+  const [, periodTick] = useState(0);
+  useEffect(
+    () => subscribeLeaderboardPeriod(() => periodTick((n) => n + 1)),
+    []
+  );
+  const resetAt = nextResetAt();
   const admin = isAdmin(user);
   const focusClass = admin ? classId : yourClass || DEFAULT_CLASS;
-  const classBoard = buildClassLeaderboard(user, progress, focusClass);
-  const cohort = buildCohortLeaderboard(user, progress);
-  const individuals = buildIndividualLeaderboard(user, progress);
+  const classBoard = buildClassLeaderboard(user, progress, focusClass, rankMode);
+  const cohort = buildCohortLeaderboard(user, progress, rankMode);
+  const individuals = buildIndividualLeaderboard(user, progress, rankMode);
   const cohortMode = mode === "cohort";
   const individualMode = mode === "individual";
+  const xpLabel = rankMode === "weekly" ? "XP this week" : "total XP";
 
   return (
     <div className="page">
@@ -92,10 +156,11 @@ export default function Leaderboard({ user, progress, mode = "class" }) {
           </h1>
         </div>
       </header>
+      <ModeToggle mode={rankMode} setMode={setRankMode} resetAt={resetAt} />
       {cohortMode ? (
         <>
           <p className="login-hint">
-            Classes ranked by total XP. Classmates will show here once they are
+            Classes ranked by {xpLabel}. Classmates will show here once they are
             in Circuito.
             {admin
               ? " Staff are not in a class."
@@ -115,7 +180,9 @@ export default function Leaderboard({ user, progress, mode = "class" }) {
                   {row.you ? " (your class)" : ""}
                 </span>
                 <span className="board-xp">{row.members} students</span>
-                <span className="board-xp">{row.xp} XP</span>
+                <span className="board-xp">
+                  {row.xp} XP{rankMode === "weekly" ? " this week" : ""}
+                </span>
                 <span className="login-hint">avg {row.avg}</span>
               </li>
             ))}
@@ -124,7 +191,7 @@ export default function Leaderboard({ user, progress, mode = "class" }) {
       ) : individualMode ? (
         <>
           <p className="login-hint">
-            Top 10 students in the cohort by total XP. Classmates appear as they
+            Top 10 students in the cohort by {xpLabel}. Classmates appear as they
             join Circuito.
             {admin
               ? ""
@@ -135,21 +202,21 @@ export default function Leaderboard({ user, progress, mode = "class" }) {
                   : ""}
           </p>
           {individuals.top.length ? (
-            <StudentRows rows={individuals.top} />
+            <StudentRows rows={individuals.top} mode={rankMode} />
           ) : (
             <p className="login-hint">No students on this board yet.</p>
           )}
           {individuals.you && !individuals.youInTop ? (
             <>
               <p className="board-cut">Your place in the cohort</p>
-              <StudentRows rows={[individuals.you]} />
+              <StudentRows rows={[individuals.you]} mode={rankMode} />
             </>
           ) : null}
         </>
       ) : (
         <>
           <p className="login-hint">
-            Students in {classBoard.classId}, ranked by total XP.
+            Students in {classBoard.classId}, ranked by {xpLabel}.
             {classBoard.youRank
               ? ` You are #${classBoard.youRank} of ${classBoard.total}.`
               : classBoard.total
@@ -174,7 +241,7 @@ export default function Leaderboard({ user, progress, mode = "class" }) {
             </label>
           ) : null}
           {classBoard.rows.length ? (
-            <StudentRows rows={classBoard.rows} />
+            <StudentRows rows={classBoard.rows} mode={rankMode} />
           ) : (
             <p className="login-hint">No students in this class yet.</p>
           )}
