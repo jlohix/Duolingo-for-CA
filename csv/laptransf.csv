@@ -1,0 +1,124 @@
+﻿id,topicid,main_question,question,optionA,optionB,optionC,optionD,answer,image,explanation,difficulty,walkthrough_tag
+201-1,2,,What are the s-domain impedances of the 0.5 F capacitor and the 1 H inductor?,"$Z_C = 2/s, Z_L = s$","$Z_C = 1/s, Z_L = s$","$Z_C = 1/0.5s, Z_L = s$","$Z_C = 0.5s, Z_L = 1/s$",optionA,"https://raw.githubusercontent.com/jlohix/Duolingo-for-CA/main/question-bank/laptransf/lptrfqn1.png","The impedance of a capacitor is $Z_C = 1/(Cs)$. Given $C = 0.5 F$, $Z_C = 1/(0.5s) = 2/s$. The impedance of an inductor is $Z_L = Ls$. Given $L = 1 H$, $Z_L = s$.",1,custom
+201-2,2,,Let $V_x$ be the node voltage between the capacitor and inductor. How can $I(s)$ and $V_O(s)$ be expressed in terms of $V_x$?,"$I(s) = V_x(s/2)$, $V_O(s) = V_x(3)/(s+3)$","$I(s) = (V_S - V_x)/(2/s)$, $V_x = V_O(s)/3$","$I(s) = (V_S - V_x)s/2$, $V_x = V_O(s+3)/3$","$I(s) = (V_S - V_x)s$, $V_x = V_O(s+3)$",optionC,"https://raw.githubusercontent.com/jlohix/Duolingo-for-CA/main/question-bank/laptransf/lptrfqn1.png","The current $I(s)$ flows through the capacitor: $I = (V_S - V_x) / (2/s) = s/2 * (V_S - V_x)$. For the output branch, by voltage division or series impedance, $V_x = V_O * (s+3) / 3$ (where $s+3$ is the impedance of the inductor and resistor combined). Thus, $V_x = V_O(s+3)/3$.",1,custom
+201-3,2,,What is the KCL equation at the node $V_x$?,$I = V_x / (s+3)$,$I = 2I + V_x / (s+3)$,$I + 2I = V_x / (s+3)$,$I + 2I = V_x / (3)$,optionC,"https://raw.githubusercontent.com/jlohix/Duolingo-for-CA/main/question-bank/laptransf/lptrfqn1.png","Applying KCL at node $V_x$, the sum of currents leaving the node must be zero. The current $I$ enters, $2I$ enters, and the current leaving through the branch $(s+3)$ is $V_x/(s+3)$. Therefore, $I + 2I = V_x / (s+3)$.",1,custom
+201-4,2,,Solve for the transfer function $H(s) = V_O(s)/V_S(s)$.,$(9s)/(3s^2 + 9s + 2)$,$(s)/(s^2 + 3s + 2)$,$(3s)/(3s^2 + 9s + 2)$,$(9s)/(s^2 + 9s + 3)$,optionA,"https://raw.githubusercontent.com/jlohix/Duolingo-for-CA/main/question-bank/laptransf/lptrfqn1.png",Substituting $I = s/2(V_S - V_x)$ into $3I = V_x/(s+3)$ yields $3(s/2)(V_S - V_x) = V_x/(s+3)$. Solving this algebraic system for $V_O/V_S$ leads to $H(s) = (9s)/(3s^2 + 9s + 2)$ as shown in the provided solution.,1,custom
+202-1,2,,"What are the s-domain impedances of the resistor ($R$), inductor ($L$), and capacitor ($C$) under zero initial conditions?","$Z_R = R$, $Z_L = \frac{L}{s}$, $Z_C = Cs$","$Z_R = \frac{R}{s}$, $Z_L = Ls$, $Z_C = \frac{1}{Cs}$","$Z_R = R$, $Z_L = Ls$, $Z_C = Cs$","$Z_R = R$, $Z_L = Ls$, $Z_C = \frac{1}{Cs}$",optionD,"https://raw.githubusercontent.com/jlohix/Duolingo-for-CA/main/question-bank/laptransf/lptrfqn2.png","In s-domain circuit analysis, the impedance of a resistor is $Z_R(s) = R$, the impedance of an inductor is $Z_L(s) = sL$, and the impedance of a capacitor is $Z_C(s) = \frac{1}{sC}$.",1,custom
+202-2,2,,How do you write the s-domain Kirchhoff's Voltage Law (KVL) equation around the circuit loop in terms of the input voltage $V_g(s)$ and loop current $I(s)$?,$RI(s) + \frac{L}{s}I(s) + CsI(s) = V_g(s)$,$RI(s) + LsI(s) + \frac{1}{Cs}I(s) = V_g(s)$,$RI(s) + LsI(s) + CsI(s) = V_g(s)$,$I(s) = (R + Ls + \frac{1}{Cs}) V_g(s)$,optionB,"https://raw.githubusercontent.com/jlohix/Duolingo-for-CA/main/question-bank/laptransf/lptrfqn2.png","Applying KVL to the loop in the s-domain with loop current $I(s)$ flowing through the series combination of $R$, $L$, and $C$, the sum of the voltage drops must equal the source voltage $V_g(s)$: $(Z_R + Z_L + Z_C)I(s) = V_g(s)$, which gives $RI(s) + LsI(s) + \frac{1}{Cs}I(s) = V_g(s)$.",1,custom
+202-3,2,,How is the transfer function $H(s)$ defined in terms of the output current $I(s)$ and the input voltage $V_g(s)$?,$H(s) = \frac{I(s)}{V_g(s)}$,$H(s) = \frac{1}{I(s) V_g(s)}$,$H(s) = \frac{V_g(s)}{I(s)}$,$H(s) = I(s) \cdot V_g(s)$,optionA,"https://raw.githubusercontent.com/jlohix/Duolingo-for-CA/main/question-bank/laptransf/lptrfqn2.png","A transfer function $H(s)$ of a linear system is defined as the ratio of the Laplace transform of the output to the Laplace transform of the input, with all initial conditions set to zero. Here, the output is current $I(s)$ and the input is voltage $V_g(s)$, so $H(s) = \frac{I(s)}{V_g(s)}$.",1,custom
+202-4,2,,What is the transfer function $H(s) = \frac{I(s)}{V_g(s)}$ for the given RLC circuit?,$H(s) = R + Ls + \frac{1}{Cs}$,$H(s) = \frac{s}{Ls^2 + Rs + C}$,$H(s) = \frac{1}{R + Ls + \frac{1}{Cs}}$,$H(s) = \frac{Cs}{R + Ls}$,optionC,"https://raw.githubusercontent.com/jlohix/Duolingo-for-CA/main/question-bank/laptransf/lptrfqn2.png","From the KVL equation $RI(s) + LsI(s) + \frac{1}{Cs}I(s) = V_g(s)$, we can factor out $I(s)$: $\left(R + Ls + \frac{1}{Cs}\right)I(s) = V_g(s)$. Dividing by $V_g(s)$ and the impedance term, we get $H(s) = \frac{I(s)}{V_g(s)} = \frac{1}{R + Ls + \frac{1}{Cs}}$.",1,custom
+203-1,2,,What is the Laplace transform of the input signal $x(t) = e^{-t} u(t)$?,$X(s) = \frac{1}{s+1}$,$X(s) = \frac{1}{s}$,$X(s) = \frac{1}{s-1}$,$X(s) = \frac{s}{s+1}$,optionA,"https://raw.githubusercontent.com/jlohix/Duolingo-for-CA/main/question-bank/laptransf/lptrfqn3.png","Using the standard Laplace transform pair for an exponential signal, $\mathcal{L}\{e^{-at} u(t)\} = \frac{1}{s+a}$. With $a = 1$, we get $X(s) = \frac{1}{s+1}$.",1,custom
+203-2,2,,What is the Laplace transform of the output signal $y(t) = 10 e^{-t} \cos(4t) u(t)$?,$Y(s) = \frac{10}{(s+1)^2 + 16}$,$Y(s) = \frac{10(s+1)}{(s+1)^2 + 16}$,$Y(s) = \frac{10s}{(s+1)^2 + 16}$,$Y(s) = \frac{10(s+1)}{(s+1)^2 + 4}$,optionB,"https://raw.githubusercontent.com/jlohix/Duolingo-for-CA/main/question-bank/laptransf/lptrfqn3.png","Using the Laplace transform property for an exponentially damped cosine wave, $\mathcal{L}\{e^{-at} \cos(\omega t) u(t)\} = \frac{s+a}{(s+a)^2 + \omega^2}$. Here, $a = 1$, $\omega = 4$, and there is a scaling factor of 10. Thus, $Y(s) = \frac{10(s+1)}{(s+1)^2 + 4^2} = \frac{10(s+1)}{(s+1)^2 + 16}$.",1,custom
+203-3,2,,What is the transfer function $H(s)$ expressed as the ratio of $Y(s)$ to $X(s)$?,$H(s) = \frac{10(s+1)^2}{(s+1)^2 + 4}$,$H(s) = \frac{10(s+1)^2}{(s+1)^2 + 16}$,$H(s) = \frac{10(s+1)}{(s+1)^2 + 16}$,$H(s) = \frac{10}{(s+1)^2 + 16}$,optionB,"https://raw.githubusercontent.com/jlohix/Duolingo-for-CA/main/question-bank/laptransf/lptrfqn3.png","The transfer function $H(s)$ is given by $H(s) = \frac{Y(s)}{X(s)}$. Substituting $Y(s) = \frac{10(s+1)}{(s+1)^2 + 16}$ and $X(s) = \frac{1}{s+1}$, we get: $H(s) = \frac{10(s+1)}{(s+1)^2 + 16} \cdot (s+1) = \frac{10(s+1)^2}{(s+1)^2 + 16}$.",1,custom
+203-4,2,,How do you find the impulse response $h(t)$ by taking the inverse Laplace transform of the transfer function $H(s)$?,$h(t) = 10e^{-t}\cos(4t)u(t)$,$h(t) = 10\delta(t) - 40e^{-t}\sin(4t)u(t)$,$h(t) = 10\delta(t) - 160e^{-t}\sin(4t)u(t)$,$h(t) = 10\delta(t) + 40e^{-t}\sin(4t)u(t)$,optionB,"https://raw.githubusercontent.com/jlohix/Duolingo-for-CA/main/question-bank/laptransf/lptrfqn3.png","Rewrite $H(s)$ as: $H(s) = \frac{10[(s+1)^2 + 16 - 16]}{(s+1)^2 + 16} = 10 - \frac{160}{(s+1)^2 + 16} = 10 - 40\frac{4}{(s+1)^2 + 16}$. Taking the inverse Laplace transform gives $h(t) = 10\delta(t) - 40e^{-t}\sin(4t)u(t)$.",1,custom
+204-1,2,,"Given the input signal $x(t) = 5e^{-3t}u(t)$, what is its Laplace transform $X(s)$?",$X(s) = \frac{5}{s^2 + 9}$,$X(s) = \frac{5}{s+3}$,$X(s) = \frac{5}{s-3}$,$X(s) = \frac{5s}{s+3}$,optionB,"https://raw.githubusercontent.com/jlohix/Duolingo-for-CA/main/question-bank/laptransf/lptrfqn4.png","Using the Laplace transform pair $\mathcal{L}\{e^{-at}u(t)\} = \frac{1}{s+a}$, we find for $x(t) = 5e^{-3t}u(t)$ that $X(s) = 5 \cdot \frac{1}{s+3} = \frac{5}{s+3}$.",1,custom
+204-2,2,,"Given the transfer function $H(s) = \frac{2s}{s+6}$ and the input $X(s) = \frac{5}{s+3}$, what is the expression for the output $Y(s)$ in the frequency domain?",$Y(s) = \frac{10}{(s+3)(s+6)}$,$Y(s) = \frac{10s^2}{(s+3)(s+6)}$,$Y(s) = \frac{2s(s+3)}{5(s+6)}$,$Y(s) = \frac{10s}{(s+3)(s+6)}$,optionD,"https://raw.githubusercontent.com/jlohix/Duolingo-for-CA/main/question-bank/laptransf/lptrfqn4.png","The output in the frequency domain is given by the product of the transfer function and the input Laplace transform: $Y(s) = H(s)X(s) = \left(\frac{2s}{s+6}\right)\left(\frac{5}{s+3}\right) = \frac{10s}{(s+3)(s+6)}$.",1,custom
+204-3,2,,"Using partial fraction expansion on the expression $Y(s) = \frac{10s}{(s+3)(s+6)}$, which of the following represents the correct simplified expression?",$Y(s) = \frac{20}{s+3} - \frac{10}{s+6}$,$Y(s) = \frac{-5}{s+3} + \frac{15}{s+6}$,$Y(s) = \frac{10}{s+3} - \frac{20}{s+6}$,$Y(s) = \frac{-10}{s+3} + \frac{20}{s+6}$,optionD,"https://raw.githubusercontent.com/jlohix/Duolingo-for-CA/main/question-bank/laptransf/lptrfqn4.png","We write $Y(s) = \frac{10s}{(s+3)(s+6)} = \frac{A}{s+3} + \frac{B}{s+6}$. Finding the coefficients:
+
+$A = \left. \frac{10s}{s+6} \right|_{s=-3} = \frac{10(-3)}{-3+6} = \frac{-30}{3} = -10$
+
+$B = \left. \frac{10s}{s+3} \right|_{s=-6} = \frac{10(-6)}{-6+3} = \frac{-60}{-3} = 20$
+
+Thus, $Y(s) = \frac{-10}{s+3} + \frac{20}{s+6}$.",1,custom
+204-4,2,,What is the time-domain output $y(t)$ obtained by taking the inverse Laplace transform of $Y(s) = \frac{-10}{s+3} + \frac{20}{s+6}$?,$y(t) = (20e^{-3t} - 10e^{-6t})u(t)$,$y(t) = (-5e^{-3t} + 15e^{-6t})u(t)$,$y(t) = (-10e^{-3t} + 20e^{-6t})u(t)$,$y(t) = (10e^{-3t} - 20e^{-6t})u(t)$,optionC,"https://raw.githubusercontent.com/jlohix/Duolingo-for-CA/main/question-bank/laptransf/lptrfqn4.png","Taking the inverse Laplace transform of each individual term:
+
+$\mathcal{L}^{-1}\left\{\frac{-10}{s+3}\right\} = -10e^{-3t}u(t)$
+
+$\mathcal{L}^{-1}\left\{\frac{20}{s+6}\right\} = 20e^{-6t}u(t)$
+
+Combining these gives $y(t) = (-10e^{-3t} + 20e^{-6t})u(t)$.",1,custom
+204-5,2,,"What is the impulse response $h(t)$ of the system, found by taking the inverse Laplace transform of $H(s) = \frac{2s}{s+6}$?",$h(t) = \delta(t) - 6e^{-6t}u(t)$,$h(t) = 2\delta(t) + 12e^{-6t}u(t)$,$h(t) = 2\delta(t) - 12e^{-6t}u(t)$,$h(t) = 2e^{-6t}u(t)$,optionC,"https://raw.githubusercontent.com/jlohix/Duolingo-for-CA/main/question-bank/laptransf/lptrfqn4.png","We can rewrite the transfer function $H(s)$ as:
+
+$H(s) = \frac{2s}{s+6} = \frac{2(s+6) - 12}{s+6} = 2 - \frac{12}{s+6}$
+
+Taking the inverse Laplace transform of each part:
+
+$\mathcal{L}^{-1}\{2\} = 2\delta(t)$
+
+$\mathcal{L}^{-1}\left\{\frac{12}{s+6}\right\} = 12e^{-6t}u(t)$
+
+Therefore, the impulse response is $h(t) = 2\delta(t) - 12e^{-6t}u(t)$.",1,custom
+205-1,2,,What is the Laplace transform of the input signal $x(t) = e^{-2t} u(t)$?,$X(s) = \frac{2}{s+2}$,$X(s) = \frac{1}{s+2}$,$X(s) = \frac{s}{s+2}$,$X(s) = \frac{1}{s-2}$,optionB,"https://raw.githubusercontent.com/jlohix/Duolingo-for-CA/main/question-bank/laptransf/lptrfqn5.png","The Laplace transform of $e^{-at} u(t)$ is given by $\frac{1}{s+a}$. For $x(t) = e^{-2t} u(t)$, we substitute $a = 2$, which gives $X(s) = \frac{1}{s+2}$",1,custom
+205-2,2,,What is the Laplace transform of the output signal $y(t) = e^{-t} \left( \cos 3t + \frac{4}{3} \sin 3t \right) u(t)$?,$Y(s) = \frac{s+5}{s^2 + 2s + 9}$,$Y(s) = \frac{s+4}{s^2 + 2s + 10}$,$Y(s) = \frac{s+4}{s^2 + 3s + 10}$,$Y(s) = \frac{s+5}{s^2 + 2s + 10}$,optionD,"https://raw.githubusercontent.com/jlohix/Duolingo-for-CA/main/question-bank/laptransf/lptrfqn5.png","We can use the frequency shift property of the Laplace transform, $\mathcal{L}\{e^{-at} f(t)\} = F(s+a)$. First, find the transform of the unshifted signal: $\mathcal{L}\{\cos 3t + \frac{4}{3} \sin 3t\} = \frac{s}{s^2+9} + \frac{4}{3} \frac{3}{s^2+9} = \frac{s+4}{s^2+9}$. Now apply the frequency shift for $a=1$: $Y(s) = \frac{(s+1)+4}{(s+1)^2+9} = \frac{s+5}{s^2+2s+10}$.",1,custom
+205-3,2,,"How do you determine the transfer function $H(s)$ from $Y(s)$ and $X(s)$, and what is its expression?",$H(s) = Y(s) X(s) = \frac{s+5}{(s+2)(s^2 + 2s + 10)}$,$H(s) = \frac{Y(s)}{X(s)} = \frac{s^2 + 7s + 10}{s^2 + 2s + 10}$,$H(s) = \frac{Y(s)}{X(s)} = \frac{s^2 + 5s + 6}{s^2 + 2s + 10}$,$H(s) = \frac{X(s)}{Y(s)} = \frac{s^2 + 2s + 10}{s^2 + 7s + 10}$,optionB,"https://raw.githubusercontent.com/jlohix/Duolingo-for-CA/main/question-bank/laptransf/lptrfqn5.png","The transfer function of an LTI system is defined as $H(s) = \frac{Y(s)}{X(s)}$. Substituting $Y(s) = \frac{s+5}{s^2+2s+10}$ and $X(s) = \frac{1}{s+2}$, we get: $H(s) = \frac{s+5}{s^2+2s+10} \cdot (s+2) = \frac{(s+5)(s+2)}{s^2+2s+10} = \frac{s^2+7s+10}{s^2+2s+10}$.",1,custom
+205-4,2,,How do you find the impulse response $h(t)$ by taking the inverse Laplace transform of $H(s)$?,$h(t) = e^{-t} \left( 5 \cos 3t - \frac{5}{3} \sin 3t \right) u(t)$,$h(t) = \delta(t) + e^{-t} \left( 5 \cos 3t - \frac{5}{3} \sin 3t \right) u(t)$,$h(t) = \delta(t) + e^{-2t} \left( 5 \cos 3t - \frac{5}{3} \sin 3t \right) u(t)$,$h(t) = \delta(t) + e^{-t} \left( 5 \cos 3t + \frac{5}{3} \sin 3t \right) u(t)$,optionB,"https://raw.githubusercontent.com/jlohix/Duolingo-for-CA/main/question-bank/laptransf/lptrfqn5.png","To find $h(t) = \mathcal{L}^{-1}\{H(s)\}$, rewrite $H(s)$ by performing long division: $H(s) = 1 + \frac{5s}{s^2+2s+10}$. The term $1$ transforms to $\delta(t)$. Complete the square of the denominator: $s^2+2s+10 = (s+1)^2+3^2$. Then rewrite the numerator in terms of $(s+1)$: $5s = 5(s+1) - 5$. So, we have: $H(s) = 1 + 5 \frac{s+1}{(s+1)^2+3^2} - \frac{5}{3} \frac{3}{(s+1)^2+3^2}$. Taking the inverse Laplace transform yields: $h(t) = \delta(t) + e^{-t} \left( 5 \cos 3t - \frac{5}{3} \sin 3t \right) u(t)$.",1,custom
+206-1,2,,"Given the input $x(t) = te^{-t}u(t)$, what is the Laplace transform $X(s)$?",$X(s) = \frac{1}{s^2}$,$X(s) = \frac{s}{(s+1)^2}$,$X(s) = \frac{1}{s+1}$,$X(s) = \frac{1}{(s+1)^2}$,optionD,"https://raw.githubusercontent.com/jlohix/Duolingo-for-CA/main/question-bank/laptransf/lptrfqn7.png","Using the Laplace transform pair $\mathcal{L}\{t e^{-at}u(t)\} = \frac{1}{(s+a)^2}$, we identify $a=1$, so $X(s) = \frac{1}{(s+1)^2}$.",1,custom
+206-2,2,,"Given $H(s) = \frac{4(s+1)^2}{(s+2)(s+5)}$ and $X(s) = \frac{1}{(s+1)^2}$, what is the system output $Y(s) = H(s)X(s)$?",$Y(s) = \frac{4}{(s+1)^2(s+2)(s+5)}$,$Y(s) = \frac{4(s+1)}{(s+2)(s+5)}$,$Y(s) = \frac{4}{(s+1)(s+2)(s+5)}$,$Y(s) = \frac{4}{(s+2)(s+5)}$,optionD,"https://raw.githubusercontent.com/jlohix/Duolingo-for-CA/main/question-bank/laptransf/lptrfqn7.png","Multiply $H(s)$ by $X(s)$: $Y(s) = \frac{4(s+1)^2}{(s+2)(s+5)} \cdot \frac{1}{(s+1)^2} = \frac{4}{(s+2)(s+5)}$.",1,custom
+206-3,2,,What is the partial fraction expansion of $Y(s) = \frac{4}{(s+2)(s+5)}$?,$Y(s) = 4(\frac{1}{s+2} - \frac{1}{s+5})$,$Y(s) = \frac{4}{3}(\frac{1}{s+2} - \frac{1}{s+5})$,$Y(s) = \frac{4}{3}(\frac{1}{s+2} + \frac{1}{s+5})$,$Y(s) = \frac{3}{4}(\frac{1}{s+2} - \frac{1}{s+5})$,optionB,"https://raw.githubusercontent.com/jlohix/Duolingo-for-CA/main/question-bank/laptransf/lptrfqn7.png","Let $\frac{4}{(s+2)(s+5)} = \frac{A}{s+2} + \frac{B}{s+5}$. For $s=-2, A=4/3$. For $s=-5, B=-4/3$. Thus $Y(s) = \frac{4}{3}(\frac{1}{s+2} - \frac{1}{s+5})$.",1,custom
+206-4,2,,"Using the inverse Laplace transform on $Y(s) = \frac{4}{3}(\frac{1}{s+2} - \frac{1}{s+5})$, what is $y(t)$?",$y(t) = \frac{3}{4}(e^{-2t} - e^{-5t})u(t)$,$y(t) = \frac{4}{3}(e^{-2t} - e^{-5t})u(t)$,$y(t) = \frac{4}{3}(e^{-2t} + e^{-5t})u(t)$,$y(t) = \frac{4}{3}(e^{2t} - e^{5t})u(t)$,optionB,"https://raw.githubusercontent.com/jlohix/Duolingo-for-CA/main/question-bank/laptransf/lptrfqn7.png","Using the inverse transform $\mathcal{L}^{-1}\{\frac{1}{s+a}\} = e^{-at}u(t)$, we obtain $y(t) = \frac{4}{3}(e^{-2t} - e^{-5t})u(t)$.",1,custom
+206-5,2,,Expand $H(s) = \frac{4(s+1)^2}{(s+2)(s+5)}$ into partial fractions and determine $h(t)$.,"$H(s) = 4 - \frac{4}{3(s+2)} + \frac{16}{3(s+5)}$, $h(t) = 4\delta(t) - \frac{4}{3}e^{-2t} + \frac{16}{3}e^{-5t}$","$H(s) = 4 + \frac{4}{3(s+2)} - \frac{64}{3(s+5)}$, $h(t) = 4\delta(t) + (\frac{4}{3}e^{-2t} - \frac{64}{3}e^{-5t})u(t)$","$H(s) = 1 + \frac{4}{3(s+2)} - \frac{16}{3(s+5)}$, $h(t) = \delta(t) + (\frac{4}{3}e^{-2t} - \frac{16}{3}e^{-5t})u(t)$","$H(s) = 4 + \frac{4}{s+2} + \frac{16}{s+5}$, $h(t) = 4\delta(t) + (4e^{-2t} + 16e^{-5t})u(t)$",optionB,"https://raw.githubusercontent.com/jlohix/Duolingo-for-CA/main/question-bank/laptransf/lptrfqn7.png","\[
+H(s)=\frac{4(s+1)^2}{(s+2)(s+5)}
+=\frac{4s^2+8s+4}{s^2+7s+10}
+=4+\frac{-20s-36}{(s+2)(s+5)}.
+\]
+
+Perform partial fraction expansion on the remainder:
+
+\[
+\frac{-20s-36}{(s+2)(s+5)}
+=\frac{A}{s+2}+\frac{B}{s+5}.
+\]
+
+Thus,
+
+\[
+A(s+5)+B(s+2)=-20s-36.
+\]
+
+Substituting \(s=-2\),
+
+\[
+3A=4
+\quad\Rightarrow\quad
+A=\frac{4}{3}.
+\]
+
+Substituting \(s=-5\),
+
+\[
+-3B=64
+\quad\Rightarrow\quad
+B=-\frac{64}{3}.
+\]
+
+Therefore,
+
+\[
+H(s)
+=
+4+\frac{4/3}{s+2}
+-\frac{64/3}{s+5}.
+\]
+
+Taking the inverse Laplace transform,
+
+\[
+\boxed{
+h(t)
+=
+4\delta(t)
++\frac{4}{3}e^{-2t}u(t)
+-\frac{64}{3}e^{-5t}u(t)
+}.
+\]",1,custom
+207-1,2,,"Using KCL at node \(V(s)\), which equation is correct?",$$I(s)=\frac{V(s)}{R_1}+sLV(s)+Cs\left[V(s)-V_o(s)\right]$$,$$I(s)=\frac{V(s)}{R_1}+\frac{V(s)}{sL}+Cs\left[V(s)-V_o(s)\right]$$,$$I(s)=R_1V(s)+\frac{V(s)}{sL}+\frac{V(s)-V_o(s)}{Cs}$$,$$I(s)=\frac{V(s)}{R_1}+\frac{sL}{V(s)}+CsV_o(s)$$,optionB,"https://raw.githubusercontent.com/jlohix/Duolingo-for-CA/main/question-bank/laptransf/lptrfqn8.png","$$\text{Applying KCL at node }V(s),\text{ the input current equals the sum of the currents through }R_1,\ L,\text{ and }C.\text{ Hence, }I(s)=\frac{V(s)}{R_1}+\frac{V(s)}{sL}+Cs\left[V(s)-V_o(s)\right].$$",3,
+207-2,2,,What is the current through \(R_2\)?,$$I_1(s)=\frac{V_o(s)}{R_2}$$,$$I_1(s)=R_2V_o(s)$$,$$I_1(s)=CsV_o(s)$$,$$I_1(s)=\frac{V(s)}{R_2}$$,optionA,"https://raw.githubusercontent.com/jlohix/Duolingo-for-CA/main/question-bank/laptransf/lptrfqn8.png","$$\text{Since }V_o(s)\text{ is the voltage across }R_2,\text{ Ohm's law gives }I_1(s)=\frac{V_o(s)}{R_2}.$$",3,
+207-3,2,,"The capacitor current is
+\[
+Cs\left[V(s)-V_o(s)\right].
+\]
+Since this same current flows through \(R_2\), which equation is correct?",$$V_o(s)=\left[V(s)-V_o(s)\right]CsR_2$$,$$V_o(s)=\frac{V(s)-V_o(s)}{CsR_2}$$,$$V_o(s)=V(s)CsR_2$$,$$V_o(s)=\left[V(s)+V_o(s)\right]CsR_2$$,optionA,"https://raw.githubusercontent.com/jlohix/Duolingo-for-CA/main/question-bank/laptransf/lptrfqn8.png","$$I_1(s)=Cs\left[V(s)-V_o(s)\right],\text{ and }V_o(s)=I_1(s)R_2.\text{ Therefore, }V_o(s)=\left[V(s)-V_o(s)\right]CsR_2.$$",3,
+207-4,2,,"From
+\[
+V_o(s)=\left[V(s)-V_o(s)\right]CsR_2,
+\]
+which expression for \(V(s)\) is correct?",$$V(s)=V_o(s)\frac{R_2Cs}{1+R_2Cs}$$,$$V(s)=V_o(s)\frac{1+R_2Cs}{R_2Cs}$$,$$V(s)=V_o(s)\left(1+R_2Cs\right)$$,$$V(s)=\frac{V_o(s)}{R_2Cs}$$,optionB,"https://raw.githubusercontent.com/jlohix/Duolingo-for-CA/main/question-bank/laptransf/lptrfqn8.png","$$V_o(s)\left(1+R_2Cs\right)=V(s)R_2Cs,\text{ so }V(s)=V_o(s)\frac{1+R_2Cs}{R_2Cs}.$$",3,
+207-5,2,,"By substitution, what is the transfer function of the network?",$$\frac{V_o(s)}{I(s)}=\frac{R_1R_2LCs^2}{(R_1+R_2)LCs^2+(R_1R_2C+L)s+R_1}$$,$$\frac{V_o(s)}{I(s)}=\frac{R_1R_2LCs}{(R_1+R_2)LCs^2+(R_1R_2C+L)s+R_1}$$,$$\frac{V_o(s)}{I(s)}=\frac{R_1R_2LCs^2}{R_1R_2LCs^2+(R_1+R_2)s+L}$$,$$\frac{V_o(s)}{I(s)}=\frac{R_1+R_2}{LCs^2+(R_1R_2C+L)s}$$,optionA,"https://raw.githubusercontent.com/jlohix/Duolingo-for-CA/main/question-bank/laptransf/lptrfqn8.png","$$\text{After simplifying the substituted KCL expression and solving for }\frac{V_o(s)}{I(s)},\text{ the result is }\frac{V_o(s)}{I(s)}=\frac{R_1R_2LCs^2}{(R_1+R_2)LCs^2+(R_1R_2C+L)s+R_1}.$$",3,
+208-1,2,,"For the first loop, applying KVL to the input circuit involving $v_i(t)$, $R_1$, and capacitor $C$, write the correct loop equation.",$v_i(t) = R_1 i_1(t) + \frac{1}{C} \int (i_1(t) - i_2(t)) dt$,$v_i(t) = R_1 i_1(t) + \frac{1}{C} \int i_1(t) dt$,$v_i(t) = R_1 i_1(t) + \frac{1}{C} \int (i_2(t) - i_1(t)) dt$,$v_i(t) = R_1 i_1(t) + C \frac{di_1}{dt}$,optionA,"https://raw.githubusercontent.com/jlohix/Duolingo-for-CA/main/question-bank/laptransf/lptrfqn9.png","Applying KVL around the first loop, the sum of voltage drops equals the source $v_i(t)$. The resistor $R_1$ has drop $R_1 i_1(t)$ and the capacitor $C$ has voltage $\frac{1}{C} \int i_C dt$, where $i_C = i_1(t) - i_2(t)$.",3,custom
+208-2,2,,"Applying the Laplace transform to the first loop equation $v_i(t) = R_1 i_1(t) + \frac{1}{C} \int (i_1(t) - i_2(t)) dt$ results in:",$V_i(s) = R_1 I_1(s) + \frac{1}{Cs}[I_1(s) - I_2(s)]$,$V_i(s) = R_1 I_1(s) - \frac{1}{Cs} I_2(s)$,$V_i(s) = R_1 I_1(s) + \frac{1}{Cs} I_1(s)$,$V_i(s) = R_1 I_1(s) + C[I_1(s) - I_2(s)]$,optionA,"https://raw.githubusercontent.com/jlohix/Duolingo-for-CA/main/question-bank/laptransf/lptrfqn9.png","The integral $\int f(t) dt$ transforms to $F(s)/s$. Thus, $\frac{1}{C} \int (i_1 - i_2) dt$ becomes $\frac{1}{Cs}(I_1(s) - I_2(s))$.",3,custom
+208-3,2,,"For the second loop containing $C$, $R_2$, and $L$, applying KVL, which is the correct equation?",$R_2 i_2(t) + L \frac{di_2}{dt} + v_o(t) = 0$,$R_2 i_2(t) + L \frac{di_2}{dt} + \frac{1}{C} \int (i_2(t) - i_1(t)) dt = 0$,$R_2 i_2(t) + L \frac{di_2}{dt} + \frac{1}{C} \int i_2(t) dt = 0$,$R_2 i_2(t) + \frac{1}{C} \int (i_1(t) - i_2(t)) dt = 0$,optionB,"https://raw.githubusercontent.com/jlohix/Duolingo-for-CA/main/question-bank/laptransf/lptrfqn9.png","The second loop consists of $R_2$, $L$, and the capacitor $C$. The capacitor voltage is $\frac{1}{C} \int (i_2 - i_1) dt$ because current $i_2$ flows into the branch and $i_1$ flows against it.",3,custom
+208-4,2,,"Taking the Laplace transform of the second loop equation $R_2 i_2(t) + L \frac{di_2}{dt} + \frac{1}{C} \int (i_2(t) - i_1(t)) dt = 0$, what expression is derived for $I_2(s)$?",$[R_2 + sL + \frac{1}{Cs}] I_2(s) = \frac{1}{Cs} I_1(s)$,$[R_2 + sL] I_2(s) = \frac{1}{Cs} I_1(s)$,$[R_2 + sL] I_2(s) = I_1(s)$,$[R_2 + sL + \frac{1}{Cs}] I_2(s) = -\frac{1}{Cs} I_1(s)$,optionA,"https://raw.githubusercontent.com/jlohix/Duolingo-for-CA/main/question-bank/laptransf/lptrfqn9.png","Transforming the equation: $R_2 I_2(s) + sL I_2(s) + \frac{1}{Cs}(I_2(s) - I_1(s)) = 0$. Grouping $I_2(s)$ terms gives $(R_2 + sL + \frac{1}{Cs})I_2(s) = \frac{1}{Cs} I_1(s)$.",3,custom
+208-5,2,,"From the second loop Laplace equation, solve for $I_1(s)$ in terms of $I_2(s)$.",$I_1(s) = \frac{1}{R_2 Cs + LC s^2 + 1} I_2(s)$,$I_1(s) = (R_2 + sL) Cs I_2(s)$,$I_1(s) = (R_2 Cs + LC s^2 + 1) I_2(s)$,$I_1(s) = (LC s^2 + 1) I_2(s)$,optionC,"https://raw.githubusercontent.com/jlohix/Duolingo-for-CA/main/question-bank/laptransf/lptrfqn9.png",Multiply both sides of the equation $(R_2 + sL + \frac{1}{Cs}) I_2(s) = \frac{1}{Cs} I_1(s)$ by $Cs$ to get $(R_2 Cs + LC s^2 + 1) I_2(s) = I_1(s)$.,3,custom
+208-6,2,,"Substituting $I_1(s)$ into the expression for $V_i(s) = R_1 I_1(s) + \frac{1}{Cs}(I_1(s) - I_2(s))$, which expression represents $V_i(s)$ in terms of $I_2(s)$?",$V_i(s) = (R_2Cs + LCs^2 + 1 + R_1) I_2(s)$,$V_i(s) = (1 + R_1Cs) I_2(s)$,$V_i(s) = \frac{R_2Cs + LCs^2 + 1}{Cs} I_2(s)$,$V_i(s) = \frac{[(R_2Cs + LCs^2 + 1)(1 + R_1Cs) - 1]}{Cs} I_2(s)$,optionD,"https://raw.githubusercontent.com/jlohix/Duolingo-for-CA/main/question-bank/laptransf/lptrfqn9.png","$V_i(s) = (R_1 + \frac{1}{Cs})I_1(s) - \frac{1}{Cs}I_2(s)$. Substituting $I_1 = (R_2Cs + LCs^2 + 1)I_2$ leads to $V_i(s) = [(R_1 + \frac{1}{Cs})(R_2Cs + LCs^2 + 1) - \frac{1}{Cs}]I_2(s)$, which simplifies to the provided choice.",3,custom
+208-7,2,,"Given $V_o(s) = sL I_2(s)$, how do we relate $V_o(s)$ to $V_i(s)$?",$V_o(s) = sL \cdot V_i(s)$,$V_o(s) = \frac{V_i(s)}{sL}$,$V_o(s) = I_2(s) \cdot (sL + R_2)$,$V_o(s) = sL \cdot \frac{V_i(s)Cs}{[(R_2Cs + LCs^2 + 1)(1 + R_1Cs) - 1]}$,optionD,"https://raw.githubusercontent.com/jlohix/Duolingo-for-CA/main/question-bank/laptransf/lptrfqn9.png","Since $V_o(s) = sL I_2(s)$, we find $I_2(s) = V_o(s) / sL$. We substitute this into the $V_i(s)$ equation derived in step 6 to solve for $V_o/V_i$.",3,custom
+208-8,2,,"The final transfer function $\frac{V_o(s)}{V_i(s)}$ is:",$\frac{sL}{L R_1 C s^2 + R_1 s + R_2}$,$\frac{sL}{s^2 LC + s R_2 C + 1}$,$\frac{sL}{L R_1 C s^2 + (R_1 R_2 C + L)s + (R_1 + R_2)}$,$\frac{1}{s^2 LC + s R_1 C + 1}$,optionC,"https://raw.githubusercontent.com/jlohix/Duolingo-for-CA/main/question-bank/laptransf/lptrfqn9.png","By simplifying the algebraic expression from step 7: $\frac{V_o(s)}{V_i(s)} = \frac{sL}{L R_1 C s^2 + (R_1 R_2 C + L)s + (R_1 + R_2)}$.",3,custom
