@@ -12,6 +12,7 @@ import { useRemoteRosterTick } from "../hooks/useRemoteRosterTick";
 import {
   subscribeLeaderboardPeriod,
   nextResetAt,
+  periodLabel,
 } from "../state/leaderboardPeriod";
 
 // Format "time until the weekly reset", e.g. "3d 4h".
@@ -25,8 +26,9 @@ function formatCountdown(ms) {
   return `${m}m`;
 }
 
-// Weekly/Lifetime toggle + the reset countdown (shown in weekly mode).
-function ModeToggle({ mode, setMode, resetAt }) {
+// Period/Lifetime toggle + the reset countdown (shown in period mode).
+// `periodName` is "Weekly" or "Bi-weekly" depending on the configured cadence.
+function ModeToggle({ mode, setMode, resetAt, periodName }) {
   const [, tick] = useState(0);
   // Re-render once a minute so the countdown stays current.
   useEffect(() => {
@@ -41,7 +43,7 @@ function ModeToggle({ mode, setMode, resetAt }) {
           className={mode === "weekly" ? "on" : ""}
           onClick={() => setMode("weekly")}
         >
-          Weekly
+          {periodName}
         </button>
         <button
           type="button"
@@ -60,7 +62,7 @@ function ModeToggle({ mode, setMode, resetAt }) {
   );
 }
 
-function StudentRows({ rows, mode }) {
+function StudentRows({ rows, mode, periodSuffix }) {
   return (
     <ol className="board">
       {rows.map((row) => {
@@ -97,7 +99,7 @@ function StudentRows({ rows, mode }) {
             </span>
             <span className="board-xp">
               {mode === "weekly" ? row.weeklyXp : row.xp} XP
-              {mode === "weekly" ? " this week" : ""}
+              {mode === "weekly" ? ` ${periodSuffix}` : ""}
             </span>
             <span
               className={`streak-chip board-streak ${days > 0 ? "hot" : ""}`}
@@ -127,6 +129,8 @@ export default function Leaderboard({ user, progress, mode = "class" }) {
     []
   );
   const resetAt = nextResetAt();
+  const periodName = periodLabel(); // "Weekly" or "Bi-weekly"
+  const periodSuffix = `this ${periodName === "Bi-weekly" ? "fortnight" : "week"}`;
   const admin = isAdmin(user);
   const focusClass = admin ? classId : yourClass || DEFAULT_CLASS;
   const classBoard = buildClassLeaderboard(user, progress, focusClass, rankMode);
@@ -134,7 +138,8 @@ export default function Leaderboard({ user, progress, mode = "class" }) {
   const individuals = buildIndividualLeaderboard(user, progress, rankMode);
   const cohortMode = mode === "cohort";
   const individualMode = mode === "individual";
-  const xpLabel = rankMode === "weekly" ? "XP this week" : "total XP";
+  const xpLabel =
+    rankMode === "weekly" ? `XP ${periodSuffix}` : "total XP";
 
   return (
     <div className="page">
@@ -156,7 +161,12 @@ export default function Leaderboard({ user, progress, mode = "class" }) {
           </h1>
         </div>
       </header>
-      <ModeToggle mode={rankMode} setMode={setRankMode} resetAt={resetAt} />
+      <ModeToggle
+        mode={rankMode}
+        setMode={setRankMode}
+        resetAt={resetAt}
+        periodName={periodName}
+      />
       {cohortMode ? (
         <>
           <p className="login-hint">
@@ -181,7 +191,7 @@ export default function Leaderboard({ user, progress, mode = "class" }) {
                 </span>
                 <span className="board-xp">{row.members} students</span>
                 <span className="board-xp">
-                  {row.xp} XP{rankMode === "weekly" ? " this week" : ""}
+                  {row.xp} XP{rankMode === "weekly" ? ` ${periodSuffix}` : ""}
                 </span>
                 <span className="login-hint">avg {row.avg}</span>
               </li>
@@ -202,14 +212,22 @@ export default function Leaderboard({ user, progress, mode = "class" }) {
                   : ""}
           </p>
           {individuals.top.length ? (
-            <StudentRows rows={individuals.top} mode={rankMode} />
+            <StudentRows
+              rows={individuals.top}
+              mode={rankMode}
+              periodSuffix={periodSuffix}
+            />
           ) : (
             <p className="login-hint">No students on this board yet.</p>
           )}
           {individuals.you && !individuals.youInTop ? (
             <>
               <p className="board-cut">Your place in the cohort</p>
-              <StudentRows rows={[individuals.you]} mode={rankMode} />
+              <StudentRows
+                rows={[individuals.you]}
+                mode={rankMode}
+                periodSuffix={periodSuffix}
+              />
             </>
           ) : null}
         </>
@@ -241,7 +259,11 @@ export default function Leaderboard({ user, progress, mode = "class" }) {
             </label>
           ) : null}
           {classBoard.rows.length ? (
-            <StudentRows rows={classBoard.rows} mode={rankMode} />
+            <StudentRows
+              rows={classBoard.rows}
+              mode={rankMode}
+              periodSuffix={periodSuffix}
+            />
           ) : (
             <p className="login-hint">No students in this class yet.</p>
           )}
