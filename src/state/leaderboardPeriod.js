@@ -94,3 +94,13 @@ export function msUntilReset() {
 export function getPeriodCache() {
   return cache;
 }
+
+// How many weeks each period spans (1 = weekly, 2 = bi-weekly). Defaults to 1.
+export function recurWeeks() {
+  return Number(cache.recurWeeks) || 1;
+}
+
+// The label for the "this period" ranking, driven by the configured cadence.
+export function periodLabel() {
+  return recurWeeks() >= 2 ? "Bi-weekly" : "Weekly";
+}
