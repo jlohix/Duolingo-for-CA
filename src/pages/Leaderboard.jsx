@@ -14,15 +14,15 @@ import {
   nextResetAt,
 } from "../state/leaderboardPeriod";
 
-// Format "time left until the weekly reset", e.g. "3d 4h left".
+// Format "time until the weekly reset", e.g. "3d 4h".
 function formatCountdown(ms) {
   const v = Math.max(0, ms);
   const d = Math.floor(v / 86400000);
   const h = Math.floor((v % 86400000) / 3600000);
   const m = Math.floor((v % 3600000) / 60000);
-  if (d > 0) return `${d}d ${h}h left`;
-  if (h > 0) return `${h}h ${m}m left`;
-  return `${m}m left`;
+  if (d > 0) return `${d}d ${h}h`;
+  if (h > 0) return `${h}h ${m}m`;
+  return `${m}m`;
 }
 
 // Weekly/Lifetime toggle + the reset countdown (shown in weekly mode).

@@ -99,17 +99,25 @@ begin
   -- v_anchor_sgt is the most recent WEEKLY occurrence of the weekday+time.
   v_anchor_utc := v_anchor_sgt at time zone 'Asia/Singapore';
 
-  -- For bi-weekly (or longer), the weekly anchor might be an "off" week. Snap
-  -- back in whole-week steps until the boundary aligns to the recurrence grid
-  -- (measured in whole days from a fixed epoch reference, so the phase is
-  -- stable across resets and server restarts).
-  if v_period_days > 7 then
-    while (
-      (floor(extract(epoch from (v_anchor_utc - timestamptz 'epoch')) / 86400.0)::integer % v_period_days)
-      <> 0
-    ) loop
-      v_anchor_utc := v_anchor_utc - interval '7 days';
-    end loop;
+  -- For bi-weekly (or longer): the weekly anchor might land on an "off" week.
+  -- Count whole weeks between a fixed reference date and this anchor, then step
+  -- back (weeks mod recur_weeks) weeks so boundaries fall on a stable grid.
+  -- Done with a single bounded calculation (no loop) to avoid runaway/underflow.
+  if v_recur > 1 then
+    declare
+      -- Fixed reference anchor (a Monday) to measure week parity against.
+      v_ref date := date '2024-01-01';
+      v_weeks integer;
+      v_offset integer;
+    begin
+      v_weeks := floor(
+        (v_anchor_utc::date - v_ref)::numeric / 7.0
+      )::integer;
+      v_offset := ((v_weeks % v_recur) + v_recur) % v_recur;  -- 0..recur-1
+      if v_offset > 0 then
+        v_anchor_utc := v_anchor_utc - (v_offset * 7 || ' days')::interval;
+      end if;
+    end;
   end if;
 
   return v_anchor_utc;
