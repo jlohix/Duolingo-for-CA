@@ -127,6 +127,14 @@ export const QUESTION_BANKS = [
     walkthroughKey: "walk-6-poles-zeros-stability",
     topicId: 6,
   },
+  {
+    id: "complexlap",
+    title: "Complex Impedance",
+    csv: "complexlap.csv",
+    assetFolder: "complexlap",
+    walkthroughKey: "walk-6-complex-phase",
+    topicId: 6,
+  },
 ];
 
 /** Local fallbacks only when a CSV image is a filename, not a GitHub URL. */

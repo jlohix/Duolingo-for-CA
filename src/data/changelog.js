@@ -1,5 +1,11 @@
 export const BUILT_IN_LOGS = [
   {
+    id: "built-2026-10-05-complexlap-banks",
+    date: "2026-10-05",
+    title: "Complex impedance practice",
+    body: "After Complex Numbers and Phase Angles you can now practise Easy, Average, and Challenging equivalent-impedance questions. Laplace Circuit Application and Poles practice are updated too.",
+  },
+  {
     id: "built-2026-10-03-malayalam-option",
     date: "2026-10-03",
     title: "Fixed a garbled option",
