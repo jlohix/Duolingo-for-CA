@@ -299,6 +299,29 @@ export async function chatUsageSummaryRemote() {
   return Array.isArray(data) ? data[0] || null : data || null;
 }
 
+// ---------- Weekly leaderboard period (independent of league season) ----------
+
+// Advance/compute the current weekly leaderboard period. Returns
+// { periodStart, nextReset, recurWeeks, weeklyXp: { email -> xpGained } }.
+export async function syncLeaderboardPeriodRemote() {
+  const data = await rpc("sync_leaderboard_period", {});
+  return data && typeof data === "object" ? data : null;
+}
+
+export async function getLeaderboardConfigRemote() {
+  const data = await rpc("get_leaderboard_config", {});
+  return data && typeof data === "object" ? data : null;
+}
+
+export async function setLeaderboardConfigRemote(anchorDow, anchorTime, recurWeeks) {
+  const data = await rpc("set_leaderboard_config", {
+    p_anchor_dow: Number(anchorDow),
+    p_anchor_time: String(anchorTime),
+    p_recur_weeks: Number(recurWeeks),
+  });
+  return data && typeof data === "object" ? data : null;
+}
+
 export async function listChatTopicTallyRemote() {
   const data = await rpc("list_chat_topic_tally", {});
   return Array.isArray(data) ? data : [];
