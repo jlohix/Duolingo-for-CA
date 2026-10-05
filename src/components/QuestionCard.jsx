@@ -3,27 +3,47 @@ import QuestionReport from "./QuestionReport";
 
 const LABELS = ["A", "B", "C", "D"];
 
+function CircuitImage({ src }) {
+  if (!src) return null;
+  return (
+    <img
+      className="circuit-image"
+      src={src}
+      alt="Circuit for this question"
+      onError={(event) => {
+        event.currentTarget.remove();
+      }}
+    />
+  );
+}
+
 export default function QuestionCard({
   question,
   selected,
   revealed,
   onSelect,
 }) {
+  const mainQuestion = String(question.mainQuestion || "").trim();
   return (
     <article className="question-card">
-      <h2>
-        <MathText text={question.question} />
-      </h2>
-      {question.image ? (
-        <img
-          className="circuit-image"
-          src={question.image}
-          alt="Circuit for this question"
-          onError={(event) => {
-            event.currentTarget.remove();
-          }}
-        />
-      ) : null}
+      {mainQuestion ? (
+        <>
+          <h2 className="question-main">
+            <MathText text={mainQuestion} />
+          </h2>
+          <CircuitImage src={question.image} />
+          <p className="question-part">
+            <MathText text={question.question} />
+          </p>
+        </>
+      ) : (
+        <>
+          <h2>
+            <MathText text={question.question} />
+          </h2>
+          <CircuitImage src={question.image} />
+        </>
+      )}
       <div className="options">
         {LABELS.map((label) => {
           const key = label.toLowerCase();

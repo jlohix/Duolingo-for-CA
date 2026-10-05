@@ -2132,6 +2132,13 @@ h2 {
   line-height: 1.45;
 }
 
+.question-card .question-part {
+  margin: 0 0 14px;
+  font-size: 1.05rem;
+  font-weight: 650;
+  line-height: 1.45;
+}
+
 .circuit-image {
   width: 100%;
   max-height: 280px;

@@ -124,6 +124,7 @@ function parseQuestionRows(text, { withPaper = false } = {}) {
     if (!options[answer]) continue;
 
     const image = normalizeImage(cell(row, "image"));
+    const mainQuestion = dressLatex(cell(row, "main_question", "mainQuestion"));
     const topicRaw = cell(row, "topicId", "topicid");
     const rawId =
       clean(cell(row, "id")) || `${topicRaw || "p"}-${questions.length}`;
@@ -134,6 +135,7 @@ function parseQuestionRows(text, { withPaper = false } = {}) {
       questionFamilyId,
       stepNumber,
       topicId: Number(topicRaw) || 0,
+      mainQuestion,
       question,
       options,
       answer,
@@ -277,10 +279,14 @@ export function questionsForBank(all, bankId, difficulty) {
   const out = [];
   familyIds.forEach((familyId, familyIndex) => {
     const steps = byFamily.get(familyId);
+    const familyMain = steps.map((step) => step.mainQuestion).find(Boolean) || "";
+    const familyImage = steps.map((step) => step.image).find(Boolean) || "";
     steps.forEach((step, stepIndex) => {
       out.push({
         ...step,
         questionFamilyId: familyId,
+        mainQuestion: step.mainQuestion || familyMain,
+        image: step.image || familyImage,
         familyIndex: familyIndex + 1,
         familyTotal: familyIds.length,
         stepIndex: stepIndex + 1,

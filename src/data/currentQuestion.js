@@ -30,6 +30,7 @@ export function setCurrentQuestion(q) {
   current = {
     id: q.id ?? null,
     question: String(q.question ?? ""),
+    mainQuestion: q.mainQuestion ? String(q.mainQuestion) : "",
     options: q.options ?? null,
     answer: q.answer ?? null,
     explanation: q.explanation ? String(q.explanation) : "",

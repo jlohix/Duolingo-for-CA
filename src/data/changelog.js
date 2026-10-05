@@ -1,5 +1,11 @@
 export const BUILT_IN_LOGS = [
   {
+    id: "built-2026-10-05-family-stem",
+    date: "2026-10-05",
+    title: "Stem stays on every part",
+    body: "On Complex Numbers and Phase Angles practice, the family prompt and circuit stay at the top of every part, with that part’s question and choices underneath.",
+  },
+  {
     id: "built-2026-10-05-complexlap-banks",
     date: "2026-10-05",
     title: "Complex impedance practice",
