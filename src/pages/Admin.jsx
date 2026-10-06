@@ -242,7 +242,7 @@ export default function Admin({ progress, setProgress, counts, bankCounts = {} }
         </div>
       </div>
       <WalkFeedbackTable students={students} />
-      <ModuleAnalyticsTable />
+      <ModuleAnalyticsTable totalStudents={students.length} />
       <LeaderboardSchedule />
       <TutorUsage totalStudents={students.length} />
       <QuestionReportsTable />
@@ -416,11 +416,12 @@ function rollupModuleAttempts(rows) {
 
     let m = byModule.get(moduleId);
     if (!m) {
-      m = { attempts: 0, students: new Set(), completedStudents: new Set(), completedAttempts: 0 };
+      m = { attempts: 0, students: new Set(), completedStudents: new Set(), completedAttempts: 0, perStudent: new Map() };
       byModule.set(moduleId, m);
     }
     m.attempts += 1;
     m.students.add(email);
+    m.perStudent.set(email, (m.perStudent.get(email) || 0) + 1);
     if (done) {
       m.completedStudents.add(email);
       m.completedAttempts += 1;
@@ -429,16 +430,24 @@ function rollupModuleAttempts(rows) {
     const dKey = `${moduleId}|${difficulty}`;
     let d = byModuleDiff.get(dKey);
     if (!d) {
-      d = { moduleId, difficulty, attempts: 0, students: new Set(), completedStudents: new Set(), completedAttempts: 0 };
+      d = { moduleId, difficulty, attempts: 0, students: new Set(), completedStudents: new Set(), completedAttempts: 0, perStudent: new Map() };
       byModuleDiff.set(dKey, d);
     }
     d.attempts += 1;
     d.students.add(email);
+    d.perStudent.set(email, (d.perStudent.get(email) || 0) + 1);
     if (done) {
       d.completedStudents.add(email);
       d.completedAttempts += 1;
     }
   }
+
+  // Count students who attempted a module 2+ times (for the repeat rate).
+  const studentsWithRepeat = (perStudent) => {
+    let n = 0;
+    for (const count of perStudent.values()) if (count >= 2) n += 1;
+    return n;
+  };
 
   const perModule = [...byModule.entries()]
     .map(([moduleId, m]) => ({
@@ -447,6 +456,7 @@ function rollupModuleAttempts(rows) {
       attempts: m.attempts,
       students: m.students.size,
       repeats: Math.max(m.attempts - m.students.size, 0),
+      studentsWithRepeat: studentsWithRepeat(m.perStudent),
       studentsCompleted: m.completedStudents.size,
       completedAttempts: m.completedAttempts,
     }))
@@ -460,6 +470,7 @@ function rollupModuleAttempts(rows) {
       attempts: d.attempts,
       students: d.students.size,
       repeats: Math.max(d.attempts - d.students.size, 0),
+      studentsWithRepeat: studentsWithRepeat(d.perStudent),
       studentsCompleted: d.completedStudents.size,
       completedAttempts: d.completedAttempts,
     }))
@@ -471,7 +482,14 @@ function rollupModuleAttempts(rows) {
   return { perModule, perModuleDiff, totalAttempts: list.length };
 }
 
-function ModuleAnalyticsTable() {
+// Format a ratio as a whole-number percent, or "—" when the denominator
+// is unknown (no roster loaded yet).
+function pct(numerator, denominator) {
+  if (!denominator || denominator <= 0) return "—";
+  return `${Math.round((numerator / denominator) * 100)}%`;
+}
+
+function ModuleAnalyticsTable({ totalStudents = 0 }) {
   const [rows, setRows] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -532,6 +550,9 @@ function ModuleAnalyticsTable() {
         module (completed or abandoned). A <strong>completion</strong> means a
         student answered every question in the module at least once.{" "}
         {totalAttempts} attempt{totalAttempts === 1 ? "" : "s"} logged.
+        Percentages are out of {totalStudents} enrolled student
+        {totalStudents === 1 ? "" : "s"} in the roster; repeat rate is the share
+        of a module's attempters who tried it 2+ times.
       </p>
       <label
         className="login-hint"
@@ -555,14 +576,17 @@ function ModuleAnalyticsTable() {
               {showDiff ? <th>Difficulty</th> : null}
               <th>Total attempts</th>
               <th>Students</th>
+              <th>% Attempted</th>
               <th>Repeat attempts</th>
+              <th>Repeat rate</th>
               <th>Students completed</th>
+              <th>% Completed</th>
             </tr>
           </thead>
           <tbody>
             {loading ? (
               <tr>
-                <td colSpan={showDiff ? 6 : 5}>Loading module attempts…</td>
+                <td colSpan={showDiff ? 9 : 8}>Loading module attempts…</td>
               </tr>
             ) : (showDiff ? perModuleDiff : perModule).length ? (
               (showDiff ? perModuleDiff : perModule).map((row) => (
@@ -573,13 +597,16 @@ function ModuleAnalyticsTable() {
                   ) : null}
                   <td>{row.attempts}</td>
                   <td>{row.students}</td>
+                  <td>{pct(row.students, totalStudents)}</td>
                   <td>{row.repeats}</td>
+                  <td>{pct(row.studentsWithRepeat, row.students)}</td>
                   <td>{row.studentsCompleted}</td>
+                  <td>{pct(row.studentsCompleted, totalStudents)}</td>
                 </tr>
               ))
             ) : (
               <tr>
-                <td colSpan={showDiff ? 6 : 5}>
+                <td colSpan={showDiff ? 9 : 8}>
                   No module attempts logged yet. Play a question bank as a
                   student to see data here.
                 </td>
