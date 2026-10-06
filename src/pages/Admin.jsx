@@ -482,11 +482,16 @@ function rollupModuleAttempts(rows) {
   return { perModule, perModuleDiff, totalAttempts: list.length };
 }
 
-// Format a ratio as a whole-number percent, or "—" when the denominator
-// is unknown (no roster loaded yet).
+// Format a ratio as a percent to one decimal place, or "—" when the
+// denominator is unknown (no roster loaded yet). A genuinely zero numerator
+// shows "0%"; a nonzero numerator that would round to 0.0% (under 0.05%)
+// shows "<0.1%" instead, so a nonzero raw count never looks like a flat 0%.
 function pct(numerator, denominator) {
   if (!denominator || denominator <= 0) return "—";
-  return `${Math.round((numerator / denominator) * 100)}%`;
+  if (numerator <= 0) return "0%";
+  const value = (numerator / denominator) * 100;
+  if (value < 0.05) return "<0.1%";
+  return `${value.toFixed(1)}%`;
 }
 
 function ModuleAnalyticsTable({ totalStudents = 0 }) {
