@@ -33,8 +33,10 @@ import {
   scheduleProgressPush,
 } from "./state/progressSync";
 import { pullLeagueSeason, syncLeagueSeason } from "./state/league";
+import { refreshLeaderboardPeriod } from "./state/leaderboardPeriod";
 import { loadSession, logout, isAdmin } from "./state/auth";
 import { useSessionTime } from "./hooks/useSessionTime";
+import { useModuleTime } from "./hooks/useModuleTime";
 import AppShell from "./components/AppShell";
 import ChatWidget from "./components/ChatWidget";
 import ConsentModal from "./components/ConsentModal";
@@ -46,7 +48,7 @@ import Leaderboard from "./pages/Leaderboard";
 import Profile from "./pages/Profile";
 import ProgressPage from "./pages/Progress";
 import Leagues from "./pages/Leagues";
-import Admin from "./pages/Admin";
+
 import Guide from "./pages/Guide";
 import Updates from "./pages/Updates";
 import Lesson from "./pages/Lesson";
@@ -55,11 +57,40 @@ import DragCircuitLab from "./pages/DragCircuitLab";
 import InvertingOpAmpLesson from "./pages/InvertingOpAmpLesson";
 import NonInvertingOpAmpLesson from "./pages/NonInvertingOpAmpLesson";
 import SourceTransformationLesson from "./pages/SourceTransformationLesson";
-import LaplaceLesson from "./section5/LaplaceLesson";
 import { SECTION_WALKS } from "./walks";
 import Results from "./pages/Results";
 
 const QuestionPack = lazy(() => import("./pages/QuestionPack"));
+// Admin is lazy-loaded so its analytics dashboard (and the Recharts library it
+// uses) is a separate chunk downloaded only for admins, not students.
+const Admin = lazy(() => import("./pages/Admin"));
+
+// Screens that count as an actual learning MODULE for time tracking.
+// Only these are logged to module_visits (time from opening the module to
+// leaving it). Menu/navigation screens (home, leaderboards, profile, guide,
+// updates, results) are deliberately excluded.
+const MODULE_SCREENS = new Set([
+  "lesson",
+  "skip",
+  "draglab",
+  "dragthevlab",
+  "dragnortonlab",
+  "dragdeplab",
+  "dragnodallab",
+  "dragmeshlab",
+  "dragsuperlab",
+  "dragsnlab",
+  "dragsuperposlab",
+  "dragdivlab",
+  "dragbranchlab",
+  "dragpowerlab",
+  "dragmptlab",
+  "sourcetransform",
+  "invopamp",
+  "ninvopamp",
+  "secwalk",
+  "paper",
+]);
 
 // Top-level wrapper: renders the app and mounts the tutor chatbot ONCE, so it
 // floats over every screen (it's position: fixed) instead of being duplicated
@@ -68,22 +99,30 @@ const QuestionPack = lazy(() => import("./pages/QuestionPack"));
 export default function App() {
   const [gate, setGate] = useState({
     screen: "home",
+    email: null,
     classId: null,
     isAdmin: false,
     consentPending: false,
   });
 
   const showChatbot =
+    // Only show the tutor once a user is actually logged in. On the login /
+    // pre-auth screens there is no session (gate.email is null), so the tutor
+    // stays hidden there.
+    Boolean(gate.email) &&
     canUseChatbot({
       classId: gate.classId,
       isAdmin: gate.isAdmin,
       screen: gate.screen,
-    }) && !gate.consentPending;
+    }) &&
+    !gate.consentPending;
 
   return (
     <>
       <AppBody onGateChange={setGate} />
-      {showChatbot && <ChatWidget />}
+      {showChatbot && (
+        <ChatWidget email={gate.email} isAdmin={gate.isAdmin} />
+      )}
     </>
   );
 }
@@ -110,7 +149,6 @@ function AppBody({ onGateChange }) {
   const [screen, setScreen] = useState("home");
   const [lesson, setLesson] = useState(null);
   const [paperPack, setPaperPack] = useState(null);
-  const [laplaceLabId, setLaplaceLabId] = useState(null);
   const [secWalk, setSecWalk] = useState(null);
   const [skipTarget, setSkipTarget] = useState(null);
   const [summary, setSummary] = useState(null);
@@ -144,6 +182,8 @@ function AppBody({ onGateChange }) {
         if (cancelled) return;
         setProgress(synced);
         await bootstrapRemoteRoster();
+        // Refresh the weekly leaderboard period (independent of league season).
+        refreshLeaderboardPeriod();
       } catch {
         if (!cancelled) {
           setProgress(
@@ -200,6 +240,33 @@ function AppBody({ onGateChange }) {
     progress?.classId ?? ""
   );
 
+  // Track ONLY the learning modules and how long the user is inside each one
+  // (module_visits) — i.e. from opening a lesson/lab/paper until they leave it
+  // (finish, exit, navigate away, or close the tab). Navigation/menu screens
+  // (home, leaderboards, profile, guide, updates, results) are intentionally
+  // NOT tracked. A fresh visit starts whenever moduleKey or moduleDetail
+  // changes. Admins are excluded.
+  const isModuleScreen = MODULE_SCREENS.has(screen);
+  const moduleDetail = lesson
+    ? lesson.bankId
+      ? `bank-${lesson.bankId}-${lesson.difficulty}`
+      : `${lesson.topicId}-${lesson.difficulty}`
+    : secWalk
+    ? String(secWalk)
+    : paperPack?.id
+    ? String(paperPack.id)
+    : skipTarget
+    ? `skip-${skipTarget}`
+    : "";
+  const trackModules = Boolean(session) && !isAdmin(session) && isModuleScreen;
+  useModuleTime({
+    email: trackModules ? session.username : null,
+    moduleKey: trackModules ? screen : null,
+    moduleDetail,
+    moduleLabel: screen,
+    classId: progress?.classId ?? "",
+  });
+
   // Report the values the chatbot gate needs (current screen, class, admin)
   // up to the App wrapper, which mounts the single floating ChatWidget.
   useEffect(() => {
@@ -207,6 +274,7 @@ function AppBody({ onGateChange }) {
       screen,
       classId: progress?.classId ?? null,
       isAdmin: isAdmin(session),
+      email: session?.username ?? null,
       consentPending:
         Boolean(session) &&
         !isAdmin(session) &&
@@ -340,7 +408,6 @@ function AppBody({ onGateChange }) {
       "sourcetransform",
       "invopamp",
       "ninvopamp",
-      "laplacelab",
       "secwalk",
       "paper",
     ].includes(screen);
@@ -393,12 +460,14 @@ function AppBody({ onGateChange }) {
             <QuestionPack questions={questions} loaded={questionsLoaded} />
           </Suspense>
         ) : (
-          <Admin
-            progress={progress}
-            setProgress={setProgress}
-            counts={counts}
-            bankCounts={bankCounts}
-          />
+          <Suspense fallback={<div className="page"><p>Loading admin…</p></div>}>
+            <Admin
+              progress={progress}
+              setProgress={setProgress}
+              counts={counts}
+              bankCounts={bankCounts}
+            />
+          </Suspense>
         )}
       </AppShell>
     );
@@ -517,7 +586,6 @@ function AppBody({ onGateChange }) {
     onExit: () => setScreen("home"),
     onFinished: (result) => {
       setSecWalk(null);
-      setLaplaceLabId(null);
       setSummary(result);
       setScreen("results");
     },
@@ -762,23 +830,6 @@ function AppBody({ onGateChange }) {
     }
   }
 
-  if (screen === "laplacelab" && laplaceLabId) {
-    return (
-      <LaplaceLesson
-        key={laplaceLabId}
-        labId={laplaceLabId}
-        progress={progress}
-        setProgress={setProgress}
-        preview={preview}
-        onExit={() => {
-          setLaplaceLabId(null);
-          setScreen("home");
-        }}
-        onFinished={labXp.onFinished}
-      />
-    );
-  }
-
   if (screen === "paper" && paperPack) {
     return (
       <Lesson
@@ -883,10 +934,6 @@ function AppBody({ onGateChange }) {
       onSectionWalk={(section, id) => {
         setSecWalk({ section, id });
         setScreen("secwalk");
-      }}
-      onLaplaceLab={(id) => {
-        setLaplaceLabId(id);
-        setScreen("laplacelab");
       }}
       allOpen={isAdmin(session)}
     />

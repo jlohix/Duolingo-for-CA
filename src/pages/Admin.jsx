@@ -8,6 +8,8 @@ import {
   addStudent,
 } from "../state/roster";
 import TopicInsight from "../components/TopicInsight";
+import TutorUsage from "../components/TutorUsage";
+import LeaderboardSchedule from "../components/LeaderboardSchedule";
 import ProgressPage from "./Progress";
 import { CLASS_IDS, DEFAULT_CLASS, isPartTimeClass } from "../data/classes";
 import { trophyFromIndex } from "../data/trophies";
@@ -86,8 +88,19 @@ export default function Admin({ progress, setProgress, counts, bankCounts = {} }
   const [newName, setNewName] = useState("");
   const [newClass, setNewClass] = useState(DEFAULT_CLASS);
   const [addError, setAddError] = useState("");
+  const [studentSearch, setStudentSearch] = useState("");
   const student =
     students.find((row) => row.username === selected) || students[0];
+
+  // Filter the roster by the search box (matches name, username, or class).
+  const filteredStudents = useMemo(() => {
+    const q = studentSearch.trim().toLowerCase();
+    if (!q) return students;
+    return students.filter((row) => {
+      const hay = `${row.display ?? ""} ${row.username ?? ""} ${row.classId ?? ""}`.toLowerCase();
+      return hay.includes(q);
+    });
+  }, [students, studentSearch]);
 
   function handleAdd(event) {
     event.preventDefault();
@@ -145,21 +158,43 @@ export default function Admin({ progress, setProgress, counts, bankCounts = {} }
         </button>
         {addError ? <p className="login-hint">{addError}</p> : null}
       </form>
-      <div className="admin-table-wrap">
-        <table className="admin-table">
-          <thead>
-            <tr>
-              <th>Student</th>
-              <th>Class</th>
-              <th>XP</th>
-              <th>League</th>
-              <th>Streak</th>
-              <th>Lessons</th>
-              <th>Focus</th>
-            </tr>
-          </thead>
-          <tbody>
-            {students.map((row) => {
+      <div className="admin-roster">
+        <div className="admin-roster-head">
+          <h2>Class overview</h2>
+          <input
+            type="search"
+            className="admin-search"
+            value={studentSearch}
+            onChange={(e) => setStudentSearch(e.target.value)}
+            placeholder="Search name, username, or class…"
+            aria-label="Search students"
+          />
+        </div>
+        <p className="admin-roster-count">
+          Showing {filteredStudents.length} of {students.length} students
+        </p>
+        <div className="admin-table-wrap admin-roster-scroll">
+          <table className="admin-table">
+            <thead>
+              <tr>
+                <th>Student</th>
+                <th>Class</th>
+                <th>XP</th>
+                <th>League</th>
+                <th>Streak</th>
+                <th>Lessons</th>
+                <th>Focus</th>
+              </tr>
+            </thead>
+            <tbody>
+              {filteredStudents.length === 0 ? (
+                <tr>
+                  <td colSpan={7} className="admin-empty">
+                    No students match “{studentSearch}”.
+                  </td>
+                </tr>
+              ) : (
+                filteredStudents.map((row) => {
               const sum = studentSummary(row, counts, leagues, bankCounts);
               return (
                 <tr
@@ -200,12 +235,16 @@ export default function Admin({ progress, setProgress, counts, bankCounts = {} }
                   </td>
                 </tr>
               );
-            })}
-          </tbody>
-        </table>
+                })
+              )}
+            </tbody>
+          </table>
+        </div>
       </div>
       <WalkFeedbackTable students={students} />
       <ModuleAnalyticsTable />
+      <LeaderboardSchedule />
+      <TutorUsage totalStudents={students.length} />
       <QuestionReportsTable />
       {student ? (
         <StudentEditor

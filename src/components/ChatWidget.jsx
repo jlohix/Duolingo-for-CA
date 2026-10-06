@@ -1,6 +1,11 @@
 import { useEffect, useRef, useState } from "react";
 import { askChatbot, CHAT_HISTORY_LIMIT } from "../supabaseClient";
 import MathText from "./MathText";
+import {
+  currentQuestionForChat,
+  getCurrentQuestion,
+  subscribeCurrentQuestion,
+} from "../data/currentQuestion";
 
 // Turn a source filename like "EE2101_Lecture_Week03.pdf" into "Week 3".
 function prettySource(source) {
@@ -13,20 +18,74 @@ function prettySource(source) {
 // Floating "Ask the tutor" chatbot with per-session conversation memory.
 //
 // Memory model:
-//   - Messages live in React state only. The conversation resets when the
-//     student closes the panel, refreshes the page, or logs out (the whole
-//     component unmounts / state is discarded). Nothing is persisted.
+//   - The conversation persists for the whole browser session: closing the
+//     panel just hides it, and messages are mirrored to sessionStorage so a
+//     page refresh keeps the history. It clears only when the session ends
+//     (tab/browser closed) or the student explicitly clears it.
 //   - Each question sends the recent history (capped) so the bot can follow
 //     up on earlier turns. RAG still runs on the latest message.
-export default function ChatWidget() {
+
+// sessionStorage lives until the browser tab/session is closed, which is
+// exactly the lifetime we want for the chat history.
+const CHAT_STORAGE_KEY = "chatbot:conversation";
+const CHAT_SESSION_KEY = "chatbot:sessionId";
+
+// A per-tab chat session id, used only for usage analytics to group a burst of
+// questions in one sitting. Lives in sessionStorage so it is stable across a
+// refresh and cleared when the tab closes (matching the conversation lifetime).
+function getChatSessionId() {
+  try {
+    let id = sessionStorage.getItem(CHAT_SESSION_KEY);
+    if (!id) {
+      id =
+        globalThis.crypto?.randomUUID?.() ||
+        `sess-${Date.now()}-${Math.random().toString(36).slice(2)}`;
+      sessionStorage.setItem(CHAT_SESSION_KEY, id);
+    }
+    return id;
+  } catch {
+    return "";
+  }
+}
+
+function loadStoredMessages() {
+  try {
+    const raw = sessionStorage.getItem(CHAT_STORAGE_KEY);
+    const parsed = raw ? JSON.parse(raw) : [];
+    return Array.isArray(parsed) ? parsed : [];
+  } catch {
+    return [];
+  }
+}
+
+export default function ChatWidget({ email = null, isAdmin = false }) {
   const [open, setOpen] = useState(false);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   // Conversation so far. Each entry: { role: "user"|"model", text, sources? }
-  const [messages, setMessages] = useState([]);
+  // Seeded from sessionStorage so a refresh within the session keeps history.
+  const [messages, setMessages] = useState(loadStoredMessages);
+  // Whether the student currently has a question on screen (drives the small
+  // "using your current question" hint). The actual context is read fresh at
+  // send-time via currentQuestionForChat().
+  const [hasQuestion, setHasQuestion] = useState(false);
   const inputRef = useRef(null);
   const bodyRef = useRef(null);
+
+  // Track whether a question is currently active on the page.
+  useEffect(() => {
+    return subscribeCurrentQuestion((q) => setHasQuestion(Boolean(q)));
+  }, []);
+
+  // Mirror the conversation to sessionStorage whenever it changes.
+  useEffect(() => {
+    try {
+      sessionStorage.setItem(CHAT_STORAGE_KEY, JSON.stringify(messages));
+    } catch {
+      // Storage full/unavailable: keep working from in-memory state.
+    }
+  }, [messages]);
 
   // Focus the input when the panel opens.
   useEffect(() => {
@@ -40,12 +99,27 @@ export default function ChatWidget() {
     }
   }, [messages, loading]);
 
-  // Closing the panel ends the session: clear the conversation.
+  // Closing the panel just hides it. The conversation is kept for the rest of
+  // the session (in state + sessionStorage) so reopening resumes where we left
+  // off. History clears only when the browser session ends or the student
+  // explicitly clears it via clearConversation().
   function closePanel() {
     setOpen(false);
+    setError("");
+    setInput("");
+  }
+
+  // Explicit reset so the student can start a fresh conversation on demand.
+  function clearConversation() {
     setMessages([]);
     setError("");
     setInput("");
+    try {
+      sessionStorage.removeItem(CHAT_STORAGE_KEY);
+    } catch {
+      // ignore
+    }
+    if (inputRef.current) inputRef.current.focus();
   }
 
   async function handleAsk(e) {
@@ -61,9 +135,25 @@ export default function ChatWidget() {
     setLoading(true);
 
     try {
-      // Send the recent conversation (capped) so the bot has memory.
+      // Send the recent conversation (capped) so the bot has memory, plus the
+      // question the student is currently viewing (if any) so the tutor can
+      // give guided, question-aware help.
       const history = priorHistory.slice(-CHAT_HISTORY_LIMIT);
-      const { answer, sources } = await askChatbot(q, history);
+      const currentQuestion = currentQuestionForChat();
+      const activeQuestion = getCurrentQuestion();
+      const meta = {
+        email,
+        isAdmin,
+        sessionId: getChatSessionId(),
+        currentQuestionId: activeQuestion?.id ?? null,
+        currentQuestionTopicId: activeQuestion?.topicId ?? null,
+      };
+      const { answer, sources } = await askChatbot(
+        q,
+        history,
+        currentQuestion,
+        meta
+      );
       setMessages((prev) => [
         ...prev,
         { role: "model", text: answer, sources },
@@ -91,18 +181,43 @@ export default function ChatWidget() {
         <div className="chat-panel" role="dialog" aria-label="Ask the tutor">
           <div className="chat-header">
             <div>
-              <p className="chat-title">Ask the tutor</p>
+              <p className="chat-title">Ask the tutor (Under Development)</p>
               <p className="chat-subtitle">
                 Grounded in your EE2101 lecture slides
               </p>
             </div>
+            {messages.length > 0 && (
+              <button
+                type="button"
+                className="chat-clear"
+                onClick={clearConversation}
+                aria-label="Clear conversation"
+              >
+                Clear
+              </button>
+            )}
           </div>
+
+          {hasQuestion && (
+            <p className="chat-context-note">
+              📄 The tutor can see the question you're working on.
+            </p>
+          )}
 
           <div className="chat-body" ref={bodyRef}>
             {messages.length === 0 && !loading && !error && (
               <p className="chat-hint">
-                Ask a circuit-analysis question, e.g.{" "}
-                <em>“What is Kirchhoff's voltage law?”</em>
+                {hasQuestion ? (
+                  <>
+                    Stuck on this question? Ask for a hint, e.g.{" "}
+                    <em>“How do I start this?”</em>
+                  </>
+                ) : (
+                  <>
+                    Ask a circuit-analysis question, e.g.{" "}
+                    <em>“What is Kirchhoff's voltage law?”</em>
+                  </>
+                )}
               </p>
             )}
 
@@ -113,7 +228,7 @@ export default function ChatWidget() {
                 </div>
               ) : (
                 <div key={i} className="chat-msg chat-msg-bot">
-                  <MathText className="chat-bubble" text={m.text} />
+                  <MathText className="chat-bubble" text={m.text} markdown />
                   {m.sources && m.sources.length > 0 && (
                     <p className="chat-sources">
                       Sources: {m.sources.map(prettySource).join(", ")}

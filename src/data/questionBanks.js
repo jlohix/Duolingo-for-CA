@@ -95,6 +95,46 @@ export const QUESTION_BANKS = [
     walkthroughKey: "test-3-lsource",
     topicId: 3,
   },
+  {
+    id: "lapbasics",
+    title: "Laplace Basics",
+    csv: "lapbasics.csv",
+    assetFolder: "laplace",
+    walkthroughKey: "walk-5-laplace-basics",
+    topicId: 5,
+  },
+  {
+    id: "laplaceinca",
+    title: "Laplace Circuit Application",
+    csv: "laplaceinca.csv",
+    assetFolder: "laplace",
+    walkthroughKey: "walk-5-laplace-circuit",
+    topicId: 5,
+  },
+  {
+    id: "laptransf",
+    title: "Transfer Functions",
+    csv: "laptransf.csv",
+    assetFolder: "laptransf",
+    walkthroughKey: "walk-5-transfer-functions",
+    topicId: 5,
+  },
+  {
+    id: "poles",
+    title: "Poles",
+    csv: "poles.csv",
+    assetFolder: "poles",
+    walkthroughKey: "walk-6-poles-zeros-stability",
+    topicId: 6,
+  },
+  {
+    id: "complexlap",
+    title: "Complex Impedance",
+    csv: "complexlap.csv",
+    assetFolder: "complexlap",
+    walkthroughKey: "walk-6-complex-phase",
+    topicId: 6,
+  },
 ];
 
 /** Local fallbacks only when a CSV image is a filename, not a GitHub URL. */
@@ -109,6 +149,19 @@ export const LOCAL_BANK_FOLDERS = new Set([
 
 export function questionBankForId(id) {
   return QUESTION_BANKS.find((bank) => bank.id === id);
+}
+
+export function banksForWalkthroughKey(walkthroughKey) {
+  const key = String(walkthroughKey || "");
+  if (!key) return [];
+  return QUESTION_BANKS.filter((bank) => bank.walkthroughKey === key);
+}
+
+export function leftoverBanksForTopic(topicId, placedIds) {
+  const placed = placedIds instanceof Set ? placedIds : new Set(placedIds);
+  return QUESTION_BANKS.filter(
+    (bank) => bank.topicId === topicId && !placed.has(bank.id)
+  );
 }
 
 export function bankLessonKey(bankId, difficulty) {

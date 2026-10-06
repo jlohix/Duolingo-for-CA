@@ -377,11 +377,63 @@ const WARMUPS = {
   ],
   6: [
     () => {
+      const num = pick([2, 3, 4]);
+      const p = pick([2, 3, 4, 5, 8]);
+      return makeMcq(
+        "w6-pole",
+        `For $H(s) = ${num}/(s+${p})$, the pole is at`,
+        `$s = -${p}$`,
+        [`$s = ${num}$`, `$s = ${p}$`, `$s = -${num}$`],
+        `Denominator zero at $s+${p} = 0$, so the pole is $s = -${p}$.`
+      );
+    },
+    () =>
+      shuffleConcept(
+        "w6-lhp",
+        "A pole in the left half plane means the corresponding exponential",
+        [
+          "decays",
+          "grows without bound",
+          "is always a constant",
+          "must be a zero instead",
+        ],
+        0,
+        "A negative real part gives $e^{-\\alpha t}$ decay."
+      ),
+    () =>
+      shuffleConcept(
+        "w6-zero",
+        "Zeros of $H(s)=N(s)/D(s)$ are",
+        [
+          "roots of $N(s)$",
+          "roots of $D(s)$",
+          "always at $s=0$",
+          "the same as poles",
+        ],
+        0,
+        "Zeros come from the numerator. Poles come from the denominator."
+      ),
+    () =>
+      shuffleConcept(
+        "w6-s",
+        "In $s=\\sigma+j\\omega$, the imaginary part $\\omega$ sets",
+        [
+          "oscillation in rad/s",
+          "the DC gain only",
+          "whether poles are zeros",
+          "the resistor values",
+        ],
+        0,
+        "$e^{st}=e^{\\sigma t}e^{j\\omega t}$. $\\omega$ is the oscillation rate."
+      ),
+  ],
+  7: [
+    () => {
       const num = pick([2, 3, 4, 5]);
       const pole = pick([1, 2, 4, 5, 6]);
       const h = `${num}/(s+${pole})`;
       return makeMcq(
-        "w6-h",
+        "w7-h",
         `If $Y(s) = ${h}$ and $X(s) = 1$ (zero ICs), what is $H(s)$?`,
         `$${h}$`,
         [`$s+${pole}$`, `$(s+${pole})/${num}$`, `$${num}$`],
@@ -393,7 +445,7 @@ const WARMUPS = {
       const vin = pick([2, 3, 4]);
       const vout = gain * vin;
       return makeMcq(
-        "w6-gain",
+        "w7-gain",
         `$H(s) = ${gain}$ (constant). If $V_{in} = ${vin}\\ \\mathrm{V}$, what is $V_{out}$?`,
         u(vout, "V"),
         [u(gain, "V"), u(vin, "V"), u(gain + vin, "V")],
@@ -402,7 +454,7 @@ const WARMUPS = {
     },
     () =>
       shuffleConcept(
-        "w6-z",
+        "w7-z",
         "A driving-point impedance is",
         [
           "$V/I$ at the same port",
@@ -417,20 +469,20 @@ const WARMUPS = {
       const num = pick([2, 3, 4]);
       const p = pick([2, 3, 4, 5, 8]);
       return makeMcq(
-        "w6-pole",
-        `For $H(s) = ${num}/(s+${p})$, the pole is at`,
-        `$s = -${p}$`,
-        [`$s = ${num}$`, `$s = ${p}$`, `$s = -${num}$`],
-        `Denominator zero at $s+${p} = 0$, so the pole is $s = -${p}$.`
+        "w7-tf",
+        `Voltage gain $H(s)=${num}/(s+${p})$. If $V_i(s)=1$, $V_o(s)$ is`,
+        `$${num}/(s+${p})$`,
+        [`$s+${p}$`, `$${num}$`, `$1/(s+${p})$`],
+        `$V_o=H V_i=${num}/(s+${p})$.`
       );
     },
   ],
-  7: [
+  8: [
     () => {
       const vm = pick([6, 8, 10, 12, 14, 20]);
       const rms = Math.round((vm / Math.SQRT2) * 100) / 100;
       return makeMcq(
-        "w7-rms",
+        "w8-rms",
         `A sine has peak ${u(vm, "V")}. What is $V_{rms}$?`,
         `about ${u(rms, "V")}`,
         [u(vm, "V"), u(vm / 2, "V"), u(vm * 2, "V")],
@@ -442,7 +494,7 @@ const WARMUPS = {
       const z = pick([3, 5, 6, 8]);
       const v = i * z;
       return makeMcq(
-        "w7-ohm",
+        "w8-ohm",
         `Phasor current ${u(i, "A")} through $Z = ${z}\\ \\Omega$ (resistive). What is $V$?`,
         u(v, "V"),
         [u(i + z, "V"), u(z / i, "V"), u(i, "V")],
@@ -454,7 +506,7 @@ const WARMUPS = {
       const irms = pick([1, 2, 3]);
       const p = vrms * irms;
       return makeMcq(
-        "w7-power",
+        "w8-power",
         `Resistive load: $V_{rms} = ${vrms}\\ \\mathrm{V}$, $I_{rms} = ${irms}\\ \\mathrm{A}$. Average power?`,
         u(p, "W"),
         [u(vrms + irms, "W"), u(vrms / irms, "W"), u(0.5 * vrms * irms, "W")],
@@ -466,7 +518,7 @@ const WARMUPS = {
       const l = pick([0.1, 0.2, 0.25, 0.5]);
       const xl = Math.round(w * l * 100) / 100;
       return makeMcq(
-        "w7-xl",
+        "w8-xl",
         `$\\omega = ${w}\\ \\mathrm{rad/s}$, $L = ${l}\\ \\mathrm{H}$. What is $X_L$?`,
         u(xl, "\\Omega"),
         [u(l / w, "\\Omega"), u(w / l, "\\Omega"), `$j${l}\\ \\Omega$`],
@@ -525,7 +577,7 @@ const PRIMERS = {
     ],
   },
   5: {
-    title: "Laplace transforms",
+    title: "Laplace Transform",
     intro:
       "Replace each element with its s-domain model, then do circuit algebra in $s$. Zero initial conditions unless the problem states otherwise.",
     formulas: [
@@ -536,6 +588,17 @@ const PRIMERS = {
     ],
   },
   6: {
+    title: "Poles and Zeros",
+    intro:
+      "Poles are denominator roots. Zeros are numerator roots. Left-half-plane poles decay; right-half-plane poles grow.",
+    formulas: [
+      { name: "Zeros", expr: "roots of $N(s)$ in $H(s)=N(s)/D(s)$" },
+      { name: "Poles", expr: "roots of $D(s)$" },
+      { name: "s-plane", expr: "$s=\\sigma+j\\omega$" },
+      { name: "Stability", expr: "LHP poles decay; RHP poles grow" },
+    ],
+  },
+  7: {
     title: "Network functions",
     intro:
       "$H(s)$ is output over input with zero initial conditions. Two-port parameters are just organized ways to write port voltages and currents.",
@@ -543,10 +606,10 @@ const PRIMERS = {
       { name: "Transfer function", expr: "$H(s) = Y(s)/X(s)$ (zero ICs)" },
       { name: "Voltage gain", expr: "$H(s) = V_{out}(s)/V_{in}(s)$" },
       { name: "Impedance function", expr: "$Z(s) = V(s)/I(s)$" },
-      { name: "Poles", expr: "roots of the denominator of $H(s)$" },
+      { name: "One-port", expr: "driving-point $V/I$ at the same port" },
     ],
   },
-  7: {
+  8: {
     title: "Frequency domain",
     intro:
       "Sinusoids become phasors. Use RMS for average power. Superposition if DC and AC sources share a circuit.",

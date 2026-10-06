@@ -482,6 +482,18 @@ export function unlockTopicBySkip(state, topicId) {
   return next;
 }
 
+/** Walkthrough-only sections complete when every walk node is done. */
+const WALK_SECTION_LABS = {
+  5: ["laplace-basics", "laplace-circuit", "transfer-functions"],
+  6: ["poles-zeros-stability", "complex-phase"],
+};
+
+export function walkProgressKeys(topicId) {
+  return (WALK_SECTION_LABS[Number(topicId)] || []).map((id) =>
+    walkLessonKey(topicId, id)
+  );
+}
+
 /** Quiz + bank lesson keys that count toward finishing a section. */
 export function sectionProgressKeys(topicId, counts = {}, bankCounts = {}) {
   const topicKeys = hasTopicQuiz(topicId)
@@ -495,7 +507,8 @@ export function sectionProgressKeys(topicId, counts = {}, bankCounts = {}) {
         .map((d) => bankLessonKey(bank.id, d))
         .filter((key) => (bankCounts[key] || 0) > 0)
     );
-  return [...topicKeys, ...bankKeys];
+  if (topicKeys.length || bankKeys.length) return [...topicKeys, ...bankKeys];
+  return walkProgressKeys(topicId);
 }
 
 export function isSectionComplete(topicId, progress, counts = {}, bankCounts = {}) {

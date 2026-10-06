@@ -12,7 +12,8 @@
     "katex": "^0.16.21",
     "papaparse": "^5.5.2",
     "react": "^19.0.0",
-    "react-dom": "^19.0.0"
+    "react-dom": "^19.0.0",
+    "recharts": "^2.15.0"
   },
   "devDependencies": {
     "@vitejs/plugin-react": "^4.3.4",

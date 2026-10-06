@@ -41,23 +41,22 @@ const SECTION4 = [
   ["freec", "Source-Free Capacitor"],
   ["freecq", "Source-Free Capacitor Practice"],
   ["freel", "Source-Free Inductor"],
-  ["freelq", "Source-Free Inductor Practice"],
+  ["test-4-freel", "Source-Free Inductor test"],
   ["stepc", "Step Response of RC"],
-  ["stepcq", "Step Response of RC Practice"],
+  ["test-4-stepc", "Step Response of RC test"],
   ["stepl", "Step Response of RL"],
-  ["steplq", "Step Response of RL Practice"],
+  ["test-4-stepl", "Step Response of RL test"],
 ];
 
 const SECTION5 = [
-  ["basics", "Laplace Transform Basics"],
-  ["properties", "Properties of LT"],
-  ["summary", "Laplace Transform Summary"],
-  ["poles", "Poles & Zeros"],
-  ["simple", "Simple Real Poles"],
-  ["repeated", "Repeated Real Poles"],
-  ["complex", "Distinct Complex Poles"],
-  ["pfe", "Partial Fraction Expansion"],
-  ["worked", "Worked examples"],
+  ["laplace-basics", "Laplace Basics"],
+  ["laplace-circuit", "Laplace Circuit Application"],
+  ["transfer-functions", "Transfer Functions"],
+];
+
+const SECTION6 = [
+  ["poles-zeros-stability", "Zeros, Poles, and Stability"],
+  ["complex-phase", "Complex Numbers and Phase Angles"],
 ];
 
 function fromPairs(section, pairs) {
@@ -80,6 +79,7 @@ export const WALK_TITLES = [
   })),
   ...fromPairs(4, SECTION4),
   ...fromPairs(5, SECTION5),
+  ...fromPairs(6, SECTION6),
 ];
 
 const TITLE_BY_KEY = new Map(WALK_TITLES.map((row) => [row.key, row]));

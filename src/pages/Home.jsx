@@ -1,14 +1,17 @@
-import { useState } from "react";
+import { Fragment, useState } from "react";
 import { DIFFICULTIES, hasTopicQuiz, lessonKey } from "../data/topics";
 import {
   QUESTION_BANKS,
   bankLessonKey,
+  banksForWalkthroughKey,
+  leftoverBanksForTopic,
   questionBankForId,
 } from "../data/questionBanks";
-import { LAPLACE_LABS } from "../section5";
 import { SECTION2_LABS } from "../section2/index.jsx";
 import { SECTION3_LABS } from "../section3/index.jsx";
 import { SECTION4_LABS } from "../section4/index.jsx";
+import { SECTION5_LABS } from "../section5/index.jsx";
+import { SECTION6_LABS } from "../section6/index.jsx";
 import {
   isTopicUnlocked,
   SKIP_QUIZ_SIZE,
@@ -16,6 +19,7 @@ import {
   testLessonKey,
   topicInsight,
   walkLessonKey,
+  walkProgressKeys,
 } from "../state/progress";
 import StreakChip from "../components/StreakChip";
 import TopicInsight from "../components/TopicInsight";
@@ -46,8 +50,9 @@ function topicMeter(topic, progress, counts, bankCounts = {}) {
     )
     .filter((key) => (bankCounts[key] || 0) > 0);
   const keys = [...topicKeys, ...bankKeys];
-  const done = keys.filter((key) => progress.completed?.includes(key)).length;
-  const total = keys.length || DIFFICULTIES.length;
+  const allKeys = keys.length ? keys : walkProgressKeys(topic.id);
+  const done = allKeys.filter((key) => progress.completed?.includes(key)).length;
+  const total = allKeys.length || DIFFICULTIES.length;
   return {
     done,
     total,
@@ -176,6 +181,7 @@ function BankDifficultyNodes({
   counts,
   onStart,
   allOpen,
+  shortName = false,
 }) {
   const bank = questionBankForId(bankId);
   if (!bank) return null;
@@ -202,7 +208,7 @@ function BankDifficultyNodes({
       >
         <span className="node-icon">{done ? "✓" : difficulty.icon}</span>
         <span className="node-name">
-          {bank.title} {difficulty.name}
+          {shortName ? difficulty.name : `${bank.title} ${difficulty.name}`}
         </span>
         <span className="node-count">
           {!count
@@ -321,6 +327,13 @@ function LawsLabs({
   );
 }
 
+function labProgressKey(topicId, lab) {
+  const progressId = lab.progressId || lab.id;
+  return lab.testOnly
+    ? testLessonKey(topicId, progressId)
+    : walkLessonKey(topicId, lab.id);
+}
+
 function SectionWalks({
   labs,
   unlocked,
@@ -328,36 +341,50 @@ function SectionWalks({
   progress,
   topicId,
   onOpen,
+  bankCounts,
+  onStartBank,
 }) {
   return (
     <>
       {labs.map((lab) => {
         const progressId = lab.progressId || lab.id;
-        const key = lab.testOnly
-          ? testLessonKey(topicId, progressId)
-          : walkLessonKey(topicId, lab.id);
+        const key = labProgressKey(topicId, lab);
         const done = Boolean(progress?.completed?.includes(key));
         const walkDone = Boolean(
           progress?.completed?.includes(walkLessonKey(topicId, progressId))
         );
         const canOpen =
           unlocked && (!lab.testOnly || allOpen || walkDone);
+        const banks = banksForWalkthroughKey(key);
         return (
-          <button
-            key={lab.id}
-            type="button"
-            className={`node ${done ? "done" : ""} ${
-              canOpen ? "" : "off"
-            }`}
-            disabled={!canOpen}
-            onClick={() => onOpen(lab.id)}
-          >
-            <span className="node-icon">{done ? "✓" : lab.icon}</span>
-            <span className="node-name">{lab.title}</span>
-            <span className="node-count">
-              {lab.testOnly && !canOpen ? "Finish walkthrough first" : lab.count}
-            </span>
-          </button>
+          <Fragment key={lab.id}>
+            <button
+              type="button"
+              className={`node ${done ? "done" : ""} ${
+                canOpen ? "" : "off"
+              }`}
+              disabled={!canOpen}
+              onClick={() => onOpen(lab.id)}
+            >
+              <span className="node-icon">{done ? "✓" : lab.icon}</span>
+              <span className="node-name">{lab.title}</span>
+              <span className="node-count">
+                {lab.testOnly && !canOpen ? "Finish walkthrough first" : lab.count}
+              </span>
+            </button>
+            {banks.map((bank) => (
+              <BankDifficultyNodes
+                key={bank.id}
+                bankId={bank.id}
+                unlocked={unlocked}
+                progress={progress}
+                counts={bankCounts}
+                onStart={onStartBank}
+                allOpen={allOpen}
+                shortName
+              />
+            ))}
+          </Fragment>
         );
       })}
     </>
@@ -368,28 +395,9 @@ const SECTION_LAB_LISTS = {
   2: SECTION2_LABS,
   3: SECTION3_LABS,
   4: SECTION4_LABS,
+  5: SECTION5_LABS,
+  6: SECTION6_LABS,
 };
-
-function LaplaceLabs({ unlocked, onLaplaceLab }) {
-  const off = unlocked ? "" : "off";
-  return (
-    <>
-      {LAPLACE_LABS.map((lab) => (
-        <button
-          key={lab.id}
-          type="button"
-          className={`node ${off}`}
-          disabled={!unlocked}
-          onClick={() => onLaplaceLab(lab.id)}
-        >
-          <span className="node-icon">{lab.icon}</span>
-          <span className="node-name">{lab.title}</span>
-          <span className="node-count">{lab.count}</span>
-        </button>
-      ))}
-    </>
-  );
-}
 
 function TopicLadder({
   topic,
@@ -400,13 +408,11 @@ function TopicLadder({
   bankCounts,
   onStartBank,
   onBack,
-  onLaplaceLab,
   onSectionWalk,
   labs,
   allOpen = false,
 }) {
   const showLawsLabs = topic.id === 1;
-  const showLaplaceWalks = topic.id === 5;
   const sectionWalks = SECTION_LAB_LISTS[topic.id];
   return (
     <DoodlePage>
@@ -445,31 +451,32 @@ function TopicLadder({
                 progress={progress}
                 topicId={topic.id}
                 onOpen={(id) => onSectionWalk(topic.id, id)}
+                bankCounts={bankCounts}
+                onStartBank={onStartBank}
               />
             ) : null}
-            {topic.id === 2 ? (
-              <BankDifficultyNodes
-                bankId="opamp"
-                unlocked={unlocked}
-                progress={progress}
-                counts={bankCounts}
-                onStart={onStartBank}
-                allOpen={allOpen}
-              />
-            ) : null}
-            {topic.id === 3 ? (
-              <BankDifficultyNodes
-                bankId="transients"
-                unlocked={unlocked}
-                progress={progress}
-                counts={bankCounts}
-                onStart={onStartBank}
-                allOpen={allOpen}
-              />
-            ) : null}
-            {showLaplaceWalks ? (
-              <LaplaceLabs unlocked={unlocked} onLaplaceLab={onLaplaceLab} />
-            ) : null}
+            {!showLawsLabs
+              ? leftoverBanksForTopic(
+                  topic.id,
+                  new Set(
+                    (sectionWalks || []).flatMap((lab) =>
+                      banksForWalkthroughKey(labProgressKey(topic.id, lab)).map(
+                        (bank) => bank.id
+                      )
+                    )
+                  )
+                ).map((bank) => (
+                  <BankDifficultyNodes
+                    key={bank.id}
+                    bankId={bank.id}
+                    unlocked={unlocked}
+                    progress={progress}
+                    counts={bankCounts}
+                    onStart={onStartBank}
+                    allOpen={allOpen}
+                  />
+                ))
+              : null}
           </div>
         </li>
       </ol>
@@ -504,7 +511,6 @@ export default function Home({
   onSourceTransform,
   onInvOpAmp,
   onNonInvOpAmp,
-  onLaplaceLab,
   onSectionWalk,
   allOpen = false,
 }) {
@@ -608,7 +614,6 @@ export default function Home({
             bankCounts={bankCounts}
             onStartBank={onStartBank}
             onBack={() => setSection(null)}
-            onLaplaceLab={onLaplaceLab}
             onSectionWalk={onSectionWalk}
             labs={{
               onLab,
@@ -659,7 +664,7 @@ export default function Home({
       ) : null}
       <div className="section-list">
         {topics.map((topic, index) => {
-          const comingSoon = topic.id >= 5;
+          const comingSoon = topic.id >= 7;
           const unlocked =
             !comingSoon &&
             (allOpen ||

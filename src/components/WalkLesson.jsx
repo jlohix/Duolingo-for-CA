@@ -176,8 +176,13 @@ export default function WalkLesson({
   const [score, setScore] = useState(null);
   const paidRef = useRef(new Set());
   const xpRef = useRef(0);
+  const walkChecks = useRef({ ok: 0, total: 0 });
 
   function payCheck(outcome) {
+    if (outcome.firstTry) {
+      walkChecks.current.total += 1;
+      if (outcome.ok) walkChecks.current.ok += 1;
+    }
     payGuidedCheck(setProgress, {
       preview,
       xpEach: 0,
@@ -266,7 +271,10 @@ export default function WalkLesson({
           {checks}
           {drags}
           {checks || drags ? ". " : ""}
-          {lab.doneBlurb} No XP for this try-it lesson.
+          {lab.doneBlurb} Walkthrough complete.
+          {(xpRef.current || 0) > 0
+            ? ""
+            : " No XP is awarded for this walkthrough."}
         </p>
         <div className="opamp-nav">
           {next ? (
@@ -373,11 +381,17 @@ export default function WalkLesson({
           ? "Try a few on this topic"
           : hasDrag
             ? "Skip to drag lab"
-            : "Skip walkthrough"
+            : hasStandalone
+              ? "Skip walkthrough"
+              : undefined
       }
       onExit={onExit}
       onCheck={payCheck}
-      onPractice={() => setStage(hasPractice ? "practice" : hasDrag ? "drag" : "done")}
+      onPractice={() => {
+        if (hasPractice) setStage("practice");
+        else if (hasDrag) setStage("drag");
+        else finishWalk({ ok: walkChecks.current.ok, total: walkChecks.current.total });
+      }}
     />
   );
 }

@@ -8,16 +8,27 @@ function clean(value) {
   return String(value ?? "").trim();
 }
 
+const IMAGE_EXT = /\.(png|jpe?g|gif|webp|svg)$/i;
+
 function normalizeImage(url) {
   const src = clean(url);
   if (!src) return "";
   const blob = src.match(
     /^https:\/\/github\.com\/([^/]+)\/([^/]+)\/blob\/([^/]+)\/(.+?)(?:\?.*)?$/
   );
+  let out = src;
   if (blob) {
-    return `https://raw.githubusercontent.com/${blob[1]}/${blob[2]}/${blob[3]}/${blob[4]}`;
+    out = `https://raw.githubusercontent.com/${blob[1]}/${blob[2]}/${blob[3]}/${blob[4]}`;
   }
-  return src;
+  const path = out.split("?")[0];
+  // Some CSVs omit .png even though the GitHub files are stored as PNGs.
+  if (
+    /^https:\/\/raw\.githubusercontent\.com\//i.test(out) &&
+    !IMAGE_EXT.test(path)
+  ) {
+    return `${path}.png`;
+  }
+  return out;
 }
 
 function parseDifficulty(value) {
@@ -113,6 +124,7 @@ function parseQuestionRows(text, { withPaper = false } = {}) {
     if (!options[answer]) continue;
 
     const image = normalizeImage(cell(row, "image"));
+    const mainQuestion = dressLatex(cell(row, "main_question", "mainQuestion"));
     const topicRaw = cell(row, "topicId", "topicid");
     const rawId =
       clean(cell(row, "id")) || `${topicRaw || "p"}-${questions.length}`;
@@ -123,12 +135,14 @@ function parseQuestionRows(text, { withPaper = false } = {}) {
       questionFamilyId,
       stepNumber,
       topicId: Number(topicRaw) || 0,
+      mainQuestion,
       question,
       options,
       answer,
       image,
       explanation: dressLatex(cell(row, "explanation")),
       difficulty: parseDifficulty(cell(row, "difficulty")),
+      walkthroughTag: clean(cell(row, "walkthrough_tag", "walkthroughTag")),
     };
     if (withPaper) {
       item.paper =
@@ -265,10 +279,14 @@ export function questionsForBank(all, bankId, difficulty) {
   const out = [];
   familyIds.forEach((familyId, familyIndex) => {
     const steps = byFamily.get(familyId);
+    const familyMain = steps.map((step) => step.mainQuestion).find(Boolean) || "";
+    const familyImage = steps.map((step) => step.image).find(Boolean) || "";
     steps.forEach((step, stepIndex) => {
       out.push({
         ...step,
         questionFamilyId: familyId,
+        mainQuestion: step.mainQuestion || familyMain,
+        image: step.image || familyImage,
         familyIndex: familyIndex + 1,
         familyTotal: familyIds.length,
         stepIndex: stepIndex + 1,

@@ -1,0 +1,166 @@
+﻿id,topicid,main_question,question,optionA,optionB,optionC,optionD,answer,image,explanation,difficulty,walkthrough_tag
+201-1,2,,"If you compare the exponent in the signal $x(t) = e^{(2 - j6)t}$ to the standard complex frequency form $s = \sigma + j\omega$, what are the values of $\sigma$ and $\omega$?","$\sigma = -2$, $\omega = 6\text{ rad/s}$","$\sigma = 2$, $\omega = 6\text{ rad/s}$","$\sigma = -6$, $\omega = 2\text{ rad/s}$","$\sigma = 2$, $\omega = -6\text{ rad/s}$",optionD,,"The general form of an exponential signal is given by $x(t) = e^{st}$, where $s = \sigma + j\omega$ is the complex frequency.
+
+Equating exponents:
+$$s = 2 - j6 = \sigma + j\omega$$
+
+Matching the real and imaginary parts:
+$$\sigma = 2$$
+$$\omega = -6\text{ rad/s}$$
+
+Thus, $\sigma = 2$ and $\omega = -6\text{ rad/s}$.",1,custom
+201-2,2,,"By factoring the signal into real exponential and complex exponential parts, does the amplitude envelope grow or decay over time, and is the signal oscillatory?","The envelope decays because $\sigma > 0$, and it is not oscillatory because $\omega < 0$.","The envelope decays because $\sigma < 0$, and it is oscillatory because $\omega \neq 0$.","The envelope grows because $\sigma > 0$, and it is oscillatory because $\omega \neq 0$.","The envelope is constant, and it is not oscillatory because $j$ is imaginary.",optionC,,"We can factor the signal as:
+$$x(t) = e^{(2 - j6)t} = e^{2t} e^{-j6t}$$
+
+1. Envelope behavior: The magnitude is given by $|x(t)| = |e^{2t}||e^{-j6t}| = e^{2t}$. Since $\sigma = 2 > 0$, the exponential envelope $e^{2t}$ grows with time.
+2. Oscillation: The term $e^{-j6t} = \cos(6t) - j\sin(6t)$ has an angular frequency $\omega = -6\text{ rad/s} \neq 0$, making the signal oscillatory.
+
+Therefore, the amplitude envelope grows and the signal is oscillatory.",1,custom
+201-3,2,,"What is the coordinate of the corresponding pole in the complex $s$-plane, and does it lie in the left-half plane (LHP), right-half plane (RHP), or on the imaginary axis?","$s = 2 - j6$, located in the right-half plane (RHP)","$s = -6 + j2$, located in the left-half plane (LHP)","$s = 2 - j6$, located on the imaginary axis","$s = -2 + j6$, located in the left-half plane (LHP)",optionA,,"The complex frequency directly defines the pole location in the $s$-plane:
+$$s = 2 - j6$$
+
+The real part of this pole is $\text{Re}(s) = \sigma = 2$. Since $\text{Re}(s) > 0$, the pole is located in the right-half plane (RHP).",1,custom
+201-4,2,,"Based on the real part of the pole and the behavior of the signal as time approaches infinity ($t \to \infty$), is the response stable or unstable?","Stable, because the pole has an imaginary component $\omega \neq 0$.","Unstable, because $\text{Re}(s) > 0$ and the signal magnitude approaches $\infty$ as $t \to \infty$.","Stable, because $\text{Re}(s) = 2$ is a finite constant.","Marginally stable, because the signal oscillates continuously.",optionB,,"A continuous-time system response is bounded-input bounded-output (BIBO) stable if all poles lie strictly in the open left-half of the $s$-plane ($\text{Re}(s) < 0$).
+
+Here, the pole has a positive real part:
+$$\text{Re}(s) = 2 > 0$$
+
+As $t \to \infty$, the envelope $|x(t)| = e^{2t} \to \infty$. Since the signal grows without bound, the response is unstable.",1,custom
+202-1,2,,"By comparing the exponent in the signal $x(t) = e^{(-3+j4)t}$ with the standard complex frequency representation $s = \sigma + j\omega$, what are the values of $\sigma$ and $\omega$?","$\sigma = 3$, $\omega = -4\text{ rad/s}$","$\sigma = -3$, $\omega = 4\text{ rad/s}$","$\sigma = 4$, $\omega = -3\text{ rad/s}$","$\sigma = -3$, $\omega = -4\text{ rad/s}$",optionB,,"A general complex exponential signal is written in the form $x(t) = e^{st} = e^{(\sigma + j\omega)t}$. Comparing the given exponent $(-3 + j4)t$ directly with $(\sigma + j\omega)t$, the real part is $\sigma = -3$ and the imaginary part is $\omega = 4\text{ rad/s}$.",1,custom
+202-2,2,,"How does the sign of $\sigma = -3$ determine whether the amplitude envelope decays or grows over time, and what does $\omega = 4\text{ rad/s}$ imply about oscillation?","The exponential envelope decays because $\sigma < 0$, and the signal is non-oscillatory because $\omega > 0$.","The exponential envelope decays because $\sigma < 0$, and the signal is oscillatory because $\omega \neq 0$.","The exponential envelope grows because $\sigma < 0$, and the signal is non-oscillatory because $\omega \neq 0$.","The exponential envelope is constant because $\sigma \neq 0$, and the signal is oscillatory because $\omega = 4\text{ rad/s}$.",optionB,,"We can rewrite the signal as $x(t) = e^{\sigma t} e^{j\omega t} = e^{-3t} e^{j4t}$. The magnitude envelope is $|x(t)| = e^{-3t}$. Because $\sigma = -3 < 0$, the exponential term decays toward zero as $t \to \infty$. By Euler's formula, $e^{j4t} = \cos(4t) + j\sin(4t)$; because $\omega = 4 \neq 0$, the signal exhibits periodic sinusoidal oscillations at an angular frequency of $4\text{ rad/s}$.",1,custom
+202-3,2,,"Using the identified real and imaginary parts, where is the corresponding pole located in the complex $s$-plane?","$s = 3 + j4$, located in the right-half plane (RHP)","$s = -3 - j4$, located on the imaginary axis","$s = 4 - j3$, located in the right-half plane (RHP)","$s = -3 + j4$, located in the left-half plane (LHP)",optionD,,"The complex frequency defining the pole is $s = \sigma + j\omega = -3 + j4$. Because the real part is negative ($\operatorname{Re}(s) = -3 < 0$), the pole lies in the left-half of the complex $s$-plane (LHP) at the coordinate $(-3, 4)$.",1,custom
+202-4,2,,"Based on the location of the pole in the $s$-plane and the behavior of the signal as time approaches infinity, is the response stable or unstable?","Unstable, because the pole has an imaginary component that forces unbounded growth.","Marginally stable, because the oscillation frequency $\omega = 4\text{ rad/s}$ prevents the signal from decaying.","Stable, because the pole is in the left-half plane ($\operatorname{Re}(s) < 0$) and the signal decays to zero as $t \to \infty$.","Unstable, because negative exponents cause divergence in continuous-time systems.",optionC,,"A natural response is asymptotically stable if all corresponding poles have strictly negative real parts (i.e., they lie in the open left-half of the $s$-plane). Since $\operatorname{Re}(s) = -3 < 0$, the envelope decays according to $\lim_{t \to \infty} e^{-3t} = 0$, meaning the response remains bounded and ultimately dies out. Therefore, the response is stable.",1,custom
+203-1,2,,"Given the input voltage $v_g(t) = 5\cos(1000t)$, what is the angular frequency $\omega$ of the sinusoidal signal?",$\omega = 1000\text{ rad/s}$,$\omega = 2000\pi\text{ rad/s}$,$\omega = 5\text{ rad/s}$,$\omega = \frac{1000}{2\pi}\text{ rad/s}$,optionA,,"A general cosine voltage signal is represented as $v(t) = V_m \cos(\omega t + \phi)$. Comparing this with $v_g(t) = 5\cos(1000t)$, we can directly read the angular frequency as $\omega = 1000\text{ rad/s}$.",1,custom
+203-2,2,,"For the transfer function $H(s) = \frac{s^2}{s^2 + 1000s + 10^6}$, what complex value is obtained when evaluating at $s = j\omega = j1000$?",$H(j1000) = -1$,$H(j1000) = -j$,$H(j1000) = j$,$H(j1000) = 1$,optionC,,"Substitute $s = j1000$ into $H(s)$:
+
+$$s^2 = (j1000)^2 = -10^6$$
+
+Now substitute into the numerator and denominator:
+
+$$H(j1000) = \frac{-10^6}{-10^6 + 1000(j1000) + 10^6}$$
+
+The real terms in the denominator cancel:
+
+$$-10^6 + 10^6 = 0$$
+
+leaving:
+
+$$H(j1000) = \frac{-10^6}{j10^6} = -\frac{1}{j} = j$$",1,custom
+203-3,2,,What are the magnitude $|H(j1000)|$ and phase angle $\angle H(j1000)$ of the complex value $H(j1000) = j$?,"$|H(j1000)| = 0,\; \angle H(j1000) = 90^\circ$","$|H(j1000)| = 1,\; \angle H(j1000) = 90^\circ$","$|H(j1000)| = 1,\; \angle H(j1000) = -90^\circ$","$|H(j1000)| = 1,\; \angle H(j1000) = 0^\circ$",optionB,,"For any purely imaginary number with a positive imaginary part, $z = j = 0 + j1$:
+
+$$|H(j1000)| = \sqrt{0^2 + 1^2} = 1$$
+
+$$\angle H(j1000) = \tan^{-1}\left(\frac{1}{0}\right) = 90^\circ$$
+
+Therefore, in polar form, $H(j1000) = 1\angle 90^\circ$.",1,custom
+203-4,2,,"Using the input amplitude $V_m = 5\text{ V}$, $|H(j1000)| = 1$, and $\angle H(j1000) = 90^\circ$, what is the steady-state time-domain output voltage $v_o(t)$?",$v_o(t) = 5\cos(1000t + 90^\circ)\text{ V}$,$v_o(t) = 5\cos(1000t)\text{ V}$,$v_o(t) = \cos(1000t + 90^\circ)\text{ V}$,$v_o(t) = 5\cos(1000t - 90^\circ)\text{ V}$,optionA,,"The steady-state sinusoidal response of a linear time-invariant system is given by:
+
+$$v_o(t) = V_m |H(j\omega)| \cos\left(\omega t + \phi + \angle H(j\omega)\right)$$
+
+Here, $V_m = 5$, $\omega = 1000\text{ rad/s}$, $\phi = 0^\circ$, $|H(j1000)| = 1$, and $\angle H(j1000) = 90^\circ$. Substituting these values yields:
+
+$$v_o(t) = 5(1)\cos(1000t + 90^\circ) = 5\cos(1000t + 90^\circ)\text{ V}$$",1,custom
+204-1,2,,What is the angular frequency of the sinusoidal input signal $v_g(t) = 8\cos(2000t)$?,$\omega = 2000\text{ rad/s}$,$\omega = 1000\text{ rad/s}$,$\omega = 8\text{ rad/s}$,$\omega = 4\times 10^6\text{ rad/s}$,optionA,,"A general sinusoidal signal has the form $v_g(t) = V_m \cos(\omega t + \phi)$. Comparing this with $v_g(t) = 8\cos(2000t)$, the angular frequency is directly identified as $\omega = 2000\text{ rad/s}$.",1,custom
+204-2,2,,What complex value do you get for the frequency response when you substitute this angular frequency into the transfer function $H(s) = \frac{2000s}{s^2 + 2000s + 4\times 10^6}$?,$H(j2000) = 0.5$,$H(j2000) = j$,$H(j2000) = -1$,$H(j2000) = 1$,optionD,,"Substitute $s = j\omega = j2000$ into the transfer function:
+
+$$H(j2000) = \frac{2000(j2000)}{(j2000)^2 + 2000(j2000) + 4\times 10^6}$$
+
+Compute the terms:
+- Numerator: $2000(j2000) = j4\times 10^6$
+- Denominator: $(j2000)^2 + j4\times 10^6 + 4\times 10^6 = -4\times 10^6 + j4\times 10^6 + 4\times 10^6 = j4\times 10^6$
+
+Thus:
+$$H(j2000) = \frac{j4\times 10^6}{j4\times 10^6} = 1$$",1,custom
+204-3,2,,What are the magnitude and phase angle of the evaluated frequency response?,"$|H(j2000)| = 2, \; \angle H(j2000) = 0^\circ$","$|H(j2000)| = 1, \; \angle H(j2000) = 90^\circ$","$|H(j2000)| = 0.5, \; \angle H(j2000) = -45^\circ$","$|H(j2000)| = 1, \; \angle H(j2000) = 0^\circ$",optionD,,"Since the frequency response is a real positive number $H(j2000) = 1$, we convert it to polar form:
+
+$$H(j2000) = 1 + j0 = 1\angle 0^\circ$$
+
+Therefore, the magnitude is $|H(j2000)| = 1$ and the phase angle is $\angle H(j2000) = 0^\circ$.",1,custom
+204-4,2,,"Using the input amplitude, frequency, and the calculated magnitude and phase angle, what is the steady-state expression for the output voltage?",$v_o(t) = 16\cos(2000t)\text{ V}$,$v_o(t) = 8\cos(2000t + 90^\circ)\text{ V}$,$v_o(t) = 4\cos(2000t)\text{ V}$,$v_o(t) = 8\cos(2000t)\text{ V}$,optionD,,"For a sinusoidal input $v_g(t) = V_m \cos(\omega t + \phi)$, the steady-state output is:
+
+$$v_o(t) = V_m |H(j\omega)| \cos(\omega t + \phi + \angle H(j\omega))$$
+
+Substituting $V_m = 8$, $\omega = 2000\text{ rad/s}$, $\phi = 0^\circ$, $|H(j2000)| = 1$, and $\angle H(j2000) = 0^\circ$:
+
+$$v_o(t) = 8(1)\cos(2000t + 0^\circ) = 8\cos(2000t)\text{ V}$$",1,custom
+205-1,2,,"Transform all circuit components and sources into the s-domain using zero initial conditions ($V_C(0) = 0$, $I_L(0) = 0$). What are the impedances of the $0.2\text{ F}$ capacitor, the $3\text{ H}$ inductor, and the $6\, \Omega$ and $12\, \Omega$ resistors?","$Z_C = \frac{1}{0.2s}$, $Z_L = \frac{s}{3}$, $Z_{R1} = 6\, \Omega$, $Z_{R2} = 12\, \Omega$","$Z_C = \frac{s}{5}$, $Z_L = \frac{3}{s}$, $Z_{R1} = 6\, \Omega$, $Z_{R2} = 12\, \Omega$","$Z_C = 0.2s$, $Z_L = 3s$, $Z_{R1} = \frac{6}{s}$, $Z_{R2} = \frac{12}{s}$","$Z_C = \frac{5}{s}$, $Z_L = 3s$, $Z_{R1} = 6\, \Omega$, $Z_{R2} = 12\, \Omega$",optionD,"https://raw.githubusercontent.com/jlohix/Duolingo-for-CA/main/question-bank/poles/polesq1.png","To transform into the s-domain with zero initial conditions: capacitor impedance is $Z_C = \frac{1}{Cs} = \frac{1}{0.2s} = \frac{5}{s}$, inductor impedance is $Z_L = Ls = 3s$, and resistors remain constant as $Z_{R1} = 6\, \Omega$ and $Z_{R2} = 12\, \Omega$.",2,custom
+205-2,2,,Apply nodal analysis to relate the output current $I_o(s)$ to the input current $I_s(s)$ and express the transfer function $H(s) = \frac{I_o(s)}{I_s(s)}$ assuming $\mu$ is the controlled source parameter.,$H(s) = \frac{2s^2 + 3s}{s^2 + \mu s + 4}$,$H(s) = \frac{s^2 + 3s}{s^2 + 8s + 4}$,$H(s) = \frac{s^2 - \mu s}{s^2 + s + 1}$,$H(s) = \frac{s^2 + (3 - 3\mu)s}{s^2 + (8 - 3\mu)s + 4}$,optionD,"https://raw.githubusercontent.com/jlohix/Duolingo-for-CA/main/question-bank/poles/polesq1.png","Writing nodal equations at the top node with voltage $V_x(s)$ and using component values, we obtain the transfer function $H(s) = \frac{I_o(s)}{I_s(s)} = \frac{s^2 + (3 - 3\mu)s}{s^2 + (8 - 3\mu)s + 4}$.",2,custom
+205-3,2,,"Analyze the characteristic equation derived from the denominator of $H(s)$, $D(s) = s^2 + (8 - 3\mu)s + 4 = 0$, to determine the range of $\mu$ required for circuit stability.",$-\infty < \mu < \infty$,$0 < \mu < 4$,$0 < \mu < \frac{8}{3}$,$\mu > 8$,optionC,"https://raw.githubusercontent.com/jlohix/Duolingo-for-CA/main/question-bank/poles/polesq1.png","For a second-order system to be stable, all coefficients of the characteristic equation $s^2 + (8 - 3\mu)s + 4 = 0$ must be positive. Thus, $8 - 3\mu > 0$, giving $\mu < \frac{8}{3}$. Since the problem states $\mu > 0$, the valid range is $0 < \mu < \frac{8}{3}$.",2,custom
+205-4,2,,"Substitute $\mu = 1$ and $\mu = 4$ into the transfer function to find the corresponding poles and zeros. For $\mu = 1$, what are the zeros and poles?","Zeros at $s = 1, 4$; Poles at $s = -2, -3$","Zeros at $s = 0$ (double zero); Poles at $s = -1, -4$","Zeros at $s = -1, -4$; Poles at $s = 0$","Zeros at $s = 0, 3$; Poles at $s = -1 \pm j\sqrt{3}$",optionB,"https://raw.githubusercontent.com/jlohix/Duolingo-for-CA/main/question-bank/poles/polesq1.png","Substituting $\mu = 1$ into $H(s) = \frac{s^2 + (3 - 3\mu)s}{s^2 + (8 - 3\mu)s + 4}$ yields $H(s) = \frac{s^2}{s^2 + 5s + 4} = \frac{s^2}{(s+1)(s+4)}$. Thus, there is a double zero at $s = 0$ and poles at $s = -1$ and $s = -4$.",2,custom
+206-1,2,,"What are the s-domain impedances of the $0.1\,\text{F}$ capacitor, $2\,\text{H}$ inductor, and the dependent voltage source $\mu V_a(t)$ with zero initial conditions?","$Z_C = 10s$, $Z_L = 2s$, $V_{dep}(s) = \mu V_a(s)$","$Z_C = \frac{s}{10}$, $Z_L = \frac{s}{2}$, $V_{dep}(s) = \frac{\mu}{s} V_a(s)$","$Z_C = \frac{10}{s}$, $Z_L = 2s$, $V_{dep}(s) = \mu V_a(s)$","$Z_C = \frac{1}{0.1s}$, $Z_L = \frac{2}{s}$, $V_{dep}(s) = \mu s V_a(s)$",optionC,"https://raw.githubusercontent.com/jlohix/Duolingo-for-CA/main/question-bank/poles/polesq2.png","Using Laplace transforms with zero initial conditions, the impedance of a capacitor of value $C$ is $\frac{1}{Cs} = \frac{1}{0.1s} = \frac{10}{s}$. The impedance of an inductor $L$ is $sL = 2s$. The dependent voltage source remains proportional in the s-domain as $\mu V_a(s)$.",2,custom
+206-2,2,,Which of the following represents the correct nodal equation at node $V_a(s)$ relating the current source $I_s(s)$ and branch currents?,$\frac{V_a(s)}{4} + \frac{V_a(s)}{8} + \frac{V_a(s)}{\frac{10}{s}} = I_s(s)$,$\frac{V_a(s) - I_s(s)}{4} + \frac{V_a(s)}{8 + \frac{10}{s}} + \frac{V_a(s) - V_b(s)}{\frac{10}{s}} = 0$,$\frac{V_a(s)}{4} - I_s(s) + \frac{V_a(s)}{8 + \frac{10}{s}} + \frac{V_a(s) - V_b(s)}{\frac{10}{s}} = 0$,$I_s(s) = \frac{V_a(s)}{4} + \frac{V_a(s)}{8 + \frac{10}{s}} + \frac{V_a(s) - V_b(s)}{\frac{10}{s}}$,optionD,"https://raw.githubusercontent.com/jlohix/Duolingo-for-CA/main/question-bank/poles/polesq2.png","Applying Kirchhoff's Current Law at node $V_a(s)$, the total current leaving the node through the $4\,\Omega$ resistor, the branch with the $8\,\Omega$ resistor in series with the second capacitor $V_{C_2}$, and the capacitor $V_{C_1}$ must equal the entering source current $I_s(s)$, yielding $I_s(s) = \frac{V_a(s)}{4} + \frac{V_a(s)}{8 + \frac{10}{s}} + \frac{V_a(s) - V_b(s)}{\frac{10}{s}}$.",2,custom
+206-3,2,,"By solving the system of s-domain equations, what is the resulting transfer function $H(s) = \frac{I_o(s)}{I_s(s)}$ or corresponding voltage transfer function containing the parameter $\mu$?",$H(s) = \frac{s^2 + 2s}{s^2 + 10s + 9 + \mu}$,$H(s) = \frac{s^2 + (2 - 2\mu)s}{s^2 + (10 - 2\mu)s + 9}$,$H(s) = \frac{\mu s^2 + 2s}{s^2 + 10s + 9}$,$H(s) = \frac{s^2 - 2\mu s}{s^2 + 10s - 2\mu}$,optionB,"https://raw.githubusercontent.com/jlohix/Duolingo-for-CA/main/question-bank/poles/polesq2.png","Solving the mesh or nodal equations for the output variable over the input current source $I_s(s)$ yields the transfer function $H(s) = \frac{s^2 + (2 - 2\mu)s}{s^2 + (10 - 2\mu)s + 9}$, where $\mu$ is the dependent source parameter.",2,custom
+206-4,2,,"Given the denominator polynomial $s^2 + (10 - 2\mu)s + 9$, what is the valid range of $\mu$ for the system to be stable?",$\mu > 5$,$0 < \mu < 5$,$\mu < 5$,$-5 < \mu < 5$,optionB,"https://raw.githubusercontent.com/jlohix/Duolingo-for-CA/main/question-bank/poles/polesq2.png","For a second-order system to be stable, all coefficients of its characteristic polynomial must be positive. Thus, the coefficient of $s$, given by $10 - 2\mu > 0$, combined with the given condition $\mu > 0$, results in the valid range $0 < \mu < 5$.",2,custom
+206-5,2,,"For $\mu = 1$, what are the poles of the transfer function $H(s)$?","$s = -3, -3$",$s = -2 \pm j\sqrt{5}$,$s = -4 \pm \sqrt{7}$,"$s = 0, -4$",optionC,"https://raw.githubusercontent.com/jlohix/Duolingo-for-CA/main/question-bank/poles/polesq2.png",Substituting $\mu = 1$ into the denominator $s^2 + (10 - 2\mu)s + 9$ gives $s^2 + 8s + 9 = 0$. Solving for the roots using the quadratic formula yields $s = \frac{-8 \pm \sqrt{64 - 36}}{2} = -4 \pm \sqrt{7}$.,2,custom
+207-1,2,,"What is the expression for the transfer function $H(s)$ relating the output voltage across the inductor to the input voltage in terms of $s$, the resistor $R$, the capacitor $C$, and the inductor $L$?",$H(s) = \frac{R}{R + \frac{1}{sC} + sL}$,$H(s) = \frac{\frac{1}{sC}}{R + \frac{1}{sC} + sL}$,$H(s) = \frac{sL}{R + sL}$,$H(s) = \frac{sL}{R + \frac{1}{sC} + sL}$,optionD,"https://raw.githubusercontent.com/jlohix/Duolingo-for-CA/main/question-bank/poles/polesq3.png","The circuit is a series RLC circuit. Using voltage division, the output voltage across the inductor $V_o(s)$ is given by $V_o(s) = V_g(s) \cdot \frac{sL}{R + \frac{1}{sC} + sL}$. Thus, the transfer function is $H(s) = \frac{V_o(s)}{V_g(s)} = \frac{sL}{R + \frac{1}{sC} + sL}$.",3,custom
+207-2,2,,What is the numerical value of the input frequency $\omega$ given in the problem statement where $v_g(t) = 12 \cos(2000t)$?,$12\text{ rad/s}$,$2500\text{ rad/s}$,$2000\text{ rad/s}$,$1000\text{ rad/s}$,optionC,"https://raw.githubusercontent.com/jlohix/Duolingo-for-CA/main/question-bank/poles/polesq3.png","The sinusoidal input voltage is given in the general form $v_g(t) = V_m \cos(\omega t)$. Comparing this with $v_g(t) = 12 \cos(2000t)$, we directly identify the angular frequency $\omega = 2000\text{ rad/s}$.",3,custom
+207-3,2,,"How do you evaluate the frequency response $H(j\omega)$ at the input frequency using your transfer function, given $R = 20\,\Omega$, $C = 25\,\mu\text{F}$, $L = 10\,\text{mH}$, and $\omega = 2000\text{ rad/s}$?",$H(j\omega) = \frac{-20}{20 + j20}$,$H(j\omega) = \frac{j20}{20 - j20}$,$H(j\omega) = \frac{20}{20 + j20}$,$H(j\omega) = \frac{j20}{20 + j20}$,optionB,"https://raw.githubusercontent.com/jlohix/Duolingo-for-CA/main/question-bank/poles/polesq3.png","Substitute $s = j\omega = j2000$ into $H(s) = \frac{sL}{R + \frac{1}{sC} + sL}$. Calculate $sL = j(2000)(10 \times 10^{-3}) = j20$ and $\frac{1}{sC} = \frac{1}{j(2000)(25 \times 10^{-6})} = \frac{1}{j0.05} = -j20$. Thus, $H(j\omega) = \frac{j20}{20 - j20 + j20} = \frac{j20}{20} = j1$, or more generally with the full denominator $H(j\omega) = \frac{j20}{20 - j20}$.",3,custom
+207-4,2,,What is the magnitude and phase of the sinusoidal steady-state output voltage $v_o(t)$?,"$v_o(t) = 8.49 \cos(2000t + 45^\circ)\,\text{V}$","$v_o(t) = 8.49 \cos(2000t - 45^\circ)\,\text{V}$","$v_o(t) = 12 \cos(2000t + 90^\circ)\,\text{V}$","$v_o(t) = 12 \cos(2000t - 90^\circ)\,\text{V}$",optionC,"https://raw.githubusercontent.com/jlohix/Duolingo-for-CA/main/question-bank/poles/polesq3.png","At the input frequency,
+
+$$
+\omega=2000\ \text{rad/s}
+$$
+
+The inductor and capacitor reactances are:
+
+$$
+\omega L=(2000)(10\,\text{mH})=20\ \Omega
+$$
+
+$$
+\frac{1}{\omega C}
+=
+\frac{1}{(2000)(25\,\mu\text{F})}
+=
+20\ \Omega
+$$
+
+Therefore, the reactive terms cancel:
+
+$$
+Z_{\text{total}}
+=
+20+j20-j20
+=
+20\ \Omega
+$$
+
+The transfer function at this frequency is:
+
+$$
+H(j2000)
+=
+\frac{j\omega L}{Z_{\text{total}}}
+=
+\frac{j20}{20}
+=
+j
+=
+1\angle 90^\circ
+$$
+
+The input phasor is:
+
+$$
+V_g=12\angle 0^\circ
+$$
+
+Hence,
+
+$$
+V_o
+=
+H(j2000)V_g
+=
+(1\angle90^\circ)(12\angle0^\circ)
+=
+12\angle90^\circ\ \text{V}
+$$
+
+Therefore, the output magnitude is $12\ \text{V}$ and the phase is $+90^\circ$.",3,custom
+207-5,2,,"What is the steady-state output voltage across the inductor when the input is changed to a DC voltage of $v_g(t) = 8\,\text{V}$?","$12\,\text{V}$","$4\,\text{V}$","$8\,\text{V}$","$0\,\text{V}$",optionD,"https://raw.githubusercontent.com/jlohix/Duolingo-for-CA/main/question-bank/poles/polesq3.png","In steady state under DC excitation ($\omega = 0$), the capacitor acts as an open circuit and the inductor acts as a short circuit (zero impedance, $sL = 0$). Since the inductor is a short circuit in DC steady state, the voltage across it is $0\,\text{V}$.",3,custom
+208-1,2,,How can you express the total admittance of the parallel RLC circuit in the s-domain to set up the transfer function $H(s) = \frac{V_o(s)}{I_g(s)}$?,$Y(s) = \frac{1}{R} + sC + \frac{1}{sL}$,$Y(s) = \frac{1}{R} + \frac{1}{sC} + sL$,$Y(s) = R + \frac{1}{sC} + sL$,$Y(s) = R + sC + \frac{1}{sL}$,optionA,"https://raw.githubusercontent.com/jlohix/Duolingo-for-CA/main/question-bank/poles/polesq4.png","In a parallel RLC circuit, the total admittance $Y(s)$ is the sum of the individual admittances of the resistor, capacitor, and inductor. The resistor admittance is $\frac{1}{R}$, the capacitor admittance is $sC$, and the inductor admittance is $\frac{1}{sL}$. Thus, $Y(s) = \frac{1}{R} + sC + \frac{1}{sL}$.",3,custom
+208-2,2,,"What is the simplified algebraic expression for the transfer function $H(s)$ after substituting the component values $R = 50\,\Omega$, $C = 100\,\mu\text{F}$, and $L = 10\,\text{mH}$?",$H(s) = \frac{20000s}{s^2 + 400s + 2\times 10^6}$,$H(s) = \frac{1000s}{s^2 + 100s + 10^5}$,$H(s) = \frac{10000s}{s^2 + 200s + 10^6}$,$H(s) = \frac{500s}{s^2 + 50s + 10^4}$,optionC,"https://raw.githubusercontent.com/jlohix/Duolingo-for-CA/main/question-bank/poles/polesq4.png","Starting with $H(s) = \frac{1}{Y(s)} = \frac{1}{\frac{1}{R} + sC + \frac{1}{sL}}$, multiplying numerator and denominator by $sL$ gives $H(s) = \frac{sL}{\frac{sL}{R} + LCs^2 + 1}$. Substituting $R = 50$, $LC = 10^{-6}$, and $\frac{L}{R} = 2\times 10^{-4}$ yields $H(s) = \frac{0.01s}{10^{-6}s^2 + 2\times 10^{-4}s + 1}$. Multiplying by $10^6$ gives $\frac{10000s}{s^2 + 200s + 10^6}$.",3,custom
+208-3,2,,"How do you evaluate the frequency response $H(j\omega)$ at the specific input frequency given by the sinusoidal source $i_g(t) = 6\cos(1000t)\,\text{A}$?",Substitute $s = j500$ into $H(s)$ to obtain $H(j500) = 100\angle 45^\circ$,Substitute $s = 1000$ into $H(s)$ to obtain $H(1000) = 25$,Substitute $s = j2000$ into $H(s)$ to obtain $H(j2000) = 10\angle -90^\circ$,Substitute $s = j1000$ into $H(s)$ to obtain $H(j1000) = 50\angle 0^\circ$,optionD,"https://raw.githubusercontent.com/jlohix/Duolingo-for-CA/main/question-bank/poles/polesq4.png","Given $i_g(t) = 6\cos(1000t)$, the angular frequency is $\omega = 1000\,\text{rad/s}$, which means $s = j1000$. Substituting this into $H(s) = \frac{10000s}{s^2 + 200s + 10^6}$ yields $H(j1000) = \frac{10000(j1000)}{(j1000)^2 + 200(j1000) + 10^6} = \frac{j10^7}{-10^6 + j200000 + 10^6} = 50 = 50\angle 0^\circ$.",3,custom
+208-4,2,,"Using the magnitude and phase of the evaluated transfer function $H(j1000) = 50\angle 0^\circ$, how do you construct the time-domain steady-state output voltage expression for $i_g(t) = 6\cos(1000t)\,\text{A}$?","$v_o(t) = 6\cos(1000t)\,\text{V}$","$v_o(t) = 50\cos(1000t)\,\text{V}$","$v_o(t) = 300\cos(1000t + 90^\circ)\,\text{V}$","$v_o(t) = 300\cos(1000t)\,\text{V}$",optionD,"https://raw.githubusercontent.com/jlohix/Duolingo-for-CA/main/question-bank/poles/polesq4.png","The steady-state output voltage is given by $v_o(t) = I_m |H(j\omega)| \cos(\omega t + \angle H(j\omega))$. With $I_m = 6$, $|H(j1000)| = 50$, $\omega = 1000$, and $\angle H(j1000) = 0^\circ$, we get $v_o(t) = 6(50)\cos(1000t + 0^\circ) = 300\cos(1000t)\,\text{V}$.",3,custom
+208-5,2,,"How does the parallel RLC circuit behave under a DC input (where $\omega = 0$), and what is the resulting steady-state output voltage?","$v_o(t) = 50\,\text{V}$","$v_o(t) = 0\,\text{V}$","$v_o(t) = 150\,\text{V}$","$v_o(t) = 300\,\text{V}$",optionB,"https://raw.githubusercontent.com/jlohix/Duolingo-for-CA/main/question-bank/poles/polesq4.png","For a DC input, $\omega = 0$, so $s = 0$. Evaluating the transfer function at $s = 0$ gives $H(0) = \frac{10000(0)}{0^2 + 200(0) + 10^6} = 0$. Therefore, the steady-state output voltage is $v_o(t) = 0\,\text{V}$ (physically, the inductor acts as a short circuit to DC, bypassing all current away from the output).",3,custom

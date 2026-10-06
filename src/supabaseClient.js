@@ -183,6 +183,90 @@ export async function listSessionTimes() {
   return Array.isArray(data) ? data : [];
 }
 
+// ---------- Module visit tracking ----------
+
+// Upsert the running duration for one module visit. Called on entering a
+// module, on periodic heartbeat, and on final flush when the user leaves.
+// The server keeps the largest duration it has seen for the visit.
+export async function logModuleVisit({
+  visitId,
+  email,
+  moduleKey,
+  durationSeconds,
+  moduleDetail = "",
+  moduleLabel = "",
+  classId = "",
+  sessionId = null,
+}) {
+  const data = await rpc("log_module_visit", {
+    p_visit_id: String(visitId || ""),
+    p_email: String(email || "").trim().toLowerCase(),
+    p_module_key: String(moduleKey || "").trim(),
+    p_duration_seconds: Math.max(0, Math.round(Number(durationSeconds) || 0)),
+    p_module_detail: String(moduleDetail || ""),
+    p_module_label: String(moduleLabel || ""),
+    p_class_id: String(classId || ""),
+    p_session_id: sessionId ? String(sessionId) : null,
+  });
+  return data === true;
+}
+
+// Fire-and-forget flush that survives the page/module being closed. Uses
+// navigator.sendBeacon when available (works during unload), and falls back
+// to a keepalive fetch. Safe to call from visibilitychange/pagehide.
+export function logModuleVisitBeacon({
+  visitId,
+  email,
+  moduleKey,
+  durationSeconds,
+  moduleDetail = "",
+  moduleLabel = "",
+  classId = "",
+  sessionId = null,
+}) {
+  const payload = {
+    p_visit_id: String(visitId || ""),
+    p_email: String(email || "").trim().toLowerCase(),
+    p_module_key: String(moduleKey || "").trim(),
+    p_duration_seconds: Math.max(0, Math.round(Number(durationSeconds) || 0)),
+    p_module_detail: String(moduleDetail || ""),
+    p_module_label: String(moduleLabel || ""),
+    p_class_id: String(classId || ""),
+    p_session_id: sessionId ? String(sessionId) : null,
+  };
+  const url = `${SUPABASE_URL}/rest/v1/rpc/log_module_visit`;
+
+  try {
+    if (typeof navigator !== "undefined" && navigator.sendBeacon) {
+      const beaconUrl = `${url}?apikey=${encodeURIComponent(SUPABASE_ANON_KEY)}`;
+      const blob = new Blob([JSON.stringify(payload)], {
+        type: "application/json",
+      });
+      if (navigator.sendBeacon(beaconUrl, blob)) return true;
+    }
+  } catch {
+    /* fall through to keepalive fetch */
+  }
+
+  try {
+    fetch(url, {
+      method: "POST",
+      headers: rpcHeaders(),
+      body: JSON.stringify(payload),
+      keepalive: true,
+    }).catch(() => {});
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+// Staff-facing read of all module visits (sorted by user, module, entry).
+export async function listModuleVisits() {
+  const data = await rpc("list_module_visits", {});
+  return Array.isArray(data) ? data : [];
+}
+
 export async function syncLeagueSeasonRemote() {
   const data = await rpc("sync_league_season", {});
   return data && typeof data === "object" ? data : null;
@@ -205,6 +289,57 @@ export async function submitQuestionReportRemote({
     p_reporter: String(reporter || "").trim().toLowerCase(),
   });
   return data === true;
+}
+
+// ---------- Chatbot usage analytics (admin dashboard) ----------
+// Raw RPC wrappers; the shaping/aggregation lives in src/state/chatAnalytics.js.
+
+export async function chatUsageSummaryRemote() {
+  const data = await rpc("chat_usage_summary", {});
+  return Array.isArray(data) ? data[0] || null : data || null;
+}
+
+// ---------- Weekly leaderboard period (independent of league season) ----------
+
+// Advance/compute the current weekly leaderboard period. Returns
+// { periodStart, nextReset, recurWeeks, weeklyXp: { email -> xpGained } }.
+export async function syncLeaderboardPeriodRemote() {
+  const data = await rpc("sync_leaderboard_period", {});
+  return data && typeof data === "object" ? data : null;
+}
+
+export async function getLeaderboardConfigRemote() {
+  const data = await rpc("get_leaderboard_config", {});
+  return data && typeof data === "object" ? data : null;
+}
+
+export async function setLeaderboardConfigRemote(anchorDow, anchorTime, recurWeeks) {
+  const data = await rpc("set_leaderboard_config", {
+    p_anchor_dow: Number(anchorDow),
+    p_anchor_time: String(anchorTime),
+    p_recur_weeks: Number(recurWeeks),
+  });
+  return data && typeof data === "object" ? data : null;
+}
+
+export async function listChatTopicTallyRemote() {
+  const data = await rpc("list_chat_topic_tally", {});
+  return Array.isArray(data) ? data : [];
+}
+
+export async function listChatWeekTallyRemote() {
+  const data = await rpc("list_chat_week_tally", {});
+  return Array.isArray(data) ? data : [];
+}
+
+export async function listChatDailyRemote() {
+  const data = await rpc("list_chat_daily", {});
+  return Array.isArray(data) ? data : [];
+}
+
+export async function listChatByStudentRemote() {
+  const data = await rpc("list_chat_by_student", {});
+  return Array.isArray(data) ? data : [];
 }
 
 export async function listQuestionReportsRemote() {
@@ -299,8 +434,17 @@ export const CHAT_HISTORY_LIMIT = 8;
 // Send a question (plus recent conversation history) to the deployed `chat`
 // Edge Function and return the grounded answer plus the lecture weeks it drew
 // from. `history` is an array of prior turns: [{ role: "user"|"model", text }].
-// Resolves to { answer, sources }. Throws with a friendly message on failure.
-export async function askChatbot(question, history = []) {
+// `currentQuestion` (optional) is the question the student is currently viewing
+// ({ question, options?, answer?, explanation? }), so the tutor can give
+// guided help. `meta` (optional) carries analytics metadata for usage logging
+// ({ email, sessionId, isAdmin, currentQuestionId }) — no transcripts.
+// Resolves to { answer, sources }. Throws a friendly message on failure.
+export async function askChatbot(
+  question,
+  history = [],
+  currentQuestion = null,
+  meta = null
+) {
   const trimmed = String(question || "").trim();
   if (!trimmed) {
     throw new Error("Please type a question first.");
@@ -318,6 +462,20 @@ export async function askChatbot(question, history = []) {
     .map((t) => ({ role: t.role, text: t.text.trim() }))
     .slice(-CHAT_HISTORY_LIMIT);
 
+  const payload = { question: trimmed, history: safeHistory };
+  if (currentQuestion && typeof currentQuestion === "object") {
+    payload.currentQuestion = currentQuestion;
+  }
+  if (meta && typeof meta === "object") {
+    if (meta.email) payload.email = String(meta.email);
+    if (meta.sessionId) payload.sessionId = String(meta.sessionId);
+    if (meta.isAdmin) payload.isAdmin = true;
+    if (meta.currentQuestionId)
+      payload.currentQuestionId = String(meta.currentQuestionId);
+    if (meta.currentQuestionTopicId != null)
+      payload.currentQuestionTopicId = Number(meta.currentQuestionTopicId);
+  }
+
   let response;
   try {
     response = await fetch(`${SUPABASE_URL}/functions/v1/chat`, {
@@ -327,7 +485,7 @@ export async function askChatbot(question, history = []) {
         Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ question: trimmed, history: safeHistory }),
+      body: JSON.stringify(payload),
     });
   } catch {
     throw new Error("Couldn't reach the tutor. Check your connection and try again.");
