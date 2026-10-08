@@ -190,14 +190,7 @@ function BankDifficultyNodes({
     const count = counts[key] || 0;
     if (!count && !allOpen) return null;
     const done = progress.completed?.includes(key);
-    const priorOpen = DIFFICULTIES
-      .filter((item) => item.id < difficulty.id)
-      .every((item) => {
-        const priorKey = bankLessonKey(bank.id, item.id);
-        return !counts[priorKey] || progress.completed?.includes(priorKey);
-      });
-    const canPlay =
-      unlocked && count > 0 && (allOpen || done || priorOpen);
+    const canPlay = unlocked && count > 0;
     return (
       <button
         key={key}
@@ -350,11 +343,7 @@ function SectionWalks({
         const progressId = lab.progressId || lab.id;
         const key = labProgressKey(topicId, lab);
         const done = Boolean(progress?.completed?.includes(key));
-        const walkDone = Boolean(
-          progress?.completed?.includes(walkLessonKey(topicId, progressId))
-        );
-        const canOpen =
-          unlocked && (!lab.testOnly || allOpen || walkDone);
+        const canOpen = unlocked;
         const banks = banksForWalkthroughKey(key);
         return (
           <Fragment key={lab.id}>
@@ -368,9 +357,7 @@ function SectionWalks({
             >
               <span className="node-icon">{done ? "✓" : lab.icon}</span>
               <span className="node-name">{lab.title}</span>
-              <span className="node-count">
-                {lab.testOnly && !canOpen ? "Finish walkthrough first" : lab.count}
-              </span>
+              <span className="node-count">{lab.count}</span>
             </button>
             {banks.map((bank) => (
               <BankDifficultyNodes
@@ -429,9 +416,7 @@ function TopicLadder({
       <p className="login-hint">{topic.blurb}</p>
       {QUESTION_BANKS.some((bank) => bank.topicId === topic.id) ? (
         <p className="login-hint">
-          Finish Easy, then Average, then Challenging to complete each
-          practice set. Completing all of them in this section unlocks the
-          next topic.
+          Easy, Average, and Challenging are all open. Play them in any order.
         </p>
       ) : null}
       {allOpen ? null : (
@@ -670,8 +655,8 @@ export default function Home({
         </p>
       ) : (
         <p className="login-hint">
-          Walkthroughs are optional. To progress, complete Easy, Average, and
-          Challenging questions in a section — that unlocks the next topic.
+          Walkthroughs are optional. Every section is open — play Easy,
+          Average, and Challenging in any order.
         </p>
       )}
       <div className="section-list">
@@ -694,7 +679,7 @@ export default function Home({
               title={topic.name}
               blurb={
                 topic.id === 4
-                  ? "There are no practice questions in here, so Section 5 is unlocked for you."
+                  ? "There are no practice questions in here."
                   : topic.blurb
               }
               index={index + 1}

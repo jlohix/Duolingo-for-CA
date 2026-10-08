@@ -1,5 +1,17 @@
 export const BUILT_IN_LOGS = [
   {
+    id: "built-2026-10-08-all-topics-open",
+    date: "2026-10-08",
+    title: "Every section is open",
+    body: "Learn no longer locks sections behind Easy through Challenging. Play any topic in any order. Network functions and Frequency domain are still coming soon.",
+  },
+  {
+    id: "built-2026-10-08-open-eac",
+    date: "2026-10-08",
+    title: "Easy through Challenging are open",
+    body: "Inside an unlocked section you can play Easy, Average, and Challenging in any order. You still need to finish all of them in that section to open the next topic.",
+  },
+  {
     id: "built-2026-10-08-profile-hide-walks",
     date: "2026-10-08",
     title: "Profile hides optional walkthroughs",

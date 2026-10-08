@@ -5,7 +5,7 @@ const STEPS = [
   },
   {
     title: "Learn path",
-    text: "Open Learn in the sidebar. You see sections as cards: Basic laws, Op-amps, Transients, First-order circuits, Laplace Transform, Poles and Zeros, Network functions, and Frequency domain. Walkthroughs are optional. On each practice set, finish Easy, then Average, then Challenging to complete that subtopic. Finish all of those in a section (or pass the skip quiz) to unlock the next topic. Finishing Transients opens both First-order circuits and Laplace Transform. Basic laws has Ohm through Superposition walkthroughs and banks. Op-amps has the op-amp walkthroughs. Laplace Transform and Poles and Zeros are walkthroughs; each walkthrough ends on its own complete screen. Past year papers sit at the bottom of Learn for exam practice.",
+    text: "Open Learn in the sidebar. You see sections as cards: Basic laws, Op-amps, Transients, First-order circuits, Laplace Transform, Poles and Zeros, Network functions, and Frequency domain. Walkthroughs are optional. Every section with lessons is already open — play Easy, Average, and Challenging in any order. Network functions and Frequency domain are coming soon. Basic laws has Ohm through Superposition walkthroughs and banks. Op-amps has the op-amp walkthroughs. Laplace Transform and Poles and Zeros are walkthroughs; each walkthrough ends on its own complete screen. Past year papers sit at the bottom of Learn for exam practice.",
   },
   {
     title: "Lessons",
@@ -21,7 +21,7 @@ const STEPS = [
   },
   {
     title: "Skip a locked topic",
-    text: "The next locked section can be unlocked with a 5-question quiz. You need 4 out of 5 correct on the first try. A second miss ends that attempt; missed questions are not retried.",
+    text: "Sections 1–6 are already open, so you do not need a skip quiz. Network functions and Frequency domain stay coming soon.",
   },
   {
     title: "Profile and Progress",

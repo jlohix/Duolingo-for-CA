@@ -518,36 +518,16 @@ export function isSectionComplete(topicId, progress, counts = {}, bankCounts = {
   return keys.every((key) => completed.includes(key));
 }
 
-/** Section that must be finished before this topic opens. */
-function priorSectionForUnlock(topicId) {
-  // First-order has no CSV bank, so it cannot mark itself complete.
-  // Laplace therefore opens with First-order once Transients is done.
-  if (topicId === 5) return 3;
-  return topicId - 1;
-}
-
 export function isTopicUnlocked(
-  topicIndex,
-  progress,
-  counts = {},
-  bankCounts = {}
+  _topicIndex,
+  _progress,
+  _counts = {},
+  _bankCounts = {}
 ) {
-  if (topicIndex === 0) return true;
-  const topicId = topicIndex + 1;
-  if ((progress.unlockedBySkip || []).includes(topicId)) return true;
-  const priorId = priorSectionForUnlock(topicId);
-  if (priorId < 1) return true;
-  return isSectionComplete(priorId, progress, counts, bankCounts);
+  return true;
 }
 
-export function isLessonUnlocked(topicId, difficulty, progress, counts = {}) {
-  const completed = progress.completed || [];
-  for (const earlier of [1, 2, 3]) {
-    if (earlier >= difficulty) break;
-    const n = counts[`${topicId}-${earlier}`] || 0;
-    if (!n) continue;
-    if (!completed.includes(`${topicId}-${earlier}`)) return false;
-  }
+export function isLessonUnlocked(_topicId, _difficulty, _progress, _counts = {}) {
   return true;
 }
 
