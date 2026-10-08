@@ -2249,9 +2249,24 @@ h2 {
   border-radius: 16px;
   padding: 16px;
   display: flex;
+  flex-wrap: wrap;
   gap: 12px;
   align-items: flex-start;
   justify-content: space-between;
+}
+
+.feedback > div {
+  min-width: 0;
+  flex: 1 1 12rem;
+}
+
+.feedback .katex,
+.feedback .katex-display {
+  max-width: 100%;
+}
+
+.feedback .katex-display {
+  overflow-x: auto;
 }
 
 .quiz-mascot {
@@ -2282,8 +2297,9 @@ h2 {
 
 .feedback .primary {
   width: auto;
-  margin: 0;
+  margin: 0 0 0 auto;
   white-space: nowrap;
+  flex: 0 0 auto;
 }
 
 .feedback p {

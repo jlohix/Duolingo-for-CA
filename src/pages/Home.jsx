@@ -427,6 +427,13 @@ function TopicLadder({
         </div>
       </header>
       <p className="login-hint">{topic.blurb}</p>
+      {QUESTION_BANKS.some((bank) => bank.topicId === topic.id) ? (
+        <p className="login-hint">
+          Finish Easy, then Average, then Challenging to complete each
+          practice set. Completing all of them in this section unlocks the
+          next topic.
+        </p>
+      ) : null}
       {allOpen ? null : (
         <TopicInsight insight={topicInsight(progress, topic.id)} compact />
       )}
@@ -661,7 +668,12 @@ export default function Home({
           Staff preview. Every section is open. Playing a lesson does not add
           XP or change student progress.
         </p>
-      ) : null}
+      ) : (
+        <p className="login-hint">
+          Walkthroughs are optional. To progress, complete Easy, Average, and
+          Challenging questions in a section — that unlocks the next topic.
+        </p>
+      )}
       <div className="section-list">
         {topics.map((topic, index) => {
           const comingSoon = topic.id >= 7;

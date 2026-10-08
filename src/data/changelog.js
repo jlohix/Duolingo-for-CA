@@ -1,5 +1,29 @@
 export const BUILT_IN_LOGS = [
   {
+    id: "built-2026-10-08-walkthrough-optional",
+    date: "2026-10-08",
+    title: "Walkthroughs are optional",
+    body: "Learn now says walkthroughs are optional, and that finishing Easy through Challenging in a section is what unlocks the next topic.",
+  },
+  {
+    id: "built-2026-10-08-tf-hard-explain",
+    date: "2026-10-08",
+    title: "Shorter Transfer Functions explanations",
+    body: "Transfer Functions Challenging now has shorter step explanations, so Continue stays on screen after you check an answer.",
+  },
+  {
+    id: "built-2026-10-08-laplace-206-explain",
+    date: "2026-10-08",
+    title: "Shorter Laplace Circuit step 3",
+    body: "Laplace Circuit Application Challenging question 206, step 3 of 6, now has a shorter KCL explanation so Continue stays on screen.",
+  },
+  {
+    id: "built-2026-10-08-progress-hint",
+    date: "2026-10-08",
+    title: "How practice unlocks the next section",
+    body: "Learn now says that finishing Easy, Average, and Challenging completes a subtopic, and finishing all of them in a section unlocks the next topic.",
+  },
+  {
     id: "built-2026-10-08-s4-mascot-note",
     date: "2026-10-08",
     title: "First-order mascot note",
