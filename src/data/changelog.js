@@ -1,5 +1,11 @@
 export const BUILT_IN_LOGS = [
   {
+    id: "built-2026-10-08-unlock-s4-s5",
+    date: "2026-10-08",
+    title: "Laplace opens with First-order",
+    body: "Finishing Transients now unlocks both First-order circuits and Laplace Transform. You no longer need a First-order question bank to reach Laplace.",
+  },
+  {
     id: "built-2026-10-05-family-stem",
     date: "2026-10-05",
     title: "Stem stays on every part",

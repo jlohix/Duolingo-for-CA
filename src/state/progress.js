@@ -518,6 +518,14 @@ export function isSectionComplete(topicId, progress, counts = {}, bankCounts = {
   return keys.every((key) => completed.includes(key));
 }
 
+/** Section that must be finished before this topic opens. */
+function priorSectionForUnlock(topicId) {
+  // First-order has no CSV bank, so it cannot mark itself complete.
+  // Laplace therefore opens with First-order once Transients is done.
+  if (topicId === 5) return 3;
+  return topicId - 1;
+}
+
 export function isTopicUnlocked(
   topicIndex,
   progress,
@@ -527,9 +535,9 @@ export function isTopicUnlocked(
   if (topicIndex === 0) return true;
   const topicId = topicIndex + 1;
   if ((progress.unlockedBySkip || []).includes(topicId)) return true;
-  // Previous section must be finished (its quiz/bank units). Topic index
-  // matches the previous topic id (0-based index → prior 1-based id).
-  return isSectionComplete(topicIndex, progress, counts, bankCounts);
+  const priorId = priorSectionForUnlock(topicId);
+  if (priorId < 1) return true;
+  return isSectionComplete(priorId, progress, counts, bankCounts);
 }
 
 export function isLessonUnlocked(topicId, difficulty, progress, counts = {}) {
