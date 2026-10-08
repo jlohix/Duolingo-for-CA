@@ -1,5 +1,11 @@
 export const BUILT_IN_LOGS = [
   {
+    id: "built-2026-10-08-s4-mascot-note",
+    date: "2026-10-08",
+    title: "First-order mascot note",
+    body: "The First-order circuits card now tells you there is no practice bank there, and that Laplace is already unlocked.",
+  },
+  {
     id: "built-2026-10-08-unlock-s4-s5",
     date: "2026-10-08",
     title: "Laplace opens with First-order",

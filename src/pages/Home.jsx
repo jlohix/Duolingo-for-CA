@@ -680,7 +680,11 @@ export default function Home({
               key={topic.id}
               kicker={`Section ${index + 1}`}
               title={topic.name}
-              blurb={topic.blurb}
+              blurb={
+                topic.id === 4
+                  ? "There are no practice questions in here, so Section 5 is unlocked for you."
+                  : topic.blurb
+              }
               index={index + 1}
               unlocked={unlocked}
               comingSoon={comingSoon}
