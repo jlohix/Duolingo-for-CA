@@ -105,11 +105,17 @@ export default function Profile({
     [topics, counts, bankCounts]
   );
   const completed = progress.completed || [];
-  const rows = liveTopics.map((topic) => ({
-    topic,
-    insight: topicInsight(progress, topic.id),
-    units: unitsForTopic(topic.id, counts, bankCounts),
-  }));
+  const rows = liveTopics.map((topic) => {
+    const units = unitsForTopic(topic.id, counts, bankCounts);
+    return {
+      topic,
+      insight: topicInsight(progress, topic.id),
+      units: staff ? units : units.filter((unit) => unit.kind !== "walk"),
+    };
+  });
+  const insideRows = staff
+    ? rows
+    : rows.filter((row) => row.units.length > 0);
   const measured = rows.filter((row) => row.insight.attempts > 0);
   const strengths = rows
     .filter((row) => STRENGTH_KINDS.has(row.insight.kind))
@@ -288,10 +294,11 @@ export default function Profile({
       <section className="profile-block">
         <h2>What’s inside</h2>
         <p className="login-hint">
-          Every walkthrough, test, and question bank that is actually in the
-          app.
+          {staff
+            ? "Every walkthrough, test, and question bank that is actually in the app."
+            : "Every test and question bank that is actually in the app. Walkthroughs stay on Learn."}
         </p>
-        <TopicList rows={rows} completed={completed} showUnits />
+        <TopicList rows={insideRows} completed={completed} showUnits />
       </section>
     </div>
   );

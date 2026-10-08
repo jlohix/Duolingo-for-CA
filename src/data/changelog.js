@@ -1,5 +1,11 @@
 export const BUILT_IN_LOGS = [
   {
+    id: "built-2026-10-08-profile-hide-walks",
+    date: "2026-10-08",
+    title: "Profile hides optional walkthroughs",
+    body: "Student Profile What’s inside now lists tests and question banks only. Walkthroughs stay on Learn, and staff Profile still shows them.",
+  },
+  {
     id: "built-2026-10-08-walkthrough-optional",
     date: "2026-10-08",
     title: "Walkthroughs are optional",
