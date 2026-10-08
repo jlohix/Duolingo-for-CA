@@ -1,5 +1,23 @@
 export const BUILT_IN_LOGS = [
   {
+    id: "built-2026-10-09-poles-c2-label",
+    date: "2026-10-09",
+    title: "C2 value on the circuit",
+    body: "On Poles Average question 206, the circuit now labels the second capacitor as 0.1 F, same as the first.",
+  },
+  {
+    id: "built-2026-10-08-poles-206-3",
+    date: "2026-10-08",
+    title: "Poles transfer function fix",
+    body: "On Poles Average question 206, both capacitors are now 0.1 F, and the transfer function is the voltage across the 10 ohm over the source current. The stability range and pole questions that follow use that same function.",
+  },
+  {
+    id: "built-2026-10-08-poles-206-2",
+    date: "2026-10-08",
+    title: "Poles nodal equation fix",
+    body: "On Poles Average question 206, step 2, the KCL at node Va no longer treats the 4 ohm resistor as if it went to ground. The 4 ohm is in series with the current source, so that current all enters Va.",
+  },
+  {
     id: "built-2026-10-08-all-topics-open",
     date: "2026-10-08",
     title: "Every section is open",
