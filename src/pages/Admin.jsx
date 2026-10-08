@@ -22,6 +22,12 @@ import {
   resolveQuestionReport,
   reasonLabel,
 } from "../state/questionReports";
+import { listModuleAttempts } from "../supabaseClient";
+import {
+  moduleTitle,
+  MODULE_ANALYTICS_REPORTS,
+  downloadModuleAnalyticsCsv,
+} from "../state/moduleAttemptsExport";
 
 function lessonKeysForCounts(counts, bankCounts = {}) {
   const keys = [];
@@ -236,6 +242,7 @@ export default function Admin({ progress, setProgress, counts, bankCounts = {} }
         </div>
       </div>
       <WalkFeedbackTable students={students} />
+      <ModuleAnalyticsTable totalStudents={students.length} />
       <LeaderboardSchedule />
       <TutorUsage totalStudents={students.length} />
       <QuestionReportsTable />
@@ -385,6 +392,250 @@ function QuestionReportsTable() {
             )}
           </tbody>
         </table>
+      </div>
+    </section>
+  );
+}
+
+const DIFFICULTY_NAMES = { 1: "Easy", 2: "Average", 3: "Challenging" };
+
+// Roll up raw attempt rows into the numbers the two features report.
+// Mirrors the logic in moduleAttemptsExport.js so the on-screen tables
+// and the CSV downloads always agree.
+function rollupModuleAttempts(rows) {
+  const list = Array.isArray(rows) ? rows : [];
+  const byModule = new Map();
+  const byModuleDiff = new Map();
+
+  for (const r of list) {
+    const moduleId = String(r.moduleId || "");
+    const difficulty = Math.max(1, Math.min(3, Math.round(Number(r.difficulty) || 1)));
+    const email = String(r.email || "").trim().toLowerCase();
+    const done = Boolean(r.completed ?? r.completedAt);
+    if (!moduleId || !email) continue;
+
+    let m = byModule.get(moduleId);
+    if (!m) {
+      m = { attempts: 0, students: new Set(), completedStudents: new Set(), completedAttempts: 0, perStudent: new Map() };
+      byModule.set(moduleId, m);
+    }
+    m.attempts += 1;
+    m.students.add(email);
+    m.perStudent.set(email, (m.perStudent.get(email) || 0) + 1);
+    if (done) {
+      m.completedStudents.add(email);
+      m.completedAttempts += 1;
+    }
+
+    const dKey = `${moduleId}|${difficulty}`;
+    let d = byModuleDiff.get(dKey);
+    if (!d) {
+      d = { moduleId, difficulty, attempts: 0, students: new Set(), completedStudents: new Set(), completedAttempts: 0, perStudent: new Map() };
+      byModuleDiff.set(dKey, d);
+    }
+    d.attempts += 1;
+    d.students.add(email);
+    d.perStudent.set(email, (d.perStudent.get(email) || 0) + 1);
+    if (done) {
+      d.completedStudents.add(email);
+      d.completedAttempts += 1;
+    }
+  }
+
+  // Count students who attempted a module 2+ times (for the repeat rate).
+  const studentsWithRepeat = (perStudent) => {
+    let n = 0;
+    for (const count of perStudent.values()) if (count >= 2) n += 1;
+    return n;
+  };
+
+  const perModule = [...byModule.entries()]
+    .map(([moduleId, m]) => ({
+      moduleId,
+      title: moduleTitle(moduleId),
+      attempts: m.attempts,
+      students: m.students.size,
+      repeats: Math.max(m.attempts - m.students.size, 0),
+      studentsWithRepeat: studentsWithRepeat(m.perStudent),
+      studentsCompleted: m.completedStudents.size,
+      completedAttempts: m.completedAttempts,
+    }))
+    .sort((a, b) => b.attempts - a.attempts || a.title.localeCompare(b.title));
+
+  const perModuleDiff = [...byModuleDiff.values()]
+    .map((d) => ({
+      moduleId: d.moduleId,
+      title: moduleTitle(d.moduleId),
+      difficulty: d.difficulty,
+      attempts: d.attempts,
+      students: d.students.size,
+      repeats: Math.max(d.attempts - d.students.size, 0),
+      studentsWithRepeat: studentsWithRepeat(d.perStudent),
+      studentsCompleted: d.completedStudents.size,
+      completedAttempts: d.completedAttempts,
+    }))
+    .sort(
+      (a, b) =>
+        a.title.localeCompare(b.title) || a.difficulty - b.difficulty
+    );
+
+  return { perModule, perModuleDiff, totalAttempts: list.length };
+}
+
+// Format a ratio as a percent to one decimal place, or "—" when the
+// denominator is unknown (no roster loaded yet). A genuinely zero numerator
+// shows "0%"; a nonzero numerator that would round to 0.0% (under 0.05%)
+// shows "<0.1%" instead, so a nonzero raw count never looks like a flat 0%.
+function pct(numerator, denominator) {
+  if (!denominator || denominator <= 0) return "—";
+  if (numerator <= 0) return "0%";
+  const value = (numerator / denominator) * 100;
+  if (value < 0.05) return "<0.1%";
+  return `${value.toFixed(1)}%`;
+}
+
+function ModuleAnalyticsTable({ totalStudents = 0 }) {
+  const [rows, setRows] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+  const [splitByDifficulty, setSplitByDifficulty] = useState(false);
+  const [busy, setBusy] = useState("");
+
+  function reload(active = { current: true }) {
+    setLoading(true);
+    setError("");
+    listModuleAttempts()
+      .then((data) => {
+        if (active.current !== false) setRows(Array.isArray(data) ? data : []);
+      })
+      .catch(() => {
+        if (active.current !== false) {
+          setError(
+            "Couldn't load module attempts. Make sure module_attempts.sql has been run in Supabase."
+          );
+        }
+      })
+      .finally(() => {
+        if (active.current !== false) setLoading(false);
+      });
+  }
+
+  useEffect(() => {
+    const active = { current: true };
+    reload(active);
+    return () => {
+      active.current = false;
+    };
+  }, []);
+
+  const { perModule, perModuleDiff, totalAttempts } = useMemo(
+    () => rollupModuleAttempts(rows),
+    [rows]
+  );
+
+  async function download(reportId) {
+    setBusy(reportId);
+    try {
+      await downloadModuleAnalyticsCsv(reportId);
+    } catch {
+      setError("Download failed.");
+    } finally {
+      setBusy("");
+    }
+  }
+
+  const showDiff = splitByDifficulty;
+
+  return (
+    <section className="admin-walk-feedback">
+      <h2>Module analytics</h2>
+      <p className="login-hint">
+        Per-attempt tracking of question-bank modules across all students.
+        A <strong>repeat</strong> is any attempt after a student's first go at a
+        module (completed or abandoned). A <strong>completion</strong> means a
+        student answered every question in the module at least once.{" "}
+        {totalAttempts} attempt{totalAttempts === 1 ? "" : "s"} logged.
+        Percentages are out of {totalStudents} enrolled student
+        {totalStudents === 1 ? "" : "s"} in the roster; repeat rate is the share
+        of a module's attempters who tried it 2+ times.
+      </p>
+      <label
+        className="login-hint"
+        style={{ display: "inline-block", marginBottom: 8 }}
+      >
+        <input
+          type="checkbox"
+          checked={splitByDifficulty}
+          onChange={(e) => setSplitByDifficulty(e.target.checked)}
+        />{" "}
+        Split by difficulty
+      </label>
+
+      {error ? <p className="login-hint">{error}</p> : null}
+
+      <div className="admin-table-wrap">
+        <table className="admin-table">
+          <thead>
+            <tr>
+              <th>Module</th>
+              {showDiff ? <th>Difficulty</th> : null}
+              <th>Total attempts</th>
+              <th>Students</th>
+              <th>% Attempted</th>
+              <th>Repeat attempts</th>
+              <th>Repeat rate</th>
+              <th>Students completed</th>
+              <th>% Completed</th>
+            </tr>
+          </thead>
+          <tbody>
+            {loading ? (
+              <tr>
+                <td colSpan={showDiff ? 9 : 8}>Loading module attempts…</td>
+              </tr>
+            ) : (showDiff ? perModuleDiff : perModule).length ? (
+              (showDiff ? perModuleDiff : perModule).map((row) => (
+                <tr key={showDiff ? `${row.moduleId}-${row.difficulty}` : row.moduleId}>
+                  <td>{row.title}</td>
+                  {showDiff ? (
+                    <td>{DIFFICULTY_NAMES[row.difficulty] || row.difficulty}</td>
+                  ) : null}
+                  <td>{row.attempts}</td>
+                  <td>{row.students}</td>
+                  <td>{pct(row.students, totalStudents)}</td>
+                  <td>{row.repeats}</td>
+                  <td>{pct(row.studentsWithRepeat, row.students)}</td>
+                  <td>{row.studentsCompleted}</td>
+                  <td>{pct(row.studentsCompleted, totalStudents)}</td>
+                </tr>
+              ))
+            ) : (
+              <tr>
+                <td colSpan={showDiff ? 9 : 8}>
+                  No module attempts logged yet. Play a question bank as a
+                  student to see data here.
+                </td>
+              </tr>
+            )}
+          </tbody>
+        </table>
+      </div>
+
+      <p className="login-hint" style={{ marginTop: 12 }}>
+        Download detailed CSVs:
+      </p>
+      <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
+        {Object.entries(MODULE_ANALYTICS_REPORTS).map(([id, report]) => (
+          <button
+            key={id}
+            type="button"
+            className="admin-name-btn"
+            disabled={busy === id || loading}
+            onClick={() => download(id)}
+          >
+            {busy === id ? "…" : report.label}
+          </button>
+        ))}
       </div>
     </section>
   );

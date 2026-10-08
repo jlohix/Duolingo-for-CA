@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   questionsForLesson,
   questionsForBank,
@@ -18,6 +18,10 @@ import CloseWarning from "../components/CloseWarning";
 import ThemeSwitch from "../components/ThemeSwitch";
 import HintControl from "../components/HintControl";
 import LessonWarmup from "../components/LessonWarmup";
+import {
+  startModuleAttempt,
+  finishModuleAttempt,
+} from "../state/moduleAttempts";
 
 export default function Lesson({
   allQuestions,
@@ -67,6 +71,24 @@ export default function Lesson({
   const [stage, setStage] = useState(
     paperMode || bankMode ? "quiz" : "teach"
   );
+
+  // ---- Module attempt analytics (question banks only) ----------------
+  // Log one attempt per (re)start of a bank module so staff can measure
+  // module repeats (Feature 1) and completions (Feature 2). Non-bank
+  // lessons, past papers, and staff previews are not tracked. Best-effort:
+  // the helper swallows failures and never affects the quiz.
+  const attemptRef = useRef(null);
+  useEffect(() => {
+    if (preview || !bankMode || !bankId || stage !== "quiz") return;
+    attemptRef.current = startModuleAttempt({
+      moduleId: bankId,
+      difficulty,
+      classId: progress?.classId || "",
+      questionCount: familyTotal,
+    });
+    // A new attempt is intentionally created whenever the module (re)starts.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [preview, bankMode, bankId, difficulty, stage]);
 
   // Publish the active question so the floating tutor can use it as context.
   // Only while actually answering (stage === "quiz"); cleared on unmount and
@@ -118,6 +140,12 @@ export default function Lesson({
         lessonKey: key,
       });
       return;
+    }
+    // Stamp the module attempt as completed (every question answered at
+    // least once by the time we reach finish()). Bank modules only.
+    if (bankMode && attemptRef.current) {
+      finishModuleAttempt(attemptRef.current, { answeredCount: familyTotal });
+      attemptRef.current = null;
     }
     const grew = wouldExtendStreak(progress);
     const streakFrom = visibleStreak(progress);

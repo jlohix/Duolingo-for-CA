@@ -10,3 +10,9 @@ dist
 .env
 .env.local
 .env.*.local
+
+
+# Local dev-only module-attempt logger (Option B) — never commit
+logger-server.mjs
+module_attempts.csv
+check-attempts.mjs
