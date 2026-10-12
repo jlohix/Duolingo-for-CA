@@ -14,6 +14,7 @@ import {
   nextResetAt,
   periodLabel,
 } from "../state/leaderboardPeriod";
+import LeaderboardHistory from "../components/LeaderboardHistory";
 
 // Format "time until the weekly reset", e.g. "3d 4h".
 function formatCountdown(ms) {
@@ -269,6 +270,11 @@ export default function Leaderboard({ user, progress, mode = "class" }) {
           )}
         </>
       )}
+
+      <LeaderboardHistory
+        classId={cohortMode || individualMode ? null : focusClass}
+        youName={admin ? "" : user?.username || ""}
+      />
     </div>
   );
 }

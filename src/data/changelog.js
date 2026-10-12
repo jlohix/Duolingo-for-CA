@@ -6,6 +6,12 @@ export const BUILT_IN_LOGS = [
     body: "On Superposition Average question 203, the voltage source is left on and the current source is opened when VS acts alone. When IS acts alone, VS is replaced by a short, not an open.",
   },
   {
+    id: "built-2026-10-12-leaderboard-history",
+    date: "2026-10-12",
+    title: "Past weeks on leaderboards",
+    body: "Leaderboards now keep a history. Scroll the Previous weeks list and tap any past week to see how the rankings looked then.",
+  },
+  {
     id: "built-2026-10-12-poles-c2-001",
     date: "2026-10-12",
     title: "C2 is 0.01 F",
