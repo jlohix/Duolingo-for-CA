@@ -80,15 +80,9 @@ another one — free the port and retry.
 
 ## 🔑 Accounts
 
-| Role | How to sign in |
-| --- | --- |
-| **Student** | NTU email (`…@e.ntu.edu.sg`). First time: matriculation number, then choose a password. After that, log in with that password and pick a class (EE01–EE22, or EEPT). |
-| **Staff / admin** | Local preview user `admin` / `meowmeow`, or an NTU staff email listed in `src/state/auth.js`. |
-
-- **Student** — lessons, XP, streaks, class/cohort boards, trophy leagues. Consent is recorded before play.
-- **Staff** — can open any lesson as a **preview** (no XP, no student progress). Admin screens cover class/cohort/individual boards, roster, module attempts, and session times.
-
-Staff emails are the Circuito teaching team, not a public signup list.
+Students sign in with an NTU email (`…@e.ntu.edu.sg`). First time: matriculation
+number, then choose a password. After that, log in with that password and pick a
+class (EE01–EE22, or EEPT). Consent is recorded before play.
 
 ---
 
@@ -125,7 +119,7 @@ Duolingo-for-CA/  (faizah branch)
     ├── supabaseClient.js     # Supabase RPC helpers (login, boards, logs, chatbot)
     │
     ├── state/                # Session, progress, leagues, analytics
-    │   ├── auth.js            #   Student login (NTU email) + local admin
+    │   ├── auth.js            #   Student login (NTU email)
     │   ├── progress.js        #   XP, streaks, completed lessons (all topics unlocked)
     │   ├── progressSync.js    #   Push/pull student progress to Supabase
     │   ├── roster.js          #   Classmates for boards
