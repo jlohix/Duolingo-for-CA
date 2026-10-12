@@ -4764,3 +4764,51 @@ html[data-theme="dark"] .circuit-svg .board-step {
   font-weight: 700;
   color: var(--green);
 }
+
+/* ---------- Leaderboard history (previous weeks) ---------- */
+.board-history {
+  margin-top: 26px;
+  padding-top: 18px;
+  border-top: 1px solid var(--line);
+}
+.board-history h2 {
+  margin: 0 0 4px;
+  font-size: 17px;
+}
+.board-history-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  max-height: 220px;
+  overflow-y: auto;
+  margin: 10px 0;
+  padding: 4px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+}
+.board-history-item {
+  text-align: left;
+  padding: 10px 14px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--letter-bg);
+  color: var(--ink);
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+}
+.board-history-item:hover {
+  border-color: var(--green);
+}
+.board-history-item.on {
+  background: var(--green);
+  color: #fff;
+  border-color: var(--green);
+}
+.board-history-detail {
+  margin-top: 12px;
+}
+.board-history-detail h3 {
+  margin: 0 0 8px;
+  font-size: 15px;
+}
