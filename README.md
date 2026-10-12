@@ -15,7 +15,7 @@ interactive lessons with XP, streaks, and competitive leagues.
 
 - [Tech Stack](#-tech-stack)
 - [Getting Started](#-getting-started)
-- [Demo Accounts](#-demo-accounts)
+- [Accounts](#-accounts)
 - [Available Scripts](#-available-scripts)
 - [Project Structure](#-project-structure)
 - [Where to Start Reading](#-where-to-start-reading-the-code)
@@ -34,12 +34,17 @@ interactive lessons with XP, streaks, and competitive leagues.
 | **Build tool / dev server** | [Vite 6](https://vite.dev/) |
 | **Math rendering** | [KaTeX](https://katex.org/) |
 | **CSV parsing** | [PapaParse](https://www.papaparse.com/) |
-| **State** | React state + `localStorage` (no backend yet) |
+| **Charts** | [Recharts](https://recharts.org/) |
+| **Backend** | [Supabase](https://supabase.com/) (auth, consent, class boards, session/module logs, leaderboard history, chatbot) |
+| **Local state** | React state + `localStorage` (XP, streaks, lesson completion, theme) |
 | **Styling** | Plain CSS (`src/index.css`) with a light/dark theme |
 
-> ⚠️ **This is currently a client-only app.** There is no backend — accounts,
-> XP, streaks, and question data all live in the browser (`localStorage` and
-> bundled CSV/JS files). See [Known Limitations](#-known-limitations).
+Student login, class membership, and staff analytics go through Supabase RPCs in
+`src/supabaseClient.js`. Lesson progress and XP still live in `localStorage` and
+are synced for students.
+
+Set `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` in `.env` if you need to
+point at another project. The app has defaults for the Circuito project.
 
 ---
 
@@ -73,22 +78,17 @@ another one — free the port and retry.
 
 ---
 
-## 🔑 Demo Accounts
+## 🔑 Accounts
 
-Authentication is currently **mocked** with two hardcoded accounts
-(see `src/state/auth.js`):
+| Role | How to sign in |
+| --- | --- |
+| **Student** | NTU email (`…@e.ntu.edu.sg`). First time: matriculation number, then choose a password. After that, log in with that password and pick a class (EE01–EE22, or EEPT). |
+| **Staff / admin** | Local preview user `admin` / `meowmeow`, or an NTU staff email listed in `src/state/auth.js`. |
 
-| Role | Username | Password |
-| --- | --- | --- |
-| Student | `student1` | `password` |
-| Admin | `admin` | `meowmeow` |
+- **Student** — lessons, XP, streaks, class/cohort boards, trophy leagues. Consent is recorded before play.
+- **Staff** — can open any lesson as a **preview** (no XP, no student progress). Admin screens cover class/cohort/individual boards, roster, module attempts, and session times.
 
-- **Student** — the normal learner experience (lessons, XP, streaks, leagues).
-- **Admin** — can preview any lesson (all content unlocked) and view the admin
-  dashboards (class/cohort/individual leaderboards, roster editing).
-
-> These credentials are for local development only and will be replaced when a
-> real authentication backend is added.
+Staff emails are the Circuito teaching team, not a public signup list.
 
 ---
 
@@ -109,67 +109,63 @@ Duolingo-for-CA/  (faizah branch)
 ├── index.html                # Vite HTML entry point
 ├── vite.config.js            # Vite config (React plugin, port 5173)
 ├── package.json              # Dependencies & scripts
+├── supabase/                 # SQL helpers (session times, module visits, leaderboard history)
 │
 ├── public/                   # Static assets served as-is at runtime
-│   ├── QuestionBank.csv       #   Main question bank (fetched on load)
+│   ├── QuestionBank.csv       #   Extra / legacy questions (fetched on load)
 │   ├── PastYearPapers.csv     #   Past-year exam questions
-│   ├── question-bank/         #   Per-topic CSVs + question images
+│   ├── question-bank/         #   Per-topic CSVs + images (GitHub URLs or local files)
 │   └── mascots/               #   "Sunwoo" owl mascot frames
 │
 └── src/
     ├── main.jsx              # App bootstrap (React root, ThemeProvider, ErrorBoundary)
-    ├── App.jsx               # Root component + screen router (see below)
+    ├── App.jsx               # Root component + screen router
     ├── index.css             # Global styles / design system
     ├── walks.js              # Registry of "section walk" lesson components
+    ├── supabaseClient.js     # Supabase RPC helpers (login, boards, logs, chatbot)
     │
-    ├── state/                # Client-side "backend" — all localStorage
-    │   ├── auth.js            #   Mock login/logout/session + isAdmin
-    │   ├── progress.js        #   XP, streaks, completed lessons, topic stats
-    │   ├── roster.js          #   (Mock) classmates for the leaderboard
-    │   ├── league.js          #   Competitive league seasons & promotion logic
-    │   ├── changelog.js        #   Tracks which "what's new" items were seen
+    ├── state/                # Session, progress, leagues, analytics
+    │   ├── auth.js            #   Student login (NTU email) + local admin
+    │   ├── progress.js        #   XP, streaks, completed lessons (all topics unlocked)
+    │   ├── progressSync.js    #   Push/pull student progress to Supabase
+    │   ├── roster.js          #   Classmates for boards
+    │   ├── league.js          #   Trophy-league seasons
+    │   ├── changelog.js       #   Which Updates items were seen (+ custom logs)
     │   └── theme.jsx          #   Light/dark theme context
     │
     ├── data/                 # Content + content loading
     │   ├── loadQuestions.js   #   Fetches & parses question CSVs; answer checking
     │   ├── questionBanks.js   #   Registry of CSV-backed question banks
-    │   ├── topics.js          #   The 7 course topics + 3 difficulty levels
+    │   ├── topics.js          #   8 Learn sections (7–8 are coming soon)
+    │   ├── changelog.js       #   Built-in Updates copy (student-facing)
     │   ├── dragCircuits.js    #   Hardcoded drag-lab question sets
     │   ├── *Lab.js            #   Step-by-step walkthrough scripts per topic
-    │   ├── trophies.js        #   League tiers / trophy definitions
-    │   ├── classes.js         #   Class/cohort definitions
-    │   └── ...                #   Hints, primers, changelog entries, helpers
+    │   └── ...                #   Hints, primers, classes, trophies
     │
     ├── hooks/
     │   └── useQuizQueue.js    # Quiz engine: queue, scoring, review-missed logic
     │
-    ├── components/           # ~50 presentational components
+    ├── components/           # Presentational UI
     │   ├── AppShell.jsx        #   App layout + navigation
-    │   ├── *Schematic.jsx      #   Circuit diagram renderers (Thevenin, Mesh, …)
-    │   ├── QuestionCard.jsx    #   Renders a single MCQ
-    │   ├── ValueDragLab.jsx    #   Draggable value/answer interaction
-    │   ├── MathText.jsx        #   Renders LaTeX via KaTeX
-    │   ├── QuizMascot.jsx      #   The Sunwoo owl mascot
-    │   └── ...                 #   Streak/trophy/league chrome, etc.
+    │   ├── QuestionCard.jsx    #   One MCQ (family stem + image + part)
+    │   ├── MathText.jsx        #   LaTeX via KaTeX
+    │   ├── ChatWidget.jsx      #   Optional tutor chatbot
+    │   └── ...                 #   Schematics, streak/league chrome, reports
     │
     ├── pages/                # Top-level screens
-    │   ├── Home.jsx            #   Lesson map / dashboard
-    │   ├── Login.jsx          #   Login screen
-    │   ├── Lesson.jsx          #   Runs a quiz for a topic/difficulty
+    │   ├── Home.jsx            #   Learn path (sections, banks, past papers)
+    │   ├── Login.jsx           #   Login / first password
+    │   ├── Lesson.jsx          #   Runs a quiz for a bank/difficulty
     │   ├── Results.jsx         #   Post-lesson summary
-    │   ├── Leaderboard.jsx     #   Class/cohort/individual boards
-    │   ├── Leagues.jsx         #   League standings
-    │   ├── Profile.jsx         #   User profile & topic insights
-    │   ├── Admin.jsx           #   Admin dashboard
-    │   └── ...                 #   Skip quiz, guided lessons, guide, updates
+    │   ├── Leaderboard.jsx     #   Class / cohort / individual (+ past weeks)
+    │   ├── Leagues.jsx         #   Trophy league standings
+    │   ├── Profile.jsx         #   Board name, insights (walks hidden for students)
+    │   ├── Guide.jsx           #   How to use Circuito
+    │   ├── Admin.jsx           #   Staff dashboards
+    │   └── ...                 #   Skip quiz, guided lessons, updates
     │
-    └── section2/ … section5/ # Self-contained course modules (one per section)
-        │                      #   Each has its own labs, schematics & drag boards
-        └── section5/          #   Laplace transforms (largest module):
-            ├── index.js        #     Lab registry (basics, poles, PFE, …)
-            ├── LaplaceLesson.jsx
-            ├── Schematics.jsx
-            └── labs/           #     One file per Laplace sub-topic
+    └── section2/ … section6/ # Self-contained walkthrough modules
+        └── section5/          #   Laplace transforms (largest module)
 ```
 
 ---
@@ -178,13 +174,11 @@ Duolingo-for-CA/  (faizah branch)
 
 New to the codebase? Read in this order:
 
-1. **`src/App.jsx`** — the entry point for all app logic. It holds the top-level
-   state and decides which screen to render. Start here to understand the flow.
-2. **`src/state/progress.js`** — how XP, streaks, and lesson completion work.
+1. **`src/App.jsx`** — top-level state and which screen to render.
+2. **`src/state/progress.js`** — XP, streaks, and (currently open) unlocks.
 3. **`src/data/loadQuestions.js`** — how questions are loaded and answers checked.
-4. **`src/hooks/useQuizQueue.js`** — how a quiz actually runs (question by question).
-5. Pick one **`section*/`** folder — they all follow the same shape, so learning
-   one teaches you the rest.
+4. **`src/hooks/useQuizQueue.js`** — how a quiz runs question by question.
+5. Pick one **`section*/`** folder — they follow the same shape.
 
 **Mental model:** `state/` is logic, `data/` is content, `components/` is UI,
 `pages/` are screens, and `App.jsx` wires them together.
@@ -195,28 +189,48 @@ New to the codebase? Read in this order:
 
 ### Routing (no URL router)
 
-The app does **not** use a URL router. Instead, `App.jsx` keeps a `screen`
-string in state and renders the matching screen with a series of
-`if (screen === "...")` checks. Navigation happens by calling `setScreen(...)`.
+The app does **not** use a URL router. `App.jsx` keeps a `screen` string in state
+and renders with `if (screen === "...")`. Navigation is `setScreen(...)`.
 
-> Because there is no router, the app has no shareable/deep-linkable URLs and
-> the browser Back button does not navigate between screens.
+> There are no shareable/deep-linkable URLs, and the browser Back button does
+> not move between screens.
 
-### Progression (XP, streaks, unlocks)
+### Learn path
 
-- Answering questions correctly awards **XP** (scaled by difficulty — see
-  `XP_BY_DIFFICULTY` in `progress.js`).
-- Practicing on consecutive days builds a **streak**; missing a day resets it.
-- Completing lessons unlocks the next difficulty/topic.
-- All of this is stored in `localStorage`, so it is **per-browser** and lost if
-  browser data is cleared.
+Learn shows eight sections:
 
-### Leagues
+1. Basic laws  
+2. Op-amps  
+3. Transients  
+4. First-order circuits (no practice bank — Laplace is already open)  
+5. Laplace Transform  
+6. Poles and Zeros  
+7. Network functions — **coming soon**  
+8. Frequency domain — **coming soon**  
 
-`state/league.js` runs Duolingo-style competitive **seasons** (3 days each). Users
-are ranked by XP earned during the season and promoted/demoted between league
-tiers. Because there is no backend, the league is populated with **mock
-classmates and synthetic rivals** rather than real users.
+Walkthroughs are **optional**. Every section that has lessons is already open.
+Students can play **Easy, Average, and Challenging in any order**. Progress bars
+still fill as they complete banks. Staff preview does not award XP.
+
+Past year papers sit at the bottom of Learn.
+
+### Progression (XP, streaks)
+
+- First-try correct answers: **10 / 20 / 30 XP** (Easy / Average / Challenging).
+- Finishing a lesson: **20 / 40 / 60 XP**. Walkthroughs use Easy rates.
+- Replaying a finished lesson is practice only (no extra XP).
+- Practice at least once a calendar day to keep the **streak**.
+- Student progress is stored in `localStorage` (keyed by email) and synced
+  through Supabase. Clearing the browser can still drop unsynced local state.
+
+### Leagues and boards
+
+- **Trophy leagues** (`state/league.js`): everyone starts in Bronze. Every 3 days,
+  the top 20% promote and the bottom 20% demote. XP only ranks that round.
+- **Class board** ranks students in the same class by total XP.
+- **Cohort board** ranks those classes.
+- **Individual** shows the top 10 in the cohort, plus your place.
+- Leaderboards keep a **previous-weeks** history.
 
 ---
 
@@ -225,46 +239,51 @@ classmates and synthetic rivals** rather than real users.
 Questions come from two places:
 
 1. **CSV files** in `public/` (`QuestionBank.csv`, `PastYearPapers.csv`, and the
-   per-bank CSVs under `public/question-bank/csv/`). These are fetched at
-   runtime and parsed by `loadQuestions.js`.
-2. **Hardcoded JavaScript** in `src/data/` — the drag-lab question sets
-   (`dragCircuits.js`) and the guided walkthrough scripts (`*Lab.js`).
+   per-bank CSVs under `public/question-bank/csv/`). Fetched at runtime and
+   parsed by `loadQuestions.js`. Prefer **GitHub image URLs** in the CSV when
+   the figure lives on the main asset repo; local files under
+   `public/question-bank/` are used when a figure was edited on this branch
+   (for example Poles `polesq2v2.png`).
+2. **Hardcoded JavaScript** in `src/data/` — drag-lab sets (`dragCircuits.js`)
+   and walkthrough scripts (`*Lab.js`).
 
 Each MCQ has a question, four options (A–D), a correct answer, an optional image,
-an explanation (LaTeX-supported), and a difficulty (1–3).
+an explanation (LaTeX-supported), and a difficulty (1–3). Multi-part families
+share a stem and figure across steps (`id` like `203-3`).
 
-> ⚠️ **Answers are checked on the client** (`isAnswerCorrect` in
-> `loadQuestions.js`), and the answer key ships to the browser. This is fine for
-> a prototype but means correctness can be inspected/bypassed.
+> **Answers are checked on the client** (`isAnswerCorrect` in
+> `loadQuestions.js`). The answer key ships to the browser.
+
+Student-facing Updates copy lives in `src/data/changelog.js` (`BUILT_IN_LOGS`).
+Do not write those entries to `localStorage`.
 
 ---
 
 ## ✏️ Adding Content
 
-- **Add MCQs:** edit the relevant CSV in `public/` (columns: `id`, `topicId`,
-  `question`, `optionA`–`optionD`, `answer`, `image`, `explanation`,
-  `difficulty`).
+- **Add MCQs:** edit the relevant CSV in `public/question-bank/csv/` (columns:
+  `id`, `topicId`, `main_question`, `question`, `optionA`–`optionD`, `answer`,
+  `image`, `explanation`, `difficulty`, `walkthrough_tag`).
 - **Add a question bank:** register it in `src/data/questionBanks.js` and add its
   CSV + image folder under `public/question-bank/`.
 - **Add/edit a walkthrough:** edit the matching `src/data/*Lab.js` (or a
   `section*/labs*` file).
-- **Add a topic:** update `src/data/topics.js`.
+- **Add a topic:** update `src/data/topics.js` and `Home.jsx`.
+- **Student-visible change:** add a new object at the **top** of `BUILT_IN_LOGS`
+  in `src/data/changelog.js`.
 
 ---
 
 ## ⚠️ Known Limitations
 
-This app is an early-stage prototype. Notable gaps a developer should be aware of:
-
-- **No backend.** Auth is mocked (two hardcoded users) and all user data lives in
-  `localStorage` — it is per-browser and not shared across devices.
-- **Client-side scoring.** XP and answer-checking happen in the browser, so they
-  are not tamper-proof.
-- **Mock leaderboard/leagues.** Classmates and rivals are synthetic, not real
-  users.
+- **Scoring is still client-side.** XP and answer-checking happen in the
+  browser, so they are not tamper-proof.
 - **No URL router**, so no deep links and no Back-button navigation.
 - **No tests, linter, or formatter** are configured yet.
+- **Network functions** and **Frequency domain** have no practice content yet
+  (coming soon).
+- First-order circuits has no question bank; Laplace is already open.
+- Staff preview does not change student XP or progress.
 
-> A planned migration will move accounts, XP/streaks, and questions to a
-> **Supabase** backend, add server-side answer validation, and introduce a
-> RAG-based AI tutor chatbot.
+Open **Updates** in the sidebar for what changed for students. Open **How to use**
+for the short tour.
