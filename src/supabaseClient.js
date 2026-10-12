@@ -308,6 +308,21 @@ export async function syncLeaderboardPeriodRemote() {
   return data && typeof data === "object" ? data : null;
 }
 
+// List completed leaderboard periods (newest first) for the history picker.
+export async function listLeaderboardHistoryRemote() {
+  const data = await rpc("list_leaderboard_history", {});
+  return Array.isArray(data) ? data : [];
+}
+
+// The frozen standings for one past period (optionally filtered to a class).
+export async function getLeaderboardHistoryRemote(historyId, classId = null) {
+  const data = await rpc("get_leaderboard_history", {
+    p_history_id: Number(historyId),
+    p_class: classId || null,
+  });
+  return Array.isArray(data) ? data : [];
+}
+
 export async function getLeaderboardConfigRemote() {
   const data = await rpc("get_leaderboard_config", {});
   return data && typeof data === "object" ? data : null;
