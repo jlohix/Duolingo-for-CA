@@ -1,5 +1,11 @@
 export const BUILT_IN_LOGS = [
   {
+    id: "built-2026-10-12-poles-c2-001",
+    date: "2026-10-12",
+    title: "C2 is 0.01 F",
+    body: "On Poles Average question 206, the second capacitor is 0.01 F, so its impedance is 100/s. The nodal equation, transfer function, stability range, and poles now use that value.",
+  },
+  {
     id: "built-2026-10-09-poles-c2-label",
     date: "2026-10-09",
     title: "C2 value on the circuit",
