@@ -1,5 +1,11 @@
 export const BUILT_IN_LOGS = [
   {
+    id: "built-2026-10-12-super-203-3",
+    date: "2026-10-12",
+    title: "Superposition short, not open",
+    body: "On Superposition Average question 203, the voltage source is left on and the current source is opened when VS acts alone. When IS acts alone, VS is replaced by a short, not an open.",
+  },
+  {
     id: "built-2026-10-12-poles-c2-001",
     date: "2026-10-12",
     title: "C2 is 0.01 F",
