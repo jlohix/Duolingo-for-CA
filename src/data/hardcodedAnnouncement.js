@@ -18,8 +18,9 @@
 
 export const HARDCODED_ANNOUNCEMENT = {
   enabled: true,
-  title: "Please screenshot your XP",
+  title: "Troubles saving XP",
   description:
-    "We're having some technical issues saving progress right now. After you finish each lesson, please take a screenshot of your XP page so your progress can be verified. Thank you!",
-  imageSrc: "", // e.g. "/mascot.png" (from public/), or leave "" for no image
+    "After every lesson you complete, please take a screenshot of the completion page. Currently, our database is experiencing some issues so your progress (including XP) may not be saved after completion.",
+  // Bundled image from public/ — loads offline (works during a Supabase outage).
+  imageSrc: "/mascot.png",
 };
