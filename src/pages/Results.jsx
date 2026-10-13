@@ -1,9 +1,16 @@
-import { useCallback, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import ThemeSwitch from "../components/ThemeSwitch";
 import StreakCelebrate from "../components/StreakCelebrate";
 import WalkRating from "../components/WalkRating";
 
-export default function Results({ summary, onHome, progress, setProgress }) {
+export default function Results({
+  summary,
+  onHome,
+  progress,
+  setProgress,
+  userEmail = "",
+  displayName = "",
+}) {
   const skip = summary.kind === "skip";
   const failedSkip = skip && !summary.passed;
   const title = skip
@@ -23,6 +30,22 @@ export default function Results({ summary, onHome, progress, setProgress }) {
   const onTick = useCallback((value) => setStreakShown(value), []);
   const askRating = summary.kind === "walk" || summary.kind === "lab";
   const lessonKey = summary.lessonKey || summary.topicName;
+
+  // Completion timestamp (captured when this page renders), shown in SGT for
+  // the verification footer. useMemo so it stays fixed while the page is open.
+  const completedAt = useMemo(
+    () =>
+      new Date().toLocaleString("en-SG", {
+        timeZone: "Asia/Singapore",
+        day: "numeric",
+        month: "short",
+        year: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
+        second: "2-digit",
+      }),
+    []
+  );
 
   return (
     <div className="page results">
@@ -72,6 +95,13 @@ export default function Results({ summary, onHome, progress, setProgress }) {
       <button type="button" className="primary" onClick={onHome}>
         Back to path
       </button>
+      {userEmail ? (
+        <div className="results-identity" aria-label="Account for verification">
+          {displayName ? <span>{displayName}</span> : null}
+          <span>{userEmail}</span>
+          <span>{completedAt} SGT</span>
+        </div>
+      ) : null}
     </div>
   );
 }

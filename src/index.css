@@ -4812,3 +4812,238 @@ html[data-theme="dark"] .circuit-svg .board-step {
   margin: 0 0 8px;
   font-size: 15px;
 }
+
+/* ---------- Announcement pop-up (student login) ---------- */
+.announcement-sheet {
+  max-width: 460px;
+  width: 90%;
+  max-height: 80vh;
+  overflow-y: auto;
+}
+.announcement-list {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  margin: 8px 0 16px;
+}
+.announcement-item + .announcement-item {
+  border-top: 1px solid var(--line);
+  padding-top: 16px;
+}
+.announcement-title {
+  margin: 0 0 8px;
+  font-size: 18px;
+}
+.announcement-image {
+  display: block;
+  width: 100%;
+  height: auto;
+  border-radius: 10px;
+  margin: 8px 0;
+}
+.announcement-desc {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.55;
+  white-space: pre-wrap;
+}
+.announcement-dismiss {
+  width: 100%;
+}
+
+/* ---------- Announcements admin ---------- */
+.announcement-form {
+  flex-direction: column;
+  align-items: stretch;
+  gap: 10px;
+}
+.announcement-field-wide textarea {
+  width: 100%;
+  resize: vertical;
+}
+.announcement-check {
+  flex-direction: row;
+  align-items: center;
+  gap: 8px;
+  font-weight: 600;
+}
+.announcement-check input {
+  width: auto;
+}
+.announcement-image-preview {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.announcement-image-preview img {
+  max-width: 120px;
+  max-height: 80px;
+  border-radius: 8px;
+  border: 1px solid var(--line);
+}
+.announcement-form-actions {
+  display: flex;
+  gap: 10px;
+}
+.announcement-desc-cell {
+  max-width: 260px;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+.announcement-actions {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+.admin-name-btn.danger {
+  color: var(--red, #ff4b4b);
+}
+.announcement-live {
+  background: rgba(88, 204, 2, 0.08);
+}
+.announcement-badge {
+  display: inline-block;
+  padding: 2px 9px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 700;
+}
+.announcement-badge.live {
+  background: var(--green);
+  color: #fff;
+}
+.announcement-badge.scheduled {
+  background: #ffd43b;
+  color: #5c4a00;
+}
+.announcement-badge.ended {
+  background: rgba(0, 0, 0, 0.1);
+  color: var(--ink);
+}
+
+/* ---------- Hardcoded offline-safe announcement banner ---------- */
+.hardcoded-banner {
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 16px;
+  background: #ffd43b;
+  color: #4a3800;
+  border-bottom: 2px solid #e0b400;
+  font-size: 14px;
+  line-height: 1.4;
+}
+.hardcoded-banner-thumb {
+  position: relative;
+  flex: none;
+  padding: 0;
+  border: 1px solid #e0b400;
+  border-radius: 6px;
+  background: transparent;
+  cursor: zoom-in;
+  line-height: 0;
+}
+.hardcoded-banner-thumb:hover {
+  box-shadow: 0 0 0 2px #e0b400;
+}
+.hardcoded-banner-img {
+  max-height: 44px;
+  width: auto;
+  border-radius: 6px;
+  display: block;
+}
+.hardcoded-banner-zoom {
+  position: absolute;
+  right: 2px;
+  bottom: 2px;
+  font-size: 11px;
+  background: rgba(0, 0, 0, 0.55);
+  color: #fff;
+  border-radius: 4px;
+  padding: 0 3px;
+  line-height: 1.4;
+}
+/* Fullscreen image viewer (lightbox) */
+.image-lightbox {
+  position: fixed;
+  inset: 0;
+  z-index: 2000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background: rgba(0, 0, 0, 0.85);
+  cursor: zoom-out;
+}
+.image-lightbox-img {
+  max-width: 95vw;
+  max-height: 90vh;
+  width: auto;
+  height: auto;
+  border-radius: 8px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+  cursor: default;
+}
+.image-lightbox-close {
+  position: fixed;
+  top: 16px;
+  right: 20px;
+  border: 0;
+  background: rgba(255, 255, 255, 0.15);
+  color: #fff;
+  font-size: 22px;
+  font-weight: 800;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  cursor: pointer;
+}
+.image-lightbox-close:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+.hardcoded-banner-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1;
+  min-width: 0;
+}
+.hardcoded-banner-text strong {
+  font-weight: 800;
+}
+.hardcoded-banner-note {
+  font-style: italic;
+  opacity: 0.9;
+}
+.hardcoded-banner-close {
+  flex: none;
+  border: 0;
+  background: transparent;
+  color: #4a3800;
+  font-size: 16px;
+  font-weight: 800;
+  cursor: pointer;
+  padding: 4px 8px;
+  line-height: 1;
+}
+.hardcoded-banner-close:hover {
+  opacity: 0.7;
+}
+
+/* ---------- Lesson-complete identity footer (verification) ---------- */
+.results-identity {
+  position: fixed;
+  left: 12px;
+  bottom: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  font-size: 12px;
+  line-height: 1.3;
+  color: var(--ink);
+  opacity: 0.65;
+  pointer-events: none;
+}

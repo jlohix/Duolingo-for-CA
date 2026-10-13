@@ -10,6 +10,7 @@ import {
 import TopicInsight from "../components/TopicInsight";
 import TutorUsage from "../components/TutorUsage";
 import LeaderboardSchedule from "../components/LeaderboardSchedule";
+import AnnouncementsAdmin from "../components/AnnouncementsAdmin";
 import ProgressPage from "./Progress";
 import { CLASS_IDS, DEFAULT_CLASS, isPartTimeClass } from "../data/classes";
 import { trophyFromIndex } from "../data/trophies";
@@ -242,6 +243,7 @@ export default function Admin({ progress, setProgress, counts, bankCounts = {} }
         </div>
       </div>
       <WalkFeedbackTable students={students} />
+      <AnnouncementsAdmin />
       <ModuleAnalyticsTable totalStudents={students.length} />
       <LeaderboardSchedule />
       <TutorUsage totalStudents={students.length} />

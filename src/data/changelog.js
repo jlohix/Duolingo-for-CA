@@ -1,5 +1,11 @@
 export const BUILT_IN_LOGS = [
   {
+    id: "built-2026-10-12-announcements",
+    date: "2026-10-12",
+    title: "Announcements",
+    body: "You may now see an Announcements pop-up when you log in, with important notices from the team. Tap Got it to dismiss.",
+  },
+  {
     id: "built-2026-10-12-super-203-3",
     date: "2026-10-12",
     title: "Superposition short, not open",
