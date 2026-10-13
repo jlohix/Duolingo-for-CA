@@ -25,6 +25,5 @@ export const HARDCODED_ANNOUNCEMENT = {
   note:
     "Ensure your screenshot captures the entire screen, including your email and timestamp at the bottom left corner.",
   // Bundled image from public/ — loads offline (works during a Supabase outage).
-  // NOTE: update this to the exact filename you committed to public/.
-  imageSrc: "/completion-example.png",
+  imageSrc: "/completion_page.png",
 };
