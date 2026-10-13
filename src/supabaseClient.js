@@ -439,6 +439,117 @@ export async function uploadAvatar(email, blob) {
 }
 
 
+// ---------- Announcements (login pop-up notices) ----------
+
+const ANNOUNCEMENT_BUCKET = "announcements";
+
+// Upload an image for an announcement to the public `announcements` bucket and
+// return its public URL. Each upload gets a unique filename so announcements
+// don't overwrite each other's images.
+export async function uploadAnnouncementImage(file) {
+  const ext = (file?.name?.split(".").pop() || "png")
+    .toLowerCase()
+    .replace(/[^a-z0-9]/g, "")
+    .slice(0, 5);
+  const rand =
+    (globalThis.crypto?.randomUUID?.() ||
+      `${Date.now()}-${Math.random().toString(36).slice(2)}`).replace(/[^a-z0-9-]/gi, "");
+  const path = `${rand}.${ext || "png"}`;
+  const res = await fetch(
+    `${SUPABASE_URL}/storage/v1/object/${ANNOUNCEMENT_BUCKET}/${path}`,
+    {
+      method: "POST",
+      headers: {
+        apikey: SUPABASE_ANON_KEY,
+        Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
+        "Content-Type": file.type || "image/png",
+        "x-upsert": "true",
+      },
+      body: file,
+    }
+  );
+  if (!res.ok) {
+    let detail = "";
+    try {
+      detail = await res.text();
+    } catch {
+      /* ignore */
+    }
+    throw new Error(
+      detail ? `Image upload failed. (${detail})` : "Image upload failed."
+    );
+  }
+  return `${SUPABASE_URL}/storage/v1/object/public/${ANNOUNCEMENT_BUCKET}/${path}`;
+}
+
+// Active announcements for the current moment (students). Newest first.
+export async function listActiveAnnouncementsRemote() {
+  const data = await rpc("list_active_announcements", {});
+  return Array.isArray(data) ? data : [];
+}
+
+// All announcements for the admin table (active/live ones first).
+export async function listAnnouncementsRemote() {
+  const data = await rpc("list_announcements", {});
+  return Array.isArray(data) ? data : [];
+}
+
+// Create. Dates are text in SGT ("YYYY-MM-DDTHH:MM"); empty start = now, empty
+// end = open-ended. Returns the new id.
+export async function createAnnouncementRemote({
+  title,
+  description,
+  imageUrl,
+  startsAt,
+  endsAt,
+  frequency,
+  createdBy,
+}) {
+  return rpc("create_announcement", {
+    p_title: String(title || ""),
+    p_description: description || null,
+    p_image_url: imageUrl || null,
+    p_starts_at: startsAt || null,
+    p_ends_at: endsAt || null,
+    p_frequency: frequency === "recurring" ? "recurring" : "once",
+    p_created_by: createdBy || null,
+  });
+}
+
+export async function updateAnnouncementRemote({
+  id,
+  title,
+  description,
+  imageUrl,
+  startsAt,
+  endsAt,
+  frequency,
+  active,
+}) {
+  const data = await rpc("update_announcement", {
+    p_id: id,
+    p_title: String(title || ""),
+    p_description: description || null,
+    p_image_url: imageUrl || null,
+    p_starts_at: startsAt || null,
+    p_ends_at: endsAt || null,
+    p_frequency: frequency === "recurring" ? "recurring" : "once",
+    p_active: active !== false,
+  });
+  return data === true;
+}
+
+export async function terminateAnnouncementRemote(id) {
+  const data = await rpc("terminate_announcement", { p_id: id });
+  return data === true;
+}
+
+export async function deleteAnnouncementRemote(id) {
+  const data = await rpc("delete_announcement", { p_id: id });
+  return data === true;
+}
+
+
 // ---------- RAG tutor chatbot (Supabase Edge Function: "chat") ----------
 
 // Max prior turns (messages) of conversation history to send along. A "turn"

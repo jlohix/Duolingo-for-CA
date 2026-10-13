@@ -40,6 +40,7 @@ import { useModuleTime } from "./hooks/useModuleTime";
 import AppShell from "./components/AppShell";
 import ChatWidget from "./components/ChatWidget";
 import ConsentModal from "./components/ConsentModal";
+import { AnnouncementGate } from "./components/AnnouncementModal";
 import { canUseChatbot } from "./data/chatbot";
 import { getStudentConsentStatus } from "./supabaseClient";
 import Login from "./pages/Login";
@@ -123,6 +124,14 @@ export default function App() {
       {showChatbot && (
         <ChatWidget email={gate.email} isAdmin={gate.isAdmin} />
       )}
+      {/* Login announcements pop-up: logged-in students, once consent cleared.
+          Admins don't get the pop-up (students only). */}
+      <AnnouncementGate
+        email={gate.email}
+        enabled={
+          Boolean(gate.email) && !gate.isAdmin && !gate.consentPending
+        }
+      />
     </>
   );
 }

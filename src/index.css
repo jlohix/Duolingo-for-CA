@@ -4812,3 +4812,111 @@ html[data-theme="dark"] .circuit-svg .board-step {
   margin: 0 0 8px;
   font-size: 15px;
 }
+
+/* ---------- Announcement pop-up (student login) ---------- */
+.announcement-sheet {
+  max-width: 460px;
+  width: 90%;
+  max-height: 80vh;
+  overflow-y: auto;
+}
+.announcement-list {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  margin: 8px 0 16px;
+}
+.announcement-item + .announcement-item {
+  border-top: 1px solid var(--line);
+  padding-top: 16px;
+}
+.announcement-title {
+  margin: 0 0 8px;
+  font-size: 18px;
+}
+.announcement-image {
+  display: block;
+  width: 100%;
+  height: auto;
+  border-radius: 10px;
+  margin: 8px 0;
+}
+.announcement-desc {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.55;
+  white-space: pre-wrap;
+}
+.announcement-dismiss {
+  width: 100%;
+}
+
+/* ---------- Announcements admin ---------- */
+.announcement-form {
+  flex-direction: column;
+  align-items: stretch;
+  gap: 10px;
+}
+.announcement-field-wide textarea {
+  width: 100%;
+  resize: vertical;
+}
+.announcement-check {
+  flex-direction: row;
+  align-items: center;
+  gap: 8px;
+  font-weight: 600;
+}
+.announcement-check input {
+  width: auto;
+}
+.announcement-image-preview {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.announcement-image-preview img {
+  max-width: 120px;
+  max-height: 80px;
+  border-radius: 8px;
+  border: 1px solid var(--line);
+}
+.announcement-form-actions {
+  display: flex;
+  gap: 10px;
+}
+.announcement-desc-cell {
+  max-width: 260px;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+.announcement-actions {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+.admin-name-btn.danger {
+  color: var(--red, #ff4b4b);
+}
+.announcement-live {
+  background: rgba(88, 204, 2, 0.08);
+}
+.announcement-badge {
+  display: inline-block;
+  padding: 2px 9px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 700;
+}
+.announcement-badge.live {
+  background: var(--green);
+  color: #fff;
+}
+.announcement-badge.scheduled {
+  background: #ffd43b;
+  color: #5c4a00;
+}
+.announcement-badge.ended {
+  background: rgba(0, 0, 0, 0.1);
+  color: var(--ink);
+}
