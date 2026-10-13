@@ -4936,11 +4936,73 @@ html[data-theme="dark"] .circuit-svg .board-step {
   font-size: 14px;
   line-height: 1.4;
 }
+.hardcoded-banner-thumb {
+  position: relative;
+  flex: none;
+  padding: 0;
+  border: 1px solid #e0b400;
+  border-radius: 6px;
+  background: transparent;
+  cursor: zoom-in;
+  line-height: 0;
+}
+.hardcoded-banner-thumb:hover {
+  box-shadow: 0 0 0 2px #e0b400;
+}
 .hardcoded-banner-img {
-  max-height: 40px;
+  max-height: 44px;
   width: auto;
   border-radius: 6px;
-  flex: none;
+  display: block;
+}
+.hardcoded-banner-zoom {
+  position: absolute;
+  right: 2px;
+  bottom: 2px;
+  font-size: 11px;
+  background: rgba(0, 0, 0, 0.55);
+  color: #fff;
+  border-radius: 4px;
+  padding: 0 3px;
+  line-height: 1.4;
+}
+/* Fullscreen image viewer (lightbox) */
+.image-lightbox {
+  position: fixed;
+  inset: 0;
+  z-index: 2000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background: rgba(0, 0, 0, 0.85);
+  cursor: zoom-out;
+}
+.image-lightbox-img {
+  max-width: 95vw;
+  max-height: 90vh;
+  width: auto;
+  height: auto;
+  border-radius: 8px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+  cursor: default;
+}
+.image-lightbox-close {
+  position: fixed;
+  top: 16px;
+  right: 20px;
+  border: 0;
+  background: rgba(255, 255, 255, 0.15);
+  color: #fff;
+  font-size: 22px;
+  font-weight: 800;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  cursor: pointer;
+}
+.image-lightbox-close:hover {
+  background: rgba(255, 255, 255, 0.3);
 }
 .hardcoded-banner-text {
   display: flex;
