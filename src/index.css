@@ -4952,6 +4952,10 @@ html[data-theme="dark"] .circuit-svg .board-step {
 .hardcoded-banner-text strong {
   font-weight: 800;
 }
+.hardcoded-banner-note {
+  font-style: italic;
+  opacity: 0.9;
+}
 .hardcoded-banner-close {
   flex: none;
   border: 0;

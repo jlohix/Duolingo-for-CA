@@ -20,6 +20,7 @@ export default function HardcodedBanner() {
       <div className="hardcoded-banner-text">
         {a.title ? <strong>{a.title}</strong> : null}
         {a.description ? <span>{a.description}</span> : null}
+        {a.note ? <em className="hardcoded-banner-note">{a.note}</em> : null}
       </div>
       <button
         type="button"
