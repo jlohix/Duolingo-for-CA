@@ -3,7 +3,14 @@ import ThemeSwitch from "../components/ThemeSwitch";
 import StreakCelebrate from "../components/StreakCelebrate";
 import WalkRating from "../components/WalkRating";
 
-export default function Results({ summary, onHome, progress, setProgress }) {
+export default function Results({
+  summary,
+  onHome,
+  progress,
+  setProgress,
+  userEmail = "",
+  displayName = "",
+}) {
   const skip = summary.kind === "skip";
   const failedSkip = skip && !summary.passed;
   const title = skip
@@ -72,6 +79,12 @@ export default function Results({ summary, onHome, progress, setProgress }) {
       <button type="button" className="primary" onClick={onHome}>
         Back to path
       </button>
+      {userEmail ? (
+        <div className="results-identity" aria-label="Account for verification">
+          {displayName ? <span>{displayName}</span> : null}
+          <span>{userEmail}</span>
+        </div>
+      ) : null}
     </div>
   );
 }

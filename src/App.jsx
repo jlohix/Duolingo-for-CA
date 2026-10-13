@@ -41,6 +41,7 @@ import AppShell from "./components/AppShell";
 import ChatWidget from "./components/ChatWidget";
 import ConsentModal from "./components/ConsentModal";
 import { AnnouncementGate } from "./components/AnnouncementModal";
+import HardcodedBanner from "./components/HardcodedBanner";
 import { canUseChatbot } from "./data/chatbot";
 import { getStudentConsentStatus } from "./supabaseClient";
 import Login from "./pages/Login";
@@ -120,6 +121,10 @@ export default function App() {
 
   return (
     <>
+      {/* Offline-safe hardcoded banner (works even if Supabase is down).
+          Shows only once a user is logged in. Controlled via
+          src/data/hardcodedAnnouncement.js. */}
+      {Boolean(gate.email) && <HardcodedBanner />}
       <AppBody onGateChange={setGate} />
       {showChatbot && (
         <ChatWidget email={gate.email} isAdmin={gate.isAdmin} />
@@ -898,7 +903,7 @@ function AppBody({ onGateChange }) {
   }
 
   if (screen === "results" && summary) {
-    return <Results summary={summary} progress={progress} setProgress={setProgress} onHome={() => setScreen("home")} />;
+    return <Results summary={summary} progress={progress} setProgress={setProgress} onHome={() => setScreen("home")} userEmail={session?.username || ""} displayName={progress?.displayName || ""} />;
   }
 
   let main = (
