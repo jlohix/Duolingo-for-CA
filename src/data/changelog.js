@@ -1,5 +1,11 @@
 export const BUILT_IN_LOGS = [
   {
+    id: "built-2026-10-19-xp-notice-off",
+    date: "2026-10-19",
+    title: "Saving notice removed",
+    body: "The screenshot-your-progress pop-up is gone. Progress and XP are saving again, so you do not need to capture the completion page.",
+  },
+  {
     id: "built-2026-10-19-two-port",
     date: "2026-10-19",
     title: "Network functions is open",

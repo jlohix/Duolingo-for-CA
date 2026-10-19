@@ -17,7 +17,7 @@
 // "" for no image.
 
 export const HARDCODED_ANNOUNCEMENT = {
-  enabled: true,
+  enabled: false,
   title: "Troubles saving XP",
   description:
     "After every lesson you complete, please take a screenshot of the completion page. Currently, our database is experiencing some issues so your progress (including XP) may not be saved after completion.",
