@@ -1,5 +1,11 @@
 export const BUILT_IN_LOGS = [
   {
+    id: "built-2026-10-19-two-port-in-poles",
+    date: "2026-10-19",
+    title: "Two-port in Poles and Zeros",
+    body: "Two-port Easy through Challenging questions now sit in Poles and Zeros. Network functions has no Knowledge check and is coming soon again.",
+  },
+  {
     id: "built-2026-10-19-xp-notice-off",
     date: "2026-10-19",
     title: "Saving notice removed",

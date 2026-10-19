@@ -5,7 +5,7 @@ import { STEPC_QUIZ } from "./stepCQuizLab";
 import { STEPL_QUIZ } from "./stepLQuizLab";
 
 export const KNOWLEDGE_CHECK_SIZE = 5;
-export const KNOWLEDGE_CHECK_TOPIC_IDS = [1, 2, 3, 4, 5, 6, 7];
+export const KNOWLEDGE_CHECK_TOPIC_IDS = [1, 2, 3, 4, 5, 6];
 
 export function knowledgeCheckKey(topicId) {
   return `kcheck-${topicId}`;
