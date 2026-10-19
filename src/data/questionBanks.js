@@ -141,7 +141,7 @@ export const QUESTION_BANKS = [
     csv: "2port.csv",
     assetFolder: "2port",
     walkthroughKey: "",
-    topicId: 6,
+    topicId: 7,
   },
 ];
 

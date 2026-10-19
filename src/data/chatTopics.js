@@ -38,7 +38,7 @@ export const KEYWORD_RULES = [
   [/\b(op[-\s]?amp|opamp|operational amplifier|inverting|non[-\s]?inverting|feedback)\b/i, "Op-amps"],
   [/\b(pole|zero|stability|left half plane|right half plane|complex plane|phase angle|euler|sigma\s*\+\s*j\s*omega)\b/i, "Poles and Zeros"],
   [/\b(laplace|s[-\s]?domain|inverse transform|partial fraction|initial condition|transfer function)\b/i, "Laplace Transform"],
-  [/\b(network function|two[-\s]?port|one[-\s]?port|transfer parameter|network parameter)\b/i, "Poles and Zeros"],
+  [/\b(network function|two[-\s]?port|one[-\s]?port|transfer parameter|network parameter)\b/i, "Network functions"],
   [/\b(phasor|sinusoid|impedance|admittance|reactance|ac power|rms|power factor|three[-\s]?phase|frequency[-\s]?domain)\b/i, "Frequency domain"],
   [/\b(first[-\s]?order|source[-\s]?free|natural response|time constant|charging|discharging)\b/i, "First-order circuits"],
   [/\b(transient|capacitor|inductor|second[-\s]?order|rc circuit|rl circuit|rlc)\b/i, "Transients"],

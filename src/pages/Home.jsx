@@ -693,7 +693,7 @@ export default function Home({
       )}
       <div className="section-list">
         {topics.map((topic, index) => {
-          const comingSoon = topic.id >= 7;
+          const comingSoon = topic.id >= 8;
           const unlocked =
             !comingSoon &&
             (allOpen ||
