@@ -1,5 +1,6 @@
 import { DEFAULT_CLASS, normalizeClassId } from "../data/classes";
 import { listStudentProgress } from "../supabaseClient";
+import { parseKnowledgeChecks } from "./progress";
 
 function displayFromUsername(username) {
   const raw = String(username || "").trim();
@@ -42,6 +43,12 @@ export function normalizeRemoteStudent(row) {
         : row.topic_stats && typeof row.topic_stats === "object"
           ? row.topic_stats
           : {},
+    knowledgeChecks: parseKnowledgeChecks(
+      row.knowledgeChecks ||
+        row.knowledge_checks ||
+        row.topicStats?.__kc ||
+        row.topic_stats?.__kc
+    ),
     completed: Array.isArray(row.completed) ? row.completed : [],
     avatarUrl: String(row.avatarUrl || row.avatar_url || "").trim(),
     leagueIndex: Number.isFinite(Number(row.leagueIndex ?? row.league_index))

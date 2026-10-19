@@ -55,6 +55,7 @@ import Guide from "./pages/Guide";
 import Updates from "./pages/Updates";
 import Lesson from "./pages/Lesson";
 import SkipQuiz from "./pages/SkipQuiz";
+import KnowledgeCheck from "./pages/KnowledgeCheck";
 import DragCircuitLab from "./pages/DragCircuitLab";
 import InvertingOpAmpLesson from "./pages/InvertingOpAmpLesson";
 import NonInvertingOpAmpLesson from "./pages/NonInvertingOpAmpLesson";
@@ -74,6 +75,7 @@ const Admin = lazy(() => import("./pages/Admin"));
 const MODULE_SCREENS = new Set([
   "lesson",
   "skip",
+  "kcheck",
   "draglab",
   "dragthevlab",
   "dragnortonlab",
@@ -165,6 +167,8 @@ function AppBody({ onGateChange }) {
   const [paperPack, setPaperPack] = useState(null);
   const [secWalk, setSecWalk] = useState(null);
   const [skipTarget, setSkipTarget] = useState(null);
+  const [kcheckTopic, setKcheckTopic] = useState(null);
+  const [kcheckRun, setKcheckRun] = useState(0);
   const [summary, setSummary] = useState(null);
 
   useEffect(() => {
@@ -271,6 +275,8 @@ function AppBody({ onGateChange }) {
     ? String(paperPack.id)
     : skipTarget
     ? `skip-${skipTarget}`
+    : kcheckTopic
+    ? `kcheck-${kcheckTopic}`
     : "";
   const trackModules = Boolean(session) && !isAdmin(session) && isModuleScreen;
   useModuleTime({
@@ -405,6 +411,7 @@ function AppBody({ onGateChange }) {
       "home",
       "lesson",
       "skip",
+      "kcheck",
       "results",
       "draglab",
       "dragthevlab",
@@ -902,6 +909,28 @@ function AppBody({ onGateChange }) {
     );
   }
 
+  if (screen === "kcheck" && kcheckTopic) {
+    return (
+      <KnowledgeCheck
+        key={`${kcheckTopic}-${kcheckRun}`}
+        allQuestions={questions}
+        topicId={kcheckTopic}
+        progress={progress}
+        setProgress={setProgress}
+        preview={isAdmin(session)}
+        onExit={() => {
+          setKcheckTopic(null);
+          setScreen("home");
+        }}
+        onFinished={(result) => {
+          setKcheckTopic(null);
+          setSummary(result);
+          setScreen("results");
+        }}
+      />
+    );
+  }
+
   if (screen === "results" && summary) {
     return <Results summary={summary} progress={progress} setProgress={setProgress} onHome={() => setScreen("home")} userEmail={session?.username || ""} displayName={progress?.displayName || ""} />;
   }
@@ -949,6 +978,12 @@ function AppBody({ onGateChange }) {
         setSecWalk({ section, id });
         setScreen("secwalk");
       }}
+      onKnowledgeCheck={(topicId) => {
+        setKcheckTopic(topicId);
+        setKcheckRun((n) => n + 1);
+        setScreen("kcheck");
+      }}
+      questions={questions}
       allOpen={isAdmin(session)}
     />
   );

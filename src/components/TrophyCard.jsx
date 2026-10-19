@@ -34,7 +34,8 @@ export default function TrophyCard({ leagueIndex, staffView = false, onPickIndex
                 <span className="league-hint-tier" data-tier={next.id}>
                   {next.name}
                 </span>
-                . Finish in the top 20% this round to promote.
+                . Finish in the top 20% this round to promote. 0 XP this
+                round cannot promote.
               </>
             ) : (
               "Highest league unlocked."

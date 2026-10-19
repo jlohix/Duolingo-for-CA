@@ -391,6 +391,63 @@ export async function resolveQuestionReportRemote(id, resolved) {
   return data === true;
 }
 
+// ---------- Inbox (bell / assignments / report replies) ----------
+
+export async function listInboxRemote(email, classId) {
+  const data = await rpc("list_inbox", {
+    p_email: String(email || "").trim().toLowerCase(),
+    p_class_id: String(classId || "").trim().toUpperCase(),
+  });
+  return Array.isArray(data) ? data : [];
+}
+
+export async function markInboxReadRemote(email, id) {
+  const data = await rpc("mark_inbox_read", {
+    p_email: String(email || "").trim().toLowerCase(),
+    p_id: id,
+  });
+  return data === true;
+}
+
+export async function markInboxReadAllRemote(email, classId) {
+  const data = await rpc("mark_inbox_read_all", {
+    p_email: String(email || "").trim().toLowerCase(),
+    p_class_id: String(classId || "").trim().toUpperCase(),
+  });
+  return data === true;
+}
+
+export async function createInboxMessageRemote({
+  kind,
+  title,
+  body,
+  classId,
+  recipient,
+  createdBy,
+  sourceId,
+}) {
+  const data = await rpc("create_inbox_message", {
+    p_kind: String(kind || "assignment"),
+    p_title: String(title || "").trim(),
+    p_body: String(body || ""),
+    p_class_id: String(classId || ""),
+    p_recipient: String(recipient || "").trim().toLowerCase(),
+    p_created_by: String(createdBy || "").trim().toLowerCase(),
+    p_source_id: String(sourceId || ""),
+  });
+  return data || null;
+}
+
+export async function listInboxAdminRemote() {
+  const data = await rpc("list_inbox_admin", {});
+  return Array.isArray(data) ? data : [];
+}
+
+export async function deleteInboxMessageRemote(id) {
+  const data = await rpc("delete_inbox_message", { p_id: id });
+  return data === true;
+}
+
 // ---------- Avatar uploads (Supabase Storage: public "avatars" bucket) ----------
 
 const AVATAR_BUCKET = "avatars";
@@ -696,5 +753,36 @@ export async function completeModuleAttempt({
 // user, then start time). Backs the analytics CSV export.
 export async function listModuleAttempts() {
   const data = await rpc("list_module_attempts", {});
+  return Array.isArray(data) ? data : [];
+}
+
+export async function logKnowledgeCheckAttempt({
+  email,
+  topicId,
+  correct = 0,
+  total = 0,
+  questionStats = [],
+  classId = "",
+}) {
+  const data = await rpc("log_knowledge_check_attempt", {
+    p_email: String(email || "").trim().toLowerCase(),
+    p_topic_id: Math.round(Number(topicId) || 0),
+    p_correct: Math.max(0, Math.round(Number(correct) || 0)),
+    p_total: Math.max(0, Math.round(Number(total) || 0)),
+    p_question_stats: Array.isArray(questionStats) ? questionStats : [],
+    p_class_id: String(classId || ""),
+  });
+  return data === true;
+}
+
+export async function listMyKnowledgeCheckAttempts(email) {
+  const data = await rpc("list_my_knowledge_check_attempts", {
+    p_email: String(email || "").trim().toLowerCase(),
+  });
+  return Array.isArray(data) ? data : [];
+}
+
+export async function listKnowledgeCheckAttempts() {
+  const data = await rpc("list_knowledge_check_attempts", {});
   return Array.isArray(data) ? data : [];
 }

@@ -5,7 +5,8 @@ const TOPIC_HINTS = {
   4: "Use ideal op-amp rules: no input current, and the input terminals are at the same voltage when linear.",
   5: "Replace elements with s-domain models, then solve the circuit algebra in s.",
   6: "Find H(s) = output / input with zero initial conditions, or use the two-port parameters.",
-  7: "Work in the frequency domain: convert impedances and sources, then use RMS or superposition if needed.",
+  7: "Write the port equations for the parameter set you need (Y, Z, h, or ABCD), then read the matrix from the coefficients.",
+  8: "Work in the frequency domain: convert impedances and sources, then use RMS or superposition if needed.",
 };
 
 function sentences(text) {

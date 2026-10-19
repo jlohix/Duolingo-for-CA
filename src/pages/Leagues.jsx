@@ -43,9 +43,11 @@ export default function Leagues({ user, progress }) {
       ? "You are in the promotion zone."
       : you?.zone === "demote"
         ? "You are in the demotion zone."
-        : you
-          ? "You are in the safe zone."
-          : "";
+        : you && !(Number(you.seasonXp) > 0)
+          ? "Earn XP this round or you cannot promote."
+          : you
+            ? "You are in the safe zone."
+            : "";
 
   return (
     <div className="page">
@@ -82,7 +84,7 @@ export default function Leagues({ user, progress }) {
         Everyone here is in {board.league.name}. Ranked by XP earned this{" "}
         {SEASON_DAYS}-day round.
         {board.rows.length
-          ? ` Top 20% (${board.counts.promote}) promote. Bottom 20% (${board.counts.demote}) demote when time runs out.`
+          ? ` Top 20% (${board.counts.promote}) promote if they earned XP this round. 0 XP this round cannot promote. Bottom 20% (${board.counts.demote}) demote when time runs out.`
           : " Classmates appear here once they are in Circuito."}{" "}
         {admin
           ? "Staff can open any league."

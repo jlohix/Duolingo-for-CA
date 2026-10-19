@@ -135,6 +135,14 @@ export const QUESTION_BANKS = [
     walkthroughKey: "walk-6-complex-phase",
     topicId: 6,
   },
+  {
+    id: "two-port",
+    title: "Two-port",
+    csv: "2port.csv",
+    assetFolder: "2port",
+    walkthroughKey: "",
+    topicId: 7,
+  },
 ];
 
 /** Local fallbacks only when a CSV image is a filename, not a GitHub URL. */

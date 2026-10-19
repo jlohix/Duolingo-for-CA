@@ -314,6 +314,10 @@ begin
       select
         sp.email,
         least(9, greatest(0, sp.league_index)) as league_index,
+        greatest(
+          0,
+          sp.xp - coalesce((v_start_xp->>sp.email)::integer, sp.xp)
+        ) as season_xp,
         row_number() over (
           partition by least(9, greatest(0, sp.league_index))
           order by
@@ -336,6 +340,7 @@ begin
         email,
         case
           when n > 1
+            and season_xp > 0
             and rank <= coalesce((public.league_zone_counts(n::integer)->>'promote')::integer, 0)
             then least(9, league_index + 1)
           when n > 1

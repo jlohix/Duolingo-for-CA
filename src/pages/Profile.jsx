@@ -1,4 +1,14 @@
-import { visibleStreak, topicInsight, chooseDisplayName, DISPLAY_NAME_MAX, setAvatarUrl } from "../state/progress";
+import {
+  visibleStreak,
+  topicInsight,
+  chooseDisplayName,
+  DISPLAY_NAME_MAX,
+  setAvatarUrl,
+  knowledgeCheckSummary,
+  knowledgeCheckPercent,
+  formatKnowledgeCheckScore,
+} from "../state/progress";
+import { KNOWLEDGE_CHECK_TOPIC_IDS } from "../data/knowledgeCheck";
 import { DEFAULT_CLASS, normalizeClassId } from "../data/classes";
 import { avatarSrc, isDefaultAvatar } from "../data/avatars";
 import { displayNameFor } from "../state/roster";
@@ -10,7 +20,12 @@ import HexStats from "../components/HexStats";
 import UnitPills from "../components/UnitPills";
 import StreakNotice from "../components/StreakNotice";
 import { topicsWithQuestions, unitsForTopic } from "../data/topicUnits";
-import { useMemo, useState } from "react";
+import {
+  flattenLocalKnowledgeChecks,
+  mergeKnowledgeCheckRows,
+  loadMyKnowledgeCheckAttempts,
+} from "../state/knowledgeCheckAttempts";
+import { useEffect, useMemo, useState } from "react";
 
 // Resize/compress an image file to a small square PNG blob for the avatar.
 function compressAvatar(file, size = 256) {
@@ -64,7 +79,31 @@ export default function Profile({
   const [nameBusy, setNameBusy] = useState(false);
   const [avatarBusy, setAvatarBusy] = useState(false);
   const [avatarStatus, setAvatarStatus] = useState("");
+  const [remoteChecks, setRemoteChecks] = useState([]);
   const boardName = progress.displayName || fallbackName;
+  const checkTopics = useMemo(
+    () => topics.filter((topic) => KNOWLEDGE_CHECK_TOPIC_IDS.includes(topic.id)),
+    [topics]
+  );
+  const checkRows = useMemo(
+    () =>
+      mergeKnowledgeCheckRows(
+        flattenLocalKnowledgeChecks(progress, checkTopics),
+        remoteChecks,
+        checkTopics
+      ),
+    [progress, remoteChecks, checkTopics]
+  );
+
+  useEffect(() => {
+    let cancelled = false;
+    loadMyKnowledgeCheckAttempts(user?.username).then((rows) => {
+      if (!cancelled) setRemoteChecks(rows);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [user?.username, progress.knowledgeChecks]);
 
   async function handleAvatarPick(event) {
     const file = event.target.files?.[0];
@@ -292,6 +331,20 @@ export default function Profile({
       ) : null}
 
       <section className="profile-block">
+        <h2>Knowledge checks</h2>
+        <p className="login-hint">
+          Five random step-by-step questions per section. Your score is
+          first-try steps over every part — for example 19/24 is 79%. Each card
+          keeps your first try, then the five best later attempts.
+        </p>
+        <KnowledgeCheckVisual
+          topics={checkTopics}
+          progress={progress}
+          rows={checkRows}
+        />
+      </section>
+
+      <section className="profile-block">
         <h2>What’s inside</h2>
         <p className="login-hint">
           {staff
@@ -301,6 +354,238 @@ export default function Profile({
         <TopicList rows={insideRows} completed={completed} showUnits />
       </section>
     </div>
+  );
+}
+
+function scoreKind(correct, total) {
+  if (!total) return "starting";
+  const pct = (100 * correct) / total;
+  if (pct >= 80) return "strength";
+  if (pct >= 60) return "solid";
+  if (pct >= 40) return "developing";
+  return "weakness";
+}
+
+function formatCheckWhen(at) {
+  if (!at) return "";
+  const date = new Date(at);
+  if (Number.isNaN(date.getTime())) return "";
+  return date.toLocaleString("en-SG", {
+    timeZone: "Asia/Singapore",
+    day: "numeric",
+    month: "short",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+}
+
+function pipKind(question) {
+  if (!question?.total) return "empty";
+  const pct = question.correct / question.total;
+  if (pct >= 1) return "full";
+  if (pct > 0) return "part";
+  return "miss";
+}
+
+function laterScore(row) {
+  return row.total ? row.correct / row.total : 0;
+}
+
+function featuredKnowledgeCheckAttempts(attempts) {
+  const first = attempts.find((row) => row.attempt === 1);
+  const later = attempts.filter((row) => row.attempt !== 1);
+  const topLater = [...later]
+    .sort(
+      (a, b) =>
+        laterScore(b) - laterScore(a) ||
+        b.correct - a.correct ||
+        b.attempt - a.attempt
+    )
+    .slice(0, 5)
+    .sort((a, b) => a.attempt - b.attempt);
+  return [first, ...topLater].filter(Boolean);
+}
+
+function bestLaterFromRows(attempts) {
+  const later = attempts.filter((row) => row.attempt !== 1);
+  if (!later.length) return null;
+  return later.reduce((best, row) => {
+    const diff = laterScore(row) - laterScore(best);
+    if (diff > 0) return row;
+    if (diff < 0) return best;
+    if (row.correct !== best.correct) {
+      return row.correct > best.correct ? row : best;
+    }
+    return row.attempt > best.attempt ? row : best;
+  });
+}
+
+function KnowledgeCheckVisual({ topics, progress, rows }) {
+  return (
+    <ul className="kcheck-visual">
+      {topics.map((topic) => {
+        const summary = knowledgeCheckSummary(progress, topic.id);
+        const attempts = rows.filter((row) => row.topicId === topic.id);
+        const firstRow = attempts.find((row) => row.attempt === 1);
+        const firstCorrect = firstRow?.correct ?? summary?.firstCorrect ?? 0;
+        const firstTotal = firstRow?.total ?? summary?.firstTotal ?? 0;
+        const laterBest =
+          bestLaterFromRows(attempts) || summary?.laterBest || null;
+        const laterPct = laterBest
+          ? knowledgeCheckPercent(laterBest.correct, laterBest.total)
+          : 0;
+        const firstPct = knowledgeCheckPercent(firstCorrect, firstTotal);
+        const hasTry = Boolean(firstTotal || attempts.length);
+        const featured = featuredKnowledgeCheckAttempts(attempts);
+        const pipSource =
+          [...featured].reverse().find((row) => row.questions?.length) ||
+          [...attempts].reverse().find((row) => row.questions?.length) ||
+          null;
+        const bestKey = laterBest
+          ? `${laterBest.correct}/${laterBest.total}`
+          : "";
+        const bestAttemptN = laterBest
+          ? attempts.reduce((found, row) => {
+              if (row.attempt === 1) return found;
+              if (`${row.correct}/${row.total}` !== bestKey) return found;
+              return Math.max(found, row.attempt);
+            }, 0)
+          : 0;
+        return (
+          <li
+            key={topic.id}
+            className={`kcheck-card ${hasTry ? "has-try" : "empty"}`}
+          >
+            <div className="kcheck-card-head">
+              <strong>{topic.name}</strong>
+              {hasTry ? (
+                <span className="login-hint">
+                  {attempts.length}{" "}
+                  {attempts.length === 1 ? "attempt" : "attempts"}
+                  {attempts.length > featured.length
+                    ? ` · showing first + best ${featured.length - 1}`
+                    : ""}
+                </span>
+              ) : (
+                <span className="login-hint">Not attempted</span>
+              )}
+            </div>
+            {hasTry ? (
+              <>
+                <div className="kcheck-score-pair">
+                  <div>
+                    <span>First</span>
+                    <strong>
+                      {formatKnowledgeCheckScore(firstCorrect, firstTotal)}
+                    </strong>
+                    <span className="kcheck-score-frac">
+                      {firstCorrect}/{firstTotal} steps
+                    </span>
+                    <div className="insight-meter" aria-hidden="true">
+                      <div
+                        className={`insight-fill ${scoreKind(
+                          firstCorrect,
+                          firstTotal
+                        )}`}
+                        style={{ width: `${firstPct}%` }}
+                      />
+                    </div>
+                  </div>
+                  <div>
+                    <span>Later best</span>
+                    <strong>
+                      {laterBest
+                        ? formatKnowledgeCheckScore(
+                            laterBest.correct,
+                            laterBest.total
+                          )
+                        : "—"}
+                    </strong>
+                    <span className="kcheck-score-frac">
+                      {laterBest
+                        ? `${laterBest.correct}/${laterBest.total} steps`
+                        : "No retake yet"}
+                    </span>
+                    <div className="insight-meter" aria-hidden="true">
+                      <div
+                        className={`insight-fill ${
+                          laterBest
+                            ? scoreKind(laterBest.correct, laterBest.total)
+                            : "starting"
+                        }`}
+                        style={{ width: `${laterPct}%` }}
+                      />
+                    </div>
+                  </div>
+                </div>
+                <p className="kcheck-bars-label">First and best later</p>
+                <ol className="kcheck-bars">
+                  {featured.map((row) => {
+                    const pct = knowledgeCheckPercent(row.correct, row.total);
+                    const isFirst = row.attempt === 1;
+                    const isBest = row.attempt === bestAttemptN;
+                    const when = formatCheckWhen(row.at);
+                    return (
+                      <li
+                        key={`${row.topicId}-${row.attempt}-${row.at}`}
+                        className={`kcheck-bar ${isFirst ? "first" : ""} ${
+                          isBest ? "best" : ""
+                        } ${scoreKind(row.correct, row.total)}`}
+                        title={
+                          when
+                            ? `Attempt ${row.attempt} · ${row.correct}/${row.total} · ${pct}% · ${when}`
+                            : `Attempt ${row.attempt} · ${row.correct}/${row.total} · ${pct}%`
+                        }
+                      >
+                        <span className="kcheck-bar-track" aria-hidden="true">
+                          <span
+                            className="kcheck-bar-fill"
+                            style={{
+                              height: pct ? `${pct}%` : "4px",
+                              opacity: pct ? 1 : 0.45,
+                            }}
+                          />
+                        </span>
+                        <strong>
+                          {formatKnowledgeCheckScore(row.correct, row.total)}
+                        </strong>
+                        <span>{isFirst ? "First" : `#${row.attempt}`}</span>
+                      </li>
+                    );
+                  })}
+                </ol>
+                {pipSource ? (
+                  <div className="kcheck-pips" aria-label="Questions on a later or latest try">
+                    {[1, 2, 3, 4, 5].map((index) => {
+                      const question = pipSource.questions.find(
+                        (item) => item.index === index
+                      );
+                      return (
+                        <span
+                          key={index}
+                          className={`kcheck-pip ${pipKind(question)}`}
+                          title={
+                            question
+                              ? `Question ${index} · ${question.correct}/${question.total}`
+                              : `Question ${index}`
+                          }
+                        >
+                          Q{index}
+                        </span>
+                      );
+                    })}
+                  </div>
+                ) : null}
+              </>
+            ) : (
+              <p className="login-hint">
+                Open this section on Learn and finish a Knowledge check.
+              </p>
+            )}
+          </li>
+        );
+      })}
+    </ul>
   );
 }
 

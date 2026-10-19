@@ -5,7 +5,7 @@ const STEPS = [
   },
   {
     title: "Learn path",
-    text: "Open Learn in the sidebar. You see sections as cards: Basic laws, Op-amps, Transients, First-order circuits, Laplace Transform, Poles and Zeros, Network functions, and Frequency domain. Walkthroughs are optional. Every section with lessons is already open — play Easy, Average, and Challenging in any order. Network functions and Frequency domain are coming soon. Basic laws has Ohm through Superposition walkthroughs and banks. Op-amps has the op-amp walkthroughs. Laplace Transform and Poles and Zeros are walkthroughs; each walkthrough ends on its own complete screen. Past year papers sit at the bottom of Learn for exam practice.",
+    text: "Open Learn in the sidebar. You see sections as cards: Basic laws, Op-amps, Transients, First-order circuits, Laplace Transform, Poles and Zeros, Network functions, and Frequency domain. Walkthroughs are optional. Every section with lessons is already open — play Easy, Average, and Challenging in any order. Under Open on each section there is a Knowledge check: five random step-by-step questions from that section. Your score is first-try steps over every part of those five — if four questions have 5 steps and one has 4, that is 24 parts, so 19/24 is 79%. Each attempt draws a new random five, and skips the set you just did when the section has extras. Your first percent is saved, and later tries are tracked separately — Learn and Profile show the best later percent. The finish screen lists Question 1, Question 2, and so on, each with first-try steps over that question’s length. Frequency domain is coming soon. Basic laws has Ohm through Superposition walkthroughs and banks. Op-amps has the op-amp walkthroughs. Laplace Transform and Poles and Zeros are walkthroughs; each walkthrough ends on its own complete screen. Network functions has two-port Easy through Challenging questions. Past year papers sit at the bottom of Learn for exam practice.",
   },
   {
     title: "Lessons",
@@ -21,19 +21,23 @@ const STEPS = [
   },
   {
     title: "Skip a locked topic",
-    text: "Sections 1–6 are already open, so you do not need a skip quiz. Network functions and Frequency domain stay coming soon.",
+    text: "Sections 1–7 are already open, so you do not need a skip quiz. Frequency domain stays coming soon.",
   },
   {
     title: "Profile and Progress",
-    text: "On Profile you can pick a board name for Class board and Individual. Offensive names are not anonymous — we know who you are, because your NTU email is still on the account. Profile also lists strengths (about 80%+ first try) and weaknesses (under 60%) after at least 3 answers from lessons and walkthroughs, plus a hex chart and a list of the tests and question banks in each section. Walkthroughs stay on Learn; staff Profile still lists them. Topics with no questions are left off. Progress shows the same hex, the same lesson list, and your strongest / focus area.",
+    text: "On Profile you can pick a board name for Class board and Individual. Offensive names are not anonymous — we know who you are, because your NTU email is still on the account. Profile also lists strengths (about 80%+ first try) and weaknesses (under 60%) after at least 3 answers from lessons and walkthroughs, plus a hex chart, Knowledge check cards (first try plus your five best later attempts), and a list of the tests and question banks in each section. Walkthroughs stay on Learn; staff Profile still lists them. Topics with no questions are left off. Progress shows the same hex, the same lesson list, and your strongest / focus area.",
   },
   {
     title: "Trophy leagues",
-    text: "Everyone starts in Bronze. Every 3 days, the top 20% in your league promote and the bottom 20% demote. XP only ranks the board for that round. It does not jump you to Emerald.",
+    text: "Everyone starts in Bronze. Every 3 days, the top 20% in your league promote and the bottom 20% demote. You must earn XP this round to promote — 0 XP cannot move up. XP only ranks the board for that round. It does not jump you to Emerald.",
   },
   {
     title: "Class and cohort",
     text: "Class board ranks students in your class by total XP. Cohort board ranks those classes by combined XP. Individual shows the top 10 students in the cohort, with your place on the last row. Classmates appear once they are added to Circuito.",
+  },
+  {
+    title: "Inbox",
+    text: "The bell at the top left opens your inbox. Staff can post assignments there. If you report a question and it is marked resolved, you also get a message in that inbox.",
   },
   {
     title: "Theme",

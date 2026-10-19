@@ -20,9 +20,9 @@ export function zoneCounts(total) {
   return { promote, demote };
 }
 
-export function zoneForRank(rank, total) {
+export function zoneForRank(rank, total, seasonXp = 0) {
   const { promote, demote } = zoneCounts(total);
-  if (rank <= promote) return "promote";
+  if (rank <= promote && (Number(seasonXp) || 0) > 0) return "promote";
   if (demote && rank > total - demote) return "demote";
   return "safe";
 }
@@ -131,7 +131,11 @@ function sortZone(rows) {
     )
     .map((row, index) => {
       const rank = index + 1;
-      return { ...row, rank, zone: zoneForRank(rank, total) };
+      return {
+        ...row,
+        rank,
+        zone: zoneForRank(rank, total, row.seasonXp),
+      };
     });
 }
 
@@ -148,8 +152,9 @@ function applySeasonResults(ranked, leagueIndex) {
     if (row.filler) continue;
     const name = asName(row.username);
     const current = clampLeagueIndex(next[name] ?? row.leagueIndex);
-    if (row.zone === "promote") next[name] = clampLeagueIndex(current + 1);
-    else if (row.zone === "demote") next[name] = clampLeagueIndex(current - 1);
+    if (row.zone === "promote" && (Number(row.seasonXp) || 0) > 0) {
+      next[name] = clampLeagueIndex(current + 1);
+    } else if (row.zone === "demote") next[name] = clampLeagueIndex(current - 1);
     else next[name] = current;
   }
   return next;

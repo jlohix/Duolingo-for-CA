@@ -1,6 +1,14 @@
 import { useEffect, useMemo, useState } from "react";
 import { TOPICS, DIFFICULTIES, lessonKey } from "../data/topics";
-import { topicInsight, saveProgress, sectionProgressKeys } from "../state/progress";
+import {
+  topicInsight,
+  saveProgress,
+  sectionProgressKeys,
+  knowledgeCheckSummary,
+  formatKnowledgeCheckCell,
+  formatKnowledgeCheckDetail,
+} from "../state/progress";
+import { KNOWLEDGE_CHECK_TOPIC_IDS } from "../data/knowledgeCheck";
 import {
   listStudents,
   saveStudentRecord,
@@ -11,6 +19,7 @@ import TopicInsight from "../components/TopicInsight";
 import TutorUsage from "../components/TutorUsage";
 import LeaderboardSchedule from "../components/LeaderboardSchedule";
 import AnnouncementsAdmin from "../components/AnnouncementsAdmin";
+import InboxAdmin from "../components/InboxAdmin";
 import ProgressPage from "./Progress";
 import { CLASS_IDS, DEFAULT_CLASS, isPartTimeClass } from "../data/classes";
 import { trophyFromIndex } from "../data/trophies";
@@ -242,7 +251,9 @@ export default function Admin({ progress, setProgress, counts, bankCounts = {} }
           </table>
         </div>
       </div>
+      <KnowledgeChecksTable students={students} />
       <WalkFeedbackTable students={students} />
+      <InboxAdmin />
       <AnnouncementsAdmin />
       <ModuleAnalyticsTable totalStudents={students.length} />
       <LeaderboardSchedule />
@@ -317,7 +328,8 @@ function QuestionReportsTable() {
       <h2>Question reports</h2>
       <p className="login-hint">
         Reports submitted by students across all devices. {openCount} open.
-        Mark a report resolved once you have fixed the question.
+        Mark a report resolved once you have fixed the question. That student
+        gets an automated inbox message under the bell.
       </p>
       <label className="login-hint" style={{ display: "inline-block", marginBottom: 8 }}>
         <input
@@ -700,6 +712,64 @@ function WalkFeedbackTable({ students }) {
   );
 }
 
+function KnowledgeChecksTable({ students }) {
+  const topics = TOPICS.filter((topic) =>
+    KNOWLEDGE_CHECK_TOPIC_IDS.includes(topic.id)
+  );
+  const attempted = students.filter((row) =>
+    topics.some((topic) => knowledgeCheckSummary(row, topic.id))
+  );
+  return (
+    <section className="admin-walk-feedback">
+      <h2>Knowledge checks</h2>
+      <p className="login-hint">
+        Five random questions per section. Score is first-try steps as a
+        percent of every part (for example 19/24 = 79%). First score is locked
+        on the first finish. Later on Learn and Profile is the best retake.
+      </p>
+      <div className="admin-table-wrap">
+        <table className="admin-table admin-kcheck-table">
+          <thead>
+            <tr>
+              <th>Student</th>
+              {topics.map((topic) => (
+                <th key={topic.id}>{topic.short || topic.name}</th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {attempted.length ? (
+              attempted.map((row) => (
+                <tr key={row.username}>
+                  <td>
+                    {row.display}
+                    {row.live ? " · live" : ""}
+                  </td>
+                  {topics.map((topic) => {
+                    const summary = knowledgeCheckSummary(row, topic.id);
+                    return (
+                      <td key={topic.id} className="admin-kcheck-cell">
+                        {formatKnowledgeCheckCell(summary)}
+                      </td>
+                    );
+                  })}
+                </tr>
+              ))
+            ) : (
+              <tr>
+                <td colSpan={topics.length + 1}>
+                  No knowledge checks yet. Scores show here after a student
+                  finishes one on Learn.
+                </td>
+              </tr>
+            )}
+          </tbody>
+        </table>
+      </div>
+    </section>
+  );
+}
+
 function StudentEditor({ student, counts, bankCounts = {}, onSave }) {
   const [tab, setTab] = useState("progress");
   const [classId, setClassId] = useState(
@@ -803,6 +873,52 @@ function StudentEditor({ student, counts, bankCounts = {}, onSave }) {
             eyebrow="Student progress"
             title={student.display}
           />
+          <section className="admin-walk-feedback">
+            <h3>Knowledge checks</h3>
+            <div className="admin-table-wrap">
+              <table className="admin-table">
+                <thead>
+                  <tr>
+                    <th>Section</th>
+                    <th>First</th>
+                    <th>Later attempts</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {TOPICS.filter((topic) =>
+                    KNOWLEDGE_CHECK_TOPIC_IDS.includes(topic.id)
+                  ).map((topic) => {
+                    const summary = knowledgeCheckSummary(student, topic.id);
+                    return (
+                      <tr key={topic.id}>
+                        <td>{topic.name}</td>
+                        <td>
+                          {summary
+                            ? formatKnowledgeCheckDetail(
+                                summary.firstCorrect,
+                                summary.firstTotal
+                              )
+                            : "—"}
+                        </td>
+                        <td className="admin-kcheck-cell">
+                          {summary?.laterCount
+                            ? summary.later
+                                .map((attempt) =>
+                                  formatKnowledgeCheckDetail(
+                                    attempt.correct,
+                                    attempt.total
+                                  )
+                                )
+                                .join(" · ")
+                            : "—"}
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          </section>
         </div>
       ) : (
         <form

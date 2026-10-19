@@ -57,6 +57,7 @@ function emptyState() {
     displayName: "",
     avatarUrl: "",
     walkFeedback: {},
+    knowledgeChecks: {},
   };
 }
 
@@ -137,12 +138,145 @@ function parseTopicStats(raw) {
   if (!raw || typeof raw !== "object") return {};
   const out = {};
   for (const [id, val] of Object.entries(raw)) {
+    if (id === "__kc" || String(id).startsWith("__")) continue;
     out[id] = {
       correct: Number(val?.correct) || 0,
       attempts: Number(val?.attempts) || 0,
     };
   }
   return out;
+}
+
+function parseQuestionStats(raw) {
+  if (!Array.isArray(raw)) return [];
+  return raw
+    .map((row) => ({
+      index: Math.max(1, Number(row?.index) || 0),
+      correct: Math.max(0, Number(row?.correct) || 0),
+      total: Math.max(0, Number(row?.total) || 0),
+    }))
+    .filter((row) => row.index && row.total);
+}
+
+export function knowledgeCheckPercent(correct, total) {
+  if (!total) return 0;
+  return Math.round((100 * Number(correct)) / Number(total));
+}
+
+export function formatKnowledgeCheckScore(correct, total) {
+  if (!total) return "—";
+  return `${knowledgeCheckPercent(correct, total)}%`;
+}
+
+export function formatKnowledgeCheckDetail(correct, total) {
+  if (!total) return "—";
+  return `${correct}/${total} · ${knowledgeCheckPercent(correct, total)}%`;
+}
+
+export function scoreKnowledgeCheck(
+  questions,
+  fallbackCorrect = 0,
+  fallbackTotal = 0
+) {
+  const stats = parseQuestionStats(questions);
+  if (stats.length) {
+    const correct = stats.reduce((sum, row) => sum + row.correct, 0);
+    const total = stats.reduce((sum, row) => sum + row.total, 0);
+    if (total) return { correct, total };
+  }
+  return {
+    correct: Math.max(0, Number(fallbackCorrect) || 0),
+    total: Math.max(0, Number(fallbackTotal) || 0),
+  };
+}
+
+function parseKnowledgeAttempt(row) {
+  const total = Number(row?.total) || 0;
+  if (!total) return null;
+  return {
+    correct: Math.max(0, Number(row?.correct) || 0),
+    total,
+    at: String(row?.at || ""),
+    questions: parseQuestionStats(row?.questions),
+  };
+}
+
+export function parseKnowledgeChecks(raw) {
+  if (!raw || typeof raw !== "object" || Array.isArray(raw)) return {};
+  const out = {};
+  for (const [id, val] of Object.entries(raw)) {
+    if (!val || typeof val !== "object" || Array.isArray(val)) continue;
+    const later = (Array.isArray(val.later) ? val.later : [])
+      .map(parseKnowledgeAttempt)
+      .filter(Boolean)
+      .slice(-40);
+    const firstTotal = Number(val.firstTotal) || 0;
+    if (!firstTotal && !later.length) continue;
+    out[String(id)] = {
+      firstCorrect: Math.max(0, Number(val.firstCorrect) || 0),
+      firstTotal,
+      firstAt: String(val.firstAt || ""),
+      firstQuestions: parseQuestionStats(val.firstQuestions),
+      later,
+    };
+  }
+  return out;
+}
+
+function bestLaterAttempt(later) {
+  if (!later.length) return null;
+  return later.reduce((best, attempt) => {
+    const bestRatio = best.total ? best.correct / best.total : 0;
+    const ratio = attempt.total ? attempt.correct / attempt.total : 0;
+    if (ratio > bestRatio) return attempt;
+    if (ratio < bestRatio) return best;
+    return attempt.correct > best.correct ? attempt : best;
+  });
+}
+
+export function knowledgeCheckSummary(progress, topicId) {
+  const row =
+    progress?.knowledgeChecks?.[String(topicId)] ||
+    progress?.knowledgeChecks?.[topicId];
+  if (!row || !row.firstTotal) return null;
+  const first = scoreKnowledgeCheck(
+    row.firstQuestions,
+    row.firstCorrect,
+    row.firstTotal
+  );
+  const later = (Array.isArray(row.later) ? row.later : []).map((attempt) => {
+    const scored = scoreKnowledgeCheck(
+      attempt.questions,
+      attempt.correct,
+      attempt.total
+    );
+    return { ...attempt, correct: scored.correct, total: scored.total };
+  });
+  const laterCount = later.length;
+  const laterBest = bestLaterAttempt(later);
+  return {
+    firstCorrect: first.correct,
+    firstTotal: first.total,
+    firstAt: row.firstAt,
+    later,
+    laterCount,
+    laterBest,
+  };
+}
+
+export function formatKnowledgeCheckCell(summary) {
+  if (!summary) return "—";
+  const first = `${formatKnowledgeCheckScore(
+    summary.firstCorrect,
+    summary.firstTotal
+  )} first`;
+  if (!summary.laterBest) return first;
+  const best = `${formatKnowledgeCheckScore(
+    summary.laterBest.correct,
+    summary.laterBest.total
+  )} later`;
+  const count = summary.laterCount > 1 ? ` ×${summary.laterCount}` : "";
+  return `${first} · ${best}${count}`;
 }
 
 function parseWalkFeedback(raw) {
@@ -172,6 +306,12 @@ function normalizeProgressData(data) {
     displayName: normalizeDisplayName(data.displayName),
     avatarUrl: normalizeAvatarUrl(data.avatarUrl),
     walkFeedback: parseWalkFeedback(data.walkFeedback),
+    knowledgeChecks: parseKnowledgeChecks(
+      data.knowledgeChecks ||
+        data.knowledge_checks ||
+        data.topicStats?.__kc ||
+        data.topic_stats?.__kc
+    ),
   };
 }
 
@@ -216,6 +356,11 @@ function saveProgress(state, email) {
 export { saveProgress };
 
 export function progressToRemotePayload(state) {
+  const topicStats = parseTopicStats(state.topicStats);
+  const knowledgeChecks = parseKnowledgeChecks(state.knowledgeChecks);
+  if (Object.keys(knowledgeChecks).length) {
+    topicStats.__kc = knowledgeChecks;
+  }
   return {
     classId: normalizeClassId(state.classId),
     classChosen: Boolean(state.classChosen),
@@ -226,7 +371,8 @@ export function progressToRemotePayload(state) {
     unlockedBySkip: Array.isArray(state.unlockedBySkip)
       ? state.unlockedBySkip
       : [],
-    topicStats: parseTopicStats(state.topicStats),
+    topicStats,
+    knowledgeChecks,
     leagueIndex: Number.isFinite(Number(state.leagueIndex))
       ? Number(state.leagueIndex)
       : 0,
@@ -252,6 +398,11 @@ export function remotePayloadToProgress(data) {
     displayName: data.displayName || data.display_name,
     avatarUrl: data.avatarUrl || data.avatar_url,
     walkFeedback: data.walkFeedback || data.walk_feedback,
+    knowledgeChecks:
+      data.knowledgeChecks ||
+      data.knowledge_checks ||
+      data.topicStats?.__kc ||
+      data.topic_stats?.__kc,
   });
 }
 
@@ -268,6 +419,45 @@ export function recordWalkFeedback(state, lessonKey, vote) {
     ...state,
     walkFeedback: { ...(state.walkFeedback || {}), [lessonKey]: vote },
   };
+  saveProgress(next);
+  return next;
+}
+
+export function recordKnowledgeCheck(
+  state,
+  topicId,
+  correct,
+  total,
+  questionStats = []
+) {
+  const id = Number(topicId);
+  const scored = Math.max(0, Number(correct) || 0);
+  const outOf = Math.max(0, Number(total) || 0);
+  if (!id || !outOf) return state;
+  let next = recordPractice(state);
+  const knowledgeChecks = { ...(next.knowledgeChecks || {}) };
+  const prev = knowledgeChecks[String(id)];
+  const attempt = {
+    correct: scored,
+    total: outOf,
+    at: new Date().toISOString(),
+    questions: parseQuestionStats(questionStats),
+  };
+  if (!prev || !prev.firstTotal) {
+    knowledgeChecks[String(id)] = {
+      firstCorrect: attempt.correct,
+      firstTotal: attempt.total,
+      firstAt: attempt.at,
+      firstQuestions: attempt.questions,
+      later: [],
+    };
+  } else {
+    knowledgeChecks[String(id)] = {
+      ...prev,
+      later: [...(prev.later || []), attempt].slice(-40),
+    };
+  }
+  next = { ...next, knowledgeChecks };
   saveProgress(next);
   return next;
 }

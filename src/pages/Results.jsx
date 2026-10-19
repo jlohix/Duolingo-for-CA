@@ -2,6 +2,7 @@ import { useCallback, useMemo, useState } from "react";
 import ThemeSwitch from "../components/ThemeSwitch";
 import StreakCelebrate from "../components/StreakCelebrate";
 import WalkRating from "../components/WalkRating";
+import { knowledgeCheckPercent } from "../state/progress";
 
 export default function Results({
   summary,
@@ -12,16 +13,19 @@ export default function Results({
   displayName = "",
 }) {
   const skip = summary.kind === "skip";
+  const kcheck = summary.kind === "kcheck";
   const failedSkip = skip && !summary.passed;
   const title = skip
     ? failedSkip
       ? "Not enough to skip"
       : "Topic unlocked"
-    : summary.kind === "walk"
-      ? "Walkthrough completed"
-      : summary.kind === "lab"
-        ? "Lab complete"
-        : "Lesson complete";
+    : kcheck
+      ? "Knowledge check"
+      : summary.kind === "walk"
+        ? "Walkthrough completed"
+        : summary.kind === "lab"
+          ? "Lab complete"
+          : "Lesson complete";
   const showStreak = Boolean(summary.streakGrew);
   const finalStreak = summary.streak ?? 0;
   const [streakShown, setStreakShown] = useState(
@@ -30,6 +34,15 @@ export default function Results({
   const onTick = useCallback((value) => setStreakShown(value), []);
   const askRating = summary.kind === "walk" || summary.kind === "lab";
   const lessonKey = summary.lessonKey || summary.topicName;
+  const questionStats = Array.isArray(summary.questionStats)
+    ? summary.questionStats
+    : [];
+  const kcheckPct = kcheck
+    ? knowledgeCheckPercent(summary.correct, summary.total)
+    : 0;
+  const firstPct = kcheck
+    ? knowledgeCheckPercent(summary.firstCorrect, summary.firstTotal)
+    : 0;
 
   // Completion timestamp (captured when this page renders), shown in SGT for
   // the verification footer. useMemo so it stays fixed while the page is open.
@@ -64,6 +77,15 @@ export default function Results({
             : `You scored ${summary.correct}/${summary.total}. This topic is open.`}
         </p>
       ) : null}
+      {kcheck ? (
+        <p className="skip-result">
+          {summary.preview
+            ? `Staff preview: ${kcheckPct}% (${summary.correct} of ${summary.total} first-try steps). This was not saved.`
+            : summary.firstAttempt
+              ? `First check: ${kcheckPct}% — ${summary.correct} of ${summary.total} first-try steps. You can retake it any time — later scores are tracked separately.`
+              : `This attempt: ${kcheckPct}% (${summary.correct} of ${summary.total} first-try steps). First check was ${firstPct}%.`}
+        </p>
+      ) : null}
       {showStreak ? (
         <StreakCelebrate
           from={summary.streakFrom}
@@ -73,18 +95,51 @@ export default function Results({
       ) : null}
       <ul className="stats">
         <li>
-          <strong>{summary.correct}</strong>
-          <span>correct</span>
+          <strong>{kcheck ? `${kcheckPct}%` : summary.correct}</strong>
+          <span>{kcheck ? "score" : "correct"}</span>
         </li>
+        {kcheck ? (
+          <li>
+            <strong>
+              {summary.correct}/{summary.total}
+            </strong>
+            <span>first-try steps</span>
+          </li>
+        ) : null}
+        {kcheck ? null : (
         <li>
           <strong>+{summary.xpGained}</strong>
           <span>XP</span>
         </li>
+        )}
         <li className={showStreak ? "streak-stat" : ""}>
           <strong>{showStreak ? streakShown : finalStreak}</strong>
           <span>day streak</span>
         </li>
       </ul>
+      {kcheck && questionStats.length ? (
+        <>
+          <p className="skip-result">First try on each question’s steps</p>
+        <ul className="stats kcheck-breakdown">
+          {questionStats.map((row) => (
+            <li
+              key={row.index}
+              className={row.correct === row.total ? "done" : ""}
+            >
+              <strong>
+                {row.correct}/{row.total}
+              </strong>
+              <span>
+                Question {row.index}
+                {row.total
+                  ? ` · ${knowledgeCheckPercent(row.correct, row.total)}%`
+                  : ""}
+              </span>
+            </li>
+          ))}
+        </ul>
+        </>
+      ) : null}
       {askRating ? (
         <WalkRating
           lessonKey={lessonKey}

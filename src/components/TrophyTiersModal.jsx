@@ -18,7 +18,8 @@ export default function TrophyTiersModal({
         <h2 id="trophy-guide-title">Trophy leagues</h2>
         <p>
           Everyone starts in Bronze. Every 3 days, the top 20% in a league
-          promote and the bottom 20% demote. XP does not skip you ahead.
+          promote and the bottom 20% demote. You need XP this round to
+          promote. XP does not skip you ahead.
         </p>
         <ol className="trophy-guide-list">
           {TROPHY_TIERS.map((tier) => {

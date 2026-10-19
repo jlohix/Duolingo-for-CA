@@ -169,6 +169,108 @@ button {
   display: none;
 }
 
+.inbox-bell-btn {
+  position: fixed;
+  top: 18px;
+  left: 180px;
+  z-index: 52;
+  width: 44px;
+  height: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  background: var(--card);
+  color: var(--ink);
+  border: 2px solid var(--line);
+  border-radius: 12px;
+  font-size: 18px;
+}
+
+.inbox-badge {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 4px;
+  border-radius: 99px;
+  background: var(--red);
+  color: #fff;
+  font-size: 11px;
+  font-weight: 800;
+  line-height: 18px;
+}
+
+.inbox-overlay {
+  z-index: 80;
+}
+
+.inbox-sheet {
+  max-width: 28rem;
+  max-height: min(80vh, 640px);
+  overflow: auto;
+}
+
+.inbox-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.inbox-head h2 {
+  margin: 0 0 12px;
+}
+
+.inbox-list {
+  list-style: none;
+  margin: 0 0 16px;
+  padding: 0;
+  display: grid;
+  gap: 8px;
+}
+
+.inbox-item {
+  width: 100%;
+  display: grid;
+  gap: 4px;
+  text-align: left;
+  background: var(--cream);
+  border: 2px solid var(--line);
+  border-radius: 14px;
+  padding: 12px 14px;
+  color: inherit;
+}
+
+.inbox-item.unread {
+  border-color: var(--green);
+  background: var(--done-bg);
+}
+
+.inbox-item-kind,
+.inbox-item-when {
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.inbox-item span {
+  color: var(--muted);
+  font-size: 14px;
+}
+
+.inbox-admin-form .inbox-admin-body {
+  flex-basis: 100%;
+}
+
+.inbox-admin-form textarea {
+  width: 100%;
+  resize: vertical;
+}
+
 .shell-main {
   min-width: 0;
 }
@@ -1908,6 +2010,13 @@ h2 {
   font-size: 13px;
 }
 
+.section-ctas {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+}
+
 .section-cta {
   min-width: 11rem;
   justify-self: start;
@@ -1920,6 +2029,25 @@ h2 {
   font-weight: 800;
   text-transform: uppercase;
   letter-spacing: 0.04em;
+}
+
+.section-kcheck-score {
+  margin: 0;
+  max-width: 16rem;
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1.35;
+}
+
+.admin-kcheck-cell {
+  white-space: normal;
+  max-width: 14rem;
+  line-height: 1.35;
+}
+
+.admin-kcheck-table td {
+  vertical-align: top;
 }
 
 .section-cta.ghost {
@@ -2395,6 +2523,222 @@ h2 {
   color: var(--streak-hot);
 }
 
+.kcheck-breakdown {
+  grid-template-columns: repeat(auto-fit, minmax(96px, 1fr));
+  margin-top: 12px;
+}
+
+.kcheck-breakdown li.done {
+  border-color: var(--green);
+  background: var(--done-bg);
+}
+
+.kcheck-visual {
+  list-style: none;
+  padding: 0;
+  margin: 14px 0 0;
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+}
+
+.kcheck-card {
+  border: 2px solid var(--line);
+  border-radius: 16px;
+  padding: 12px;
+  background: var(--cream);
+  display: grid;
+  gap: 10px;
+}
+
+.kcheck-card.has-try {
+  border-color: color-mix(in srgb, var(--green) 35%, var(--line));
+}
+
+.kcheck-card.empty {
+  opacity: 0.72;
+}
+
+.kcheck-card-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  align-items: baseline;
+}
+
+.kcheck-card-head strong {
+  font-size: 0.95rem;
+}
+
+.kcheck-score-pair {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.kcheck-score-pair span {
+  display: block;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.kcheck-score-pair strong {
+  display: block;
+  font-size: 1.25rem;
+  line-height: 1.2;
+  margin: 2px 0 2px;
+}
+
+.kcheck-score-pair .kcheck-score-frac {
+  text-transform: none;
+  letter-spacing: 0;
+  font-weight: 700;
+  margin-bottom: 6px;
+  font-size: 12px;
+}
+
+.kcheck-score-pair .insight-meter {
+  margin: 0;
+  height: 7px;
+}
+
+.kcheck-bars-label {
+  margin: 2px 0 0;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.kcheck-bars {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: flex-end;
+}
+
+.kcheck-bar {
+  display: grid;
+  justify-items: center;
+  gap: 4px;
+  min-width: 42px;
+  font-size: 10px;
+  font-weight: 800;
+  color: var(--muted);
+}
+
+.kcheck-bar strong {
+  font-size: 11px;
+  color: var(--ink);
+}
+
+.kcheck-bar-track {
+  display: block;
+  width: 18px;
+  height: 56px;
+  border-radius: 99px;
+  background: var(--meter-track);
+  overflow: hidden;
+  position: relative;
+}
+
+.kcheck-bar-fill {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  border-radius: 99px;
+  background: var(--muted);
+}
+
+.kcheck-bar.solid .kcheck-bar-fill {
+  background: #1cb0f6;
+}
+
+.kcheck-bar.developing .kcheck-bar-fill {
+  background: var(--streak-hot);
+}
+
+.kcheck-bar.weakness .kcheck-bar-fill {
+  background: var(--red);
+}
+
+.kcheck-bar.strength .kcheck-bar-fill {
+  background: var(--green);
+}
+
+.kcheck-bar.first .kcheck-bar-fill {
+  background: #1cb0f6;
+}
+
+.kcheck-bar.best .kcheck-bar-fill {
+  background: var(--green);
+}
+
+.kcheck-bar.best {
+  color: var(--green-dark);
+}
+
+.kcheck-bar.best strong {
+  color: var(--green-dark);
+}
+
+.kcheck-bars.packed {
+  gap: 6px;
+}
+
+.kcheck-bars.packed .kcheck-bar {
+  min-width: 22px;
+}
+
+.kcheck-bars.packed .kcheck-bar-track {
+  width: 12px;
+  height: 48px;
+}
+
+.kcheck-bars.packed .kcheck-bar > span:last-child {
+  display: none;
+}
+
+.kcheck-pips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.kcheck-pip {
+  border: 2px solid var(--line);
+  border-radius: 999px;
+  padding: 2px 8px;
+  font-size: 11px;
+  font-weight: 800;
+  color: var(--muted);
+  background: var(--card);
+}
+
+.kcheck-pip.full {
+  border-color: var(--green);
+  background: var(--done-bg);
+  color: var(--green-dark);
+}
+
+.kcheck-pip.part {
+  border-color: var(--streak-hot-border);
+  color: var(--streak-hot);
+}
+
+.kcheck-pip.miss {
+  border-color: var(--red);
+  background: var(--bad-bg);
+}
+
 @keyframes streak-pop {
   0% {
     transform: scale(0.35) rotate(-12deg);
@@ -2462,6 +2806,11 @@ h2 {
     border-radius: 12px;
     padding: 8px 12px;
     font-weight: 800;
+  }
+
+  .inbox-bell-btn {
+    top: 12px;
+    left: 108px;
   }
 
   .shell-main .page {
@@ -4320,6 +4669,7 @@ html[data-theme="dark"] .circuit-svg .board-step {
 
 @media print {
   .pack-print .menu-btn,
+  .pack-print .inbox-bell-btn,
   .pack-print .sidebar,
   .pack-print .sidebar-backdrop,
   .pack-print .pack-toolbar,

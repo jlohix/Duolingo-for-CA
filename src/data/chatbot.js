@@ -18,7 +18,7 @@ export const CHATBOT_TEST_CLASS = "EE22";
 // student already knows, so a tutor there would undermine its purpose.
 // All other screens (lessons, papers, labs, home, boards) show the tutor.
 //   - "skip" -> Skip Quiz (test-out gate that unlocks a topic)
-export const CHATBOT_HIDDEN_SCREENS = new Set(["skip"]);
+export const CHATBOT_HIDDEN_SCREENS = new Set(["skip", "kcheck"]);
 
 // Whether the current screen is one where the tutor should stay hidden.
 export function isChatbotHiddenScreen(screen) {

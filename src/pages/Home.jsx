@@ -20,7 +20,10 @@ import {
   topicInsight,
   walkLessonKey,
   walkProgressKeys,
+  knowledgeCheckSummary,
+  formatKnowledgeCheckCell,
 } from "../state/progress";
+import { knowledgeCheckReady } from "../data/knowledgeCheck";
 import StreakChip from "../components/StreakChip";
 import TopicInsight from "../components/TopicInsight";
 import TrophyBadge from "../components/TrophyBadge";
@@ -103,8 +106,11 @@ function SectionCard({
   skipReady,
   comingSoon = false,
   showMeter = true,
+  checkReady = false,
+  checkSummary = null,
   onOpen,
   onJump,
+  onKnowledgeCheck,
 }) {
   const cta = comingSoon
     ? "Coming soon"
@@ -144,20 +150,42 @@ function SectionCard({
               : `${meter.total} ${meter.total === 1 ? "unit" : "units"}`}
           </p>
         ) : null}
-        <button
-          type="button"
-          className={unlocked && current ? "section-cta" : "section-cta ghost"}
-          disabled={comingSoon || (!unlocked && !skipReady)}
-          onClick={() => {
-            if (!unlocked) {
-              if (skipReady) onJump();
-              return;
-            }
-            onOpen();
-          }}
-        >
-          {cta}
-        </button>
+        <div className="section-ctas">
+          <button
+            type="button"
+            className={unlocked && current ? "section-cta" : "section-cta ghost"}
+            disabled={comingSoon || (!unlocked && !skipReady)}
+            onClick={() => {
+              if (!unlocked) {
+                if (skipReady) onJump();
+                return;
+              }
+              onOpen();
+            }}
+          >
+            {cta}
+          </button>
+          {unlocked && checkReady ? (
+            <>
+              <button
+                type="button"
+                className="section-cta ghost"
+                onClick={onKnowledgeCheck}
+              >
+                Knowledge check
+              </button>
+              {checkSummary ? (
+                <p className="section-kcheck-score">
+                  {formatKnowledgeCheckCell(checkSummary)}
+                </p>
+              ) : (
+                <p className="section-kcheck-score">
+                  5 random questions · scored as % of first-try steps
+                </p>
+              )}
+            </>
+          ) : null}
+        </div>
       </div>
       <div className="section-aside">
         <div className="section-speech">
@@ -504,6 +532,8 @@ export default function Home({
   onInvOpAmp,
   onNonInvOpAmp,
   onSectionWalk,
+  onKnowledgeCheck,
+  questions = [],
   allOpen = false,
 }) {
   const [section, setSection] = useState(null);
@@ -650,18 +680,20 @@ export default function Home({
       </header>
       {allOpen ? (
         <p className="login-hint">
-          Staff preview. Every section is open. Playing a lesson does not add
-          XP or change student progress.
+          Staff preview. Every section is open. Playing a lesson or knowledge
+          check does not add XP or change student progress.
         </p>
       ) : (
         <p className="login-hint">
           Walkthroughs are optional. Every section is open — play Easy,
-          Average, and Challenging in any order.
+          Average, and Challenging in any order. Use Knowledge check under
+          Open for five random questions scored as a percent of first-try
+          steps.
         </p>
       )}
       <div className="section-list">
         {topics.map((topic, index) => {
-          const comingSoon = topic.id >= 7;
+          const comingSoon = topic.id >= 8;
           const unlocked =
             !comingSoon &&
             (allOpen ||
@@ -689,8 +721,11 @@ export default function Home({
               meter={meter}
               current={!comingSoon && index === currentIndex}
               skipReady={skipReady}
+              checkReady={knowledgeCheckReady(questions, topic.id)}
+              checkSummary={knowledgeCheckSummary(progress, topic.id)}
               onOpen={() => setSection(topic.id)}
               onJump={() => setEventOpen(true)}
+              onKnowledgeCheck={() => onKnowledgeCheck?.(topic.id)}
             />
           );
         })}

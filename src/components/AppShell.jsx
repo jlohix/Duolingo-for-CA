@@ -5,6 +5,7 @@ import StreakNotice from "./StreakNotice";
 import { visibleStreak } from "../state/progress";
 import { isAdmin } from "../state/auth";
 import { boardName } from "../state/roster";
+import InboxBell from "./InboxBell";
 
 const STUDENT_LINKS = [
   { id: "home", label: "Learn", group: "Study", icon: "fa-book" },
@@ -51,6 +52,7 @@ export default function AppShell({
 
   return (
     <div className={`app-shell ${menuOpen ? "menu-open" : ""}`}>
+      <InboxBell email={user?.username} classId={progress?.classId} />
       <button
         type="button"
         className="menu-btn"
