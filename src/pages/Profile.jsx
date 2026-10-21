@@ -335,7 +335,7 @@ export default function Profile({
         <p className="login-hint">
           Five random step-by-step questions per section. Your score is
           first-try steps over every part — for example 19/24 is 79%. Each card
-          keeps your first try, then the five best later attempts.
+          shows your first attempt and your best attempt.
         </p>
         <KnowledgeCheckVisual
           topics={checkTopics}
@@ -366,44 +366,8 @@ function scoreKind(correct, total) {
   return "weakness";
 }
 
-function formatCheckWhen(at) {
-  if (!at) return "";
-  const date = new Date(at);
-  if (Number.isNaN(date.getTime())) return "";
-  return date.toLocaleString("en-SG", {
-    timeZone: "Asia/Singapore",
-    day: "numeric",
-    month: "short",
-    hour: "2-digit",
-    minute: "2-digit",
-  });
-}
-
-function pipKind(question) {
-  if (!question?.total) return "empty";
-  const pct = question.correct / question.total;
-  if (pct >= 1) return "full";
-  if (pct > 0) return "part";
-  return "miss";
-}
-
 function laterScore(row) {
   return row.total ? row.correct / row.total : 0;
-}
-
-function featuredKnowledgeCheckAttempts(attempts) {
-  const first = attempts.find((row) => row.attempt === 1);
-  const later = attempts.filter((row) => row.attempt !== 1);
-  const topLater = [...later]
-    .sort(
-      (a, b) =>
-        laterScore(b) - laterScore(a) ||
-        b.correct - a.correct ||
-        b.attempt - a.attempt
-    )
-    .slice(0, 5)
-    .sort((a, b) => a.attempt - b.attempt);
-  return [first, ...topLater].filter(Boolean);
 }
 
 function bestLaterFromRows(attempts) {
@@ -436,21 +400,6 @@ function KnowledgeCheckVisual({ topics, progress, rows }) {
           : 0;
         const firstPct = knowledgeCheckPercent(firstCorrect, firstTotal);
         const hasTry = Boolean(firstTotal || attempts.length);
-        const featured = featuredKnowledgeCheckAttempts(attempts);
-        const pipSource =
-          [...featured].reverse().find((row) => row.questions?.length) ||
-          [...attempts].reverse().find((row) => row.questions?.length) ||
-          null;
-        const bestKey = laterBest
-          ? `${laterBest.correct}/${laterBest.total}`
-          : "";
-        const bestAttemptN = laterBest
-          ? attempts.reduce((found, row) => {
-              if (row.attempt === 1) return found;
-              if (`${row.correct}/${row.total}` !== bestKey) return found;
-              return Math.max(found, row.attempt);
-            }, 0)
-          : 0;
         return (
           <li
             key={topic.id}
@@ -462,9 +411,6 @@ function KnowledgeCheckVisual({ topics, progress, rows }) {
                 <span className="login-hint">
                   {attempts.length}{" "}
                   {attempts.length === 1 ? "attempt" : "attempts"}
-                  {attempts.length > featured.length
-                    ? ` · showing first + best ${featured.length - 1}`
-                    : ""}
                 </span>
               ) : (
                 <span className="login-hint">Not attempted</span>
@@ -474,7 +420,7 @@ function KnowledgeCheckVisual({ topics, progress, rows }) {
               <>
                 <div className="kcheck-score-pair">
                   <div>
-                    <span>First</span>
+                    <span>First attempt</span>
                     <strong>
                       {formatKnowledgeCheckScore(firstCorrect, firstTotal)}
                     </strong>
@@ -492,7 +438,7 @@ function KnowledgeCheckVisual({ topics, progress, rows }) {
                     </div>
                   </div>
                   <div>
-                    <span>Later best</span>
+                    <span>Best attempt</span>
                     <strong>
                       {laterBest
                         ? formatKnowledgeCheckScore(
@@ -506,76 +452,27 @@ function KnowledgeCheckVisual({ topics, progress, rows }) {
                         ? `${laterBest.correct}/${laterBest.total} steps`
                         : "No retake yet"}
                     </span>
-                    <div className="insight-meter" aria-hidden="true">
-                      <div
-                        className={`insight-fill ${
-                          laterBest
-                            ? scoreKind(laterBest.correct, laterBest.total)
-                            : "starting"
-                        }`}
-                        style={{ width: `${laterPct}%` }}
-                      />
+                    {/* Improvement meter: red = first-attempt level, green =
+                        gain from first to later-best. If later-best is not
+                        above first, only the red (up to later-best) shows. */}
+                    <div className="insight-meter kcheck-improve-meter" aria-hidden="true">
+                      {laterBest ? (
+                        <>
+                          <div
+                            className="insight-fill kcheck-improve-base"
+                            style={{ width: `${Math.min(firstPct, laterPct)}%` }}
+                          />
+                          {laterPct > firstPct ? (
+                            <div
+                              className="insight-fill kcheck-improve-gain"
+                              style={{ width: `${laterPct - firstPct}%` }}
+                            />
+                          ) : null}
+                        </>
+                      ) : null}
                     </div>
                   </div>
                 </div>
-                <p className="kcheck-bars-label">First and best later</p>
-                <ol className="kcheck-bars">
-                  {featured.map((row) => {
-                    const pct = knowledgeCheckPercent(row.correct, row.total);
-                    const isFirst = row.attempt === 1;
-                    const isBest = row.attempt === bestAttemptN;
-                    const when = formatCheckWhen(row.at);
-                    return (
-                      <li
-                        key={`${row.topicId}-${row.attempt}-${row.at}`}
-                        className={`kcheck-bar ${isFirst ? "first" : ""} ${
-                          isBest ? "best" : ""
-                        } ${scoreKind(row.correct, row.total)}`}
-                        title={
-                          when
-                            ? `Attempt ${row.attempt} · ${row.correct}/${row.total} · ${pct}% · ${when}`
-                            : `Attempt ${row.attempt} · ${row.correct}/${row.total} · ${pct}%`
-                        }
-                      >
-                        <span className="kcheck-bar-track" aria-hidden="true">
-                          <span
-                            className="kcheck-bar-fill"
-                            style={{
-                              height: pct ? `${pct}%` : "4px",
-                              opacity: pct ? 1 : 0.45,
-                            }}
-                          />
-                        </span>
-                        <strong>
-                          {formatKnowledgeCheckScore(row.correct, row.total)}
-                        </strong>
-                        <span>{isFirst ? "First" : `#${row.attempt}`}</span>
-                      </li>
-                    );
-                  })}
-                </ol>
-                {pipSource ? (
-                  <div className="kcheck-pips" aria-label="Questions on a later or latest try">
-                    {[1, 2, 3, 4, 5].map((index) => {
-                      const question = pipSource.questions.find(
-                        (item) => item.index === index
-                      );
-                      return (
-                        <span
-                          key={index}
-                          className={`kcheck-pip ${pipKind(question)}`}
-                          title={
-                            question
-                              ? `Question ${index} · ${question.correct}/${question.total}`
-                              : `Question ${index}`
-                          }
-                        >
-                          Q{index}
-                        </span>
-                      );
-                    })}
-                  </div>
-                ) : null}
               </>
             ) : (
               <p className="login-hint">
