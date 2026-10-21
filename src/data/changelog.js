@@ -1,5 +1,11 @@
 export const BUILT_IN_LOGS = [
   {
+    id: "built-2026-10-19-kcheck-tidy",
+    date: "2026-10-19",
+    title: "Simpler Knowledge check stats",
+    body: "Your profile's Knowledge check now shows just your first and best-later percentages for each topic, without the per-attempt and per-question breakdown.",
+  },
+  {
     id: "built-2026-10-19-xp-notice-off",
     date: "2026-10-19",
     title: "Saving notice removed",
