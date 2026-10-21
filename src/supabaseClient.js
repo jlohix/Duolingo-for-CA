@@ -561,6 +561,7 @@ export async function createAnnouncementRemote({
   endsAt,
   frequency,
   createdBy,
+  color,
 }) {
   return rpc("create_announcement", {
     p_title: String(title || ""),
@@ -570,6 +571,7 @@ export async function createAnnouncementRemote({
     p_ends_at: endsAt || null,
     p_frequency: frequency === "recurring" ? "recurring" : "once",
     p_created_by: createdBy || null,
+    p_color: color || null,
   });
 }
 
@@ -582,6 +584,7 @@ export async function updateAnnouncementRemote({
   endsAt,
   frequency,
   active,
+  color,
 }) {
   const data = await rpc("update_announcement", {
     p_id: id,
@@ -592,6 +595,7 @@ export async function updateAnnouncementRemote({
     p_ends_at: endsAt || null,
     p_frequency: frequency === "recurring" ? "recurring" : "once",
     p_active: active !== false,
+    p_color: color || null,
   });
   return data === true;
 }

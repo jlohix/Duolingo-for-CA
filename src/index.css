@@ -5188,13 +5188,20 @@ html[data-theme="dark"] .circuit-svg .board-step {
   gap: 18px;
   margin: 8px 0 16px;
 }
+/* Each announcement gets a coloured accent: a left border + a coloured title
+   bar. The body stays on the sheet background for readability. */
+.announcement-item {
+  border-left: 4px solid var(--line);
+  padding-left: 12px;
+}
 .announcement-item + .announcement-item {
-  border-top: 1px solid var(--line);
-  padding-top: 16px;
+  margin-top: 4px;
 }
 .announcement-title {
-  margin: 0 0 8px;
-  font-size: 18px;
+  margin: 0 0 10px;
+  font-size: 17px;
+  padding: 8px 12px;
+  border-radius: 8px;
 }
 .announcement-image {
   display: block;
@@ -5246,6 +5253,51 @@ html[data-theme="dark"] .circuit-svg .board-step {
 .announcement-form-actions {
   display: flex;
   gap: 10px;
+}
+/* Colour picker in the admin form */
+.announcement-color-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.announcement-color-label {
+  font-weight: 600;
+  font-size: 14px;
+}
+.announcement-swatches {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+.announcement-swatch-group {
+  font-size: 12px;
+  opacity: 0.7;
+  margin-right: 2px;
+}
+.announcement-swatch-group:not(:first-child) {
+  margin-left: 10px;
+}
+.announcement-swatch {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  border: 2px solid var(--line);
+  cursor: pointer;
+  padding: 0;
+}
+.announcement-swatch.on {
+  border-color: var(--ink);
+  box-shadow: 0 0 0 2px var(--ink);
+}
+.announcement-color-dot {
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  margin-right: 6px;
+  vertical-align: middle;
+  border: 1px solid var(--line);
 }
 .announcement-desc-cell {
   max-width: 260px;

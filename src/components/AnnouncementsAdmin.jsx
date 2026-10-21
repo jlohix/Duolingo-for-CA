@@ -9,6 +9,12 @@ import {
 } from "../supabaseClient";
 import { loadSession } from "../state/auth";
 
+import {
+  BRAND_COLORS,
+  STANDARD_COLORS,
+  DEFAULT_ACCENT,
+} from "../data/announcementColors";
+
 const EMPTY_FORM = {
   id: null,
   title: "",
@@ -19,6 +25,7 @@ const EMPTY_FORM = {
   openEnded: true,
   endsAt: "",
   frequency: "once",
+  color: DEFAULT_ACCENT,
 };
 
 // Format a UTC timestamp as an SGT date-time string for display.
@@ -107,6 +114,7 @@ export default function AnnouncementsAdmin() {
       openEnded: !row.ends_at,
       endsAt: toLocalInput(row.ends_at),
       frequency: row.frequency === "recurring" ? "recurring" : "once",
+      color: row.color || DEFAULT_ACCENT,
     });
     setStatus("");
     if (fileRef.current) fileRef.current.value = "";
@@ -142,6 +150,7 @@ export default function AnnouncementsAdmin() {
       startsAt: form.startNow ? "" : form.startsAt,
       endsAt: form.openEnded ? "" : form.endsAt,
       frequency: form.frequency,
+      color: form.color || DEFAULT_ACCENT,
     };
     try {
       if (form.id) {
@@ -287,6 +296,40 @@ export default function AnnouncementsAdmin() {
           </select>
         </label>
 
+        <div className="announcement-color-field">
+          <span className="announcement-color-label">Banner colour</span>
+          <div className="announcement-swatches" role="radiogroup" aria-label="Banner colour">
+            <span className="announcement-swatch-group">Your site</span>
+            {BRAND_COLORS.map((c) => (
+              <button
+                key={c.id}
+                type="button"
+                role="radio"
+                aria-checked={form.color === c.accent}
+                aria-label={c.label}
+                title={c.label}
+                className={`announcement-swatch ${form.color === c.accent ? "on" : ""}`}
+                style={{ background: c.accent }}
+                onClick={() => set("color", c.accent)}
+              />
+            ))}
+            <span className="announcement-swatch-group">Standard</span>
+            {STANDARD_COLORS.map((c) => (
+              <button
+                key={c.id}
+                type="button"
+                role="radio"
+                aria-checked={form.color === c.accent}
+                aria-label={c.label}
+                title={c.label}
+                className={`announcement-swatch ${form.color === c.accent ? "on" : ""}`}
+                style={{ background: c.accent }}
+                onClick={() => set("color", c.accent)}
+              />
+            ))}
+          </div>
+        </div>
+
         <div className="announcement-form-actions">
           <button type="submit" className="primary" disabled={busy || uploading}>
             {form.id ? "Save changes" : "Create announcement"}
@@ -338,6 +381,12 @@ export default function AnnouncementsAdmin() {
                       </span>
                     </td>
                     <td>
+                      <span
+                        className="announcement-color-dot"
+                        style={{ background: row.color || DEFAULT_ACCENT }}
+                        title={row.color || DEFAULT_ACCENT}
+                        aria-hidden="true"
+                      />
                       {row.image_url ? "🖼️ " : ""}
                       {row.title}
                     </td>
