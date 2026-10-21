@@ -207,6 +207,9 @@ $$;
 -- ---------- 7. List all (admin) ----------
 -- Every announcement, with ACTIVE ones first, then by newest. The app also
 -- highlights active rows; this ordering puts them on top.
+-- Drop first: adding the `color` column changes the OUT/return shape, which
+-- CREATE OR REPLACE cannot do (error 42P13). Safe no-op if absent.
+drop function if exists public.list_announcements();
 create or replace function public.list_announcements()
 returns table (
   id          uuid,
