@@ -3,6 +3,7 @@ import {
   markAnnouncementsSeen,
   loadAnnouncementsForPopup,
 } from "../state/announcements";
+import { DEFAULT_ACCENT, textOn } from "../data/announcementColors";
 
 // Self-contained gate: fetches the active announcements for a logged-in student
 // and shows the pop-up once per login session. Mounted at the app root; renders
@@ -64,9 +65,20 @@ export default function AnnouncementModal({ items, onClose }) {
         </p>
 
         <div className="announcement-list">
-          {items.map((a) => (
-            <article key={a.id} className="announcement-item">
-              <h2 className="announcement-title">{a.title}</h2>
+          {items.map((a) => {
+            const accent = a.color || DEFAULT_ACCENT;
+            return (
+            <article
+              key={a.id}
+              className="announcement-item"
+              style={{ borderLeftColor: accent }}
+            >
+              <h2
+                className="announcement-title"
+                style={{ background: accent, color: textOn(accent) }}
+              >
+                {a.title}
+              </h2>
               {a.image_url ? (
                 <img
                   className="announcement-image"
@@ -79,7 +91,8 @@ export default function AnnouncementModal({ items, onClose }) {
                 <p className="announcement-desc">{a.description}</p>
               ) : null}
             </article>
-          ))}
+            );
+          })}
         </div>
 
         <button type="button" className="primary announcement-dismiss" onClick={dismiss}>

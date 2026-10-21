@@ -34,6 +34,10 @@ create table if not exists public.announcements (
   updated_at  timestamptz not null default now()
 );
 
+-- Accent colour for the student pop-up (hex string, e.g. '#ffd43b').
+-- Safe to re-run on an existing table.
+alter table public.announcements add column if not exists color text;
+
 -- Lock the table: RLS on, no policies -> no direct anon access; RPCs only.
 alter table public.announcements enable row level security;
 
@@ -52,7 +56,8 @@ create or replace function public.create_announcement(
   p_starts_at   text,
   p_ends_at     text,
   p_frequency   text,
-  p_created_by  text
+  p_created_by  text,
+  p_color       text default null
 )
 returns uuid
 language plpgsql
@@ -79,7 +84,7 @@ begin
   end;
 
   insert into public.announcements
-    (title, description, image_url, starts_at, ends_at, frequency, created_by)
+    (title, description, image_url, starts_at, ends_at, frequency, created_by, color)
   values (
     trim(p_title),
     nullif(trim(coalesce(p_description, '')), ''),
@@ -87,7 +92,8 @@ begin
     v_starts,
     v_ends,
     case when p_frequency = 'recurring' then 'recurring' else 'once' end,
-    nullif(trim(coalesce(p_created_by, '')), '')
+    nullif(trim(coalesce(p_created_by, '')), ''),
+    nullif(trim(coalesce(p_color, '')), '')
   )
   returning id into v_id;
 
@@ -105,7 +111,8 @@ create or replace function public.update_announcement(
   p_starts_at   text,
   p_ends_at     text,
   p_frequency   text,
-  p_active      boolean
+  p_active      boolean,
+  p_color       text default null
 )
 returns boolean
 language plpgsql
@@ -138,6 +145,7 @@ begin
     ends_at     = v_ends,
     frequency   = case when p_frequency = 'recurring' then 'recurring' else 'once' end,
     active      = coalesce(p_active, true),
+    color       = nullif(trim(coalesce(p_color, '')), ''),
     updated_at  = now()
   where id = p_id;
 
@@ -205,6 +213,7 @@ returns table (
   title       text,
   description text,
   image_url   text,
+  color       text,
   starts_at   timestamptz,
   ends_at     timestamptz,
   frequency   text,
@@ -219,7 +228,7 @@ security definer
 set search_path = public
 as $$
   select
-    a.id, a.title, a.description, a.image_url,
+    a.id, a.title, a.description, a.image_url, a.color,
     a.starts_at, a.ends_at, a.frequency, a.active,
     (a.active and a.starts_at <= now() and (a.ends_at is null or a.ends_at >= now())) as is_live,
     a.created_by, a.created_at, a.updated_at
@@ -231,8 +240,14 @@ $$;
 
 
 -- ---------- 8. Grants ----------
-grant execute on function public.create_announcement(text, text, text, text, text, text, text) to anon, authenticated;
-grant execute on function public.update_announcement(uuid, text, text, text, text, text, text, boolean) to anon, authenticated;
+-- Drop the older (pre-color) overloads if they exist, so only the current
+-- signatures remain (adding a param via CREATE OR REPLACE makes a NEW overload;
+-- we don't want two versions callable). Safe no-ops if they aren't present.
+drop function if exists public.create_announcement(text, text, text, text, text, text, text);
+drop function if exists public.update_announcement(uuid, text, text, text, text, text, text, boolean);
+
+grant execute on function public.create_announcement(text, text, text, text, text, text, text, text) to anon, authenticated;
+grant execute on function public.update_announcement(uuid, text, text, text, text, text, text, boolean, text) to anon, authenticated;
 grant execute on function public.terminate_announcement(uuid) to anon, authenticated;
 grant execute on function public.delete_announcement(uuid) to anon, authenticated;
 grant execute on function public.list_active_announcements() to anon, authenticated;
@@ -249,6 +264,7 @@ select
   a.title,
   a.description,
   a.image_url,
+  a.color,
   (a.starts_at at time zone 'Asia/Singapore') as starts_at_sgt,
   (a.ends_at   at time zone 'Asia/Singapore') as ends_at_sgt,
   a.frequency,
