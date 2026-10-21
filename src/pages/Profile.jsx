@@ -335,7 +335,7 @@ export default function Profile({
         <p className="login-hint">
           Five random step-by-step questions per section. Your score is
           first-try steps over every part — for example 19/24 is 79%. Each card
-          keeps your first try, then the five best later attempts.
+          shows your first attempt and your best attempt.
         </p>
         <KnowledgeCheckVisual
           topics={checkTopics}
@@ -420,7 +420,7 @@ function KnowledgeCheckVisual({ topics, progress, rows }) {
               <>
                 <div className="kcheck-score-pair">
                   <div>
-                    <span>First</span>
+                    <span>First attempt</span>
                     <strong>
                       {formatKnowledgeCheckScore(firstCorrect, firstTotal)}
                     </strong>
@@ -438,7 +438,7 @@ function KnowledgeCheckVisual({ topics, progress, rows }) {
                     </div>
                   </div>
                   <div>
-                    <span>Later best</span>
+                    <span>Best attempt</span>
                     <strong>
                       {laterBest
                         ? formatKnowledgeCheckScore(
