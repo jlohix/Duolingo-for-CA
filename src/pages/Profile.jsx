@@ -452,15 +452,24 @@ function KnowledgeCheckVisual({ topics, progress, rows }) {
                         ? `${laterBest.correct}/${laterBest.total} steps`
                         : "No retake yet"}
                     </span>
-                    <div className="insight-meter" aria-hidden="true">
-                      <div
-                        className={`insight-fill ${
-                          laterBest
-                            ? scoreKind(laterBest.correct, laterBest.total)
-                            : "starting"
-                        }`}
-                        style={{ width: `${laterPct}%` }}
-                      />
+                    {/* Improvement meter: red = first-attempt level, green =
+                        gain from first to later-best. If later-best is not
+                        above first, only the red (up to later-best) shows. */}
+                    <div className="insight-meter kcheck-improve-meter" aria-hidden="true">
+                      {laterBest ? (
+                        <>
+                          <div
+                            className="insight-fill kcheck-improve-base"
+                            style={{ width: `${Math.min(firstPct, laterPct)}%` }}
+                          />
+                          {laterPct > firstPct ? (
+                            <div
+                              className="insight-fill kcheck-improve-gain"
+                              style={{ width: `${laterPct - firstPct}%` }}
+                            />
+                          ) : null}
+                        </>
+                      ) : null}
                     </div>
                   </div>
                 </div>

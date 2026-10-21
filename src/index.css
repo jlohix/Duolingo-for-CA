@@ -1276,6 +1276,18 @@ html[data-theme="dark"] .hex-spoke {
   background: var(--red);
 }
 
+/* Knowledge-check "Later best" improvement meter: red base (first-attempt
+   level) + green gain segment laid side by side. */
+.kcheck-improve-meter {
+  display: flex;
+}
+.kcheck-improve-base {
+  background: var(--red);
+}
+.kcheck-improve-gain {
+  background: var(--green);
+}
+
 .topbar,
 .lesson-bar {
   display: flex;
