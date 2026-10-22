@@ -676,6 +676,19 @@ export function unlockTopicBySkip(state, topicId) {
 const WALK_SECTION_LABS = {
   5: ["laplace-basics", "laplace-circuit", "transfer-functions"],
   6: ["poles-zeros-stability", "complex-phase"],
+  7: [
+    "network-function-types",
+    "network-responses",
+    "steady-state-response",
+  ],
+  8: [
+    "two-port-basics",
+    "y-parameters",
+    "z-parameters",
+    "h-abcd-parameters",
+    "two-port-properties",
+    "two-port-interconnections",
+  ],
 };
 
 export function walkProgressKeys(topicId) {

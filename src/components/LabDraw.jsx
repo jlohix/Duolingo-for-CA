@@ -10,7 +10,7 @@ function looksMath(value) {
 }
 
 function needsDisplayMath(value) {
-  return /\\(?:d?frac|displaystyle|lim|sum|int|sqrt|left|right)/.test(
+  return /\\(?:d?frac|displaystyle|lim|sum|int|sqrt|left|right|begin\{)/.test(
     String(value ?? "")
   );
 }
@@ -26,7 +26,11 @@ export function ConceptPanel({ title, items, footer }) {
   const notes = footer == null ? [] : Array.isArray(footer) ? footer : [footer];
   return (
     <div className="concept-flow-panel">
-      {title ? <p className="concept-flow-title">{title}</p> : null}
+      {title ? (
+        <p className="concept-flow-title">
+          {looksMath(title) ? <MathText text={title} /> : title}
+        </p>
+      ) : null}
       <div className="concept-flow-body">
         {lines.map((item, i) => (
           <div
@@ -325,7 +329,9 @@ export function Box({ x, y, w, h, cls, title, sub, titleSize = 20, subSize = 12,
     const pad = 8;
     const subBand = sub
       ? mathSub && needsDisplayMath(sub)
-        ? 40
+        ? /\\begin\{/.test(String(sub))
+          ? 64
+          : 40
         : 22
       : 0;
     const mathCls = `${cls} ${titleCls} board-formula`.trim();

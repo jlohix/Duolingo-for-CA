@@ -112,6 +112,7 @@ export function QuickCheckCard({
   options,
   answer,
   why,
+  image,
   selected,
   revealed,
   ok,
@@ -135,6 +136,11 @@ export function QuickCheckCard({
       <p className="qc-prompt">
         <MathText text={prompt} />
       </p>
+      {image ? (
+        <div className="question-image">
+          <img src={image} alt="Circuit diagram" />
+        </div>
+      ) : null}
       <div className="qc-options">
         {LABELS.map((letter) => {
           const key = letter.toLowerCase();
@@ -213,6 +219,7 @@ export function InlineKnowledgeCheck({
       options={layout.options}
       answer={layout.answer}
       why={check.why}
+      image={check.image}
       selected={layout.toDisplay[selected] || ""}
       revealed={revealed}
       ok={ok}

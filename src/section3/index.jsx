@@ -11,7 +11,7 @@ function testLab(id, title, icon, formula, doneBlurb) {
     id: `${id}-test`,
     progressId: id,
     testOnly: true,
-    title: `${title} test`,
+    title: `${title} Test`,
     icon,
     count: `${questions.length} Qs · XP`,
     formula,

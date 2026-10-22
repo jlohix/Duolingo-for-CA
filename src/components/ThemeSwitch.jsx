@@ -1,10 +1,10 @@
 import { useTheme } from "../state/theme";
 
-export default function ThemeSwitch({ compact = false }) {
+export default function ThemeSwitch({ compact = false, className = "" }) {
   const { theme, setTheme } = useTheme();
   return (
     <div
-      className={`theme-switch ${compact ? "compact" : ""}`}
+      className={`theme-switch ${compact ? "compact" : ""} ${className}`.trim()}
       role="group"
       aria-label="Color theme"
     >

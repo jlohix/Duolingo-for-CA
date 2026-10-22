@@ -53,6 +53,8 @@ function ResistorChip({ ohms, onPointerDown, onPick, disabled }) {
 
 export default function DragCircuitLab({
   onExit,
+  onBack,
+  showBack = false,
   onFinished,
   questions = DRAG_CIRCUIT_QUESTIONS,
   walkthrough = null,
@@ -204,6 +206,8 @@ export default function DragCircuitLab({
         practiceLabel="Try the lab"
         skipLabel="Skip walkthrough"
         onExit={onExit}
+        onBack={onBack}
+        showBack={showBack}
         onPractice={() => setStage("lab")}
         onCheck={(outcome) =>
           payGuidedCheck(setProgress, {
@@ -245,10 +249,27 @@ export default function DragCircuitLab({
       onPointerUp={endDrag}
       onPointerCancel={endDrag}
     >
+      {showBack ? (
+        <div className="lesson-close-row">
+          <button type="button" className="ghost" onClick={onExit}>
+            Close
+          </button>
+        </div>
+      ) : null}
       <header className="lesson-bar">
-        <button type="button" className="ghost" onClick={onExit}>
-          Close
-        </button>
+        {showBack ? (
+          <button
+            type="button"
+            className="ghost back-link back-sticky"
+            onClick={onBack || onExit}
+          >
+            ← Back
+          </button>
+        ) : (
+          <button type="button" className="ghost" onClick={onExit}>
+            Close
+          </button>
+        )}
         <p className="lesson-meta">
           {labKindLabel(question.kind)}
           {question.kind !== "nodal" && !pickQuiz
@@ -264,7 +285,7 @@ export default function DragCircuitLab({
               ? ` · +${xpEach} XP`
               : " · practice"}
         </p>
-        <ThemeSwitch compact />
+        <ThemeSwitch compact className={showBack ? "theme-sticky" : ""} />
       </header>
       {hasHardQs && question.level !== "hard" ? (
         <p className="login-hint">

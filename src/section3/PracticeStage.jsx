@@ -18,6 +18,8 @@ export default function PracticeStage({
   xpEach = 0,
   Board,
   onExit,
+  onBack,
+  showBack = false,
   onCheck,
   onDone,
 }) {
@@ -66,19 +68,36 @@ export default function PracticeStage({
 
   return (
     <div className="page drag-lab practice-stage">
+      {showBack ? (
+        <div className="lesson-close-row">
+          <button type="button" className="ghost" onClick={onExit}>
+            Close
+          </button>
+        </div>
+      ) : null}
       <header className="lesson-bar">
-        <button type="button" className="ghost" onClick={onExit}>
-          Close
-        </button>
+        {showBack ? (
+          <button
+            type="button"
+            className="ghost back-link back-sticky"
+            onClick={onBack || onExit}
+          >
+            ← Back
+          </button>
+        ) : (
+          <button type="button" className="ghost" onClick={onExit}>
+            Close
+          </button>
+        )}
         <p className="lesson-meta">
           {progressLabel ? `${progressLabel} · ` : ""}
-          Test · {title}
+          <i>Test</i> · {title}
           {preview ? " · staff preview · no XP" : xpEach ? ` · +${xpEach} XP` : ""}
         </p>
-        <ThemeSwitch compact />
+        <ThemeSwitch compact className={showBack ? "theme-sticky" : ""} />
       </header>
       <section className="practice-shell">
-        <p className="eyebrow">Test</p>
+        <p className="eyebrow"><i>Test</i></p>
         <p className="practice-progress">
           {grouped
             ? `Question ${groupNumber} of ${groups.length}`
@@ -116,3 +135,4 @@ export default function PracticeStage({
     </div>
   );
 }
+

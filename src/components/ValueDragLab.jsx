@@ -22,6 +22,8 @@ export default function ValueDragLab({
   hint = "Hold a chip and drop it on the gap, or tap it.",
   xpHint,
   onExit,
+  onBack,
+  showBack = false,
   onCheck,
   onDone,
 }) {
@@ -137,16 +139,33 @@ export default function ValueDragLab({
       onPointerUp={endDrag}
       onPointerCancel={endDrag}
     >
+      {showBack ? (
+        <div className="lesson-close-row">
+          <button type="button" className="ghost" onClick={onExit}>
+            Close
+          </button>
+        </div>
+      ) : null}
       <header className="lesson-bar">
-        <button type="button" className="ghost" onClick={onExit}>
-          Close
-        </button>
+        {showBack ? (
+          <button
+            type="button"
+            className="ghost back-link back-sticky"
+            onClick={onBack || onExit}
+          >
+            ← Back
+          </button>
+        ) : (
+          <button type="button" className="ghost" onClick={onExit}>
+            Close
+          </button>
+        )}
         <p className="lesson-meta">
           {progressLabel ? `${progressLabel} · ` : ""}
           {title}, drag {index + 1} of {queue.length}
           {xpHint ? ` · ${xpHint}` : ""}
         </p>
-        <ThemeSwitch compact />
+        <ThemeSwitch compact className={showBack ? "theme-sticky" : ""} />
       </header>
       {reviewOpen ? (
         <ReviewGate
@@ -231,3 +250,4 @@ export default function ValueDragLab({
     </div>
   );
 }
+

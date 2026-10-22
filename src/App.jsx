@@ -62,6 +62,7 @@ import NonInvertingOpAmpLesson from "./pages/NonInvertingOpAmpLesson";
 import SourceTransformationLesson from "./pages/SourceTransformationLesson";
 import { SECTION_WALKS } from "./walks";
 import Results from "./pages/Results";
+import S78Gallery from "./debug/S78Gallery";
 
 const QuestionPack = lazy(() => import("./pages/QuestionPack"));
 // Admin is lazy-loaded so its analytics dashboard (and the Recharts library it
@@ -108,6 +109,13 @@ export default function App() {
     isAdmin: false,
     consentPending: false,
   });
+
+  if (
+    typeof window !== "undefined" &&
+    new URLSearchParams(window.location.search).has("boardqa")
+  ) {
+    return <S78Gallery />;
+  }
 
   const showChatbot =
     // Only show the tutor once a user is actually logged in. On the login /
@@ -166,7 +174,17 @@ function AppBody({ onGateChange }) {
   const [lesson, setLesson] = useState(null);
   const [paperPack, setPaperPack] = useState(null);
   const [secWalk, setSecWalk] = useState(null);
+  const [homeSection, setHomeSection] = useState(null);
   const [skipTarget, setSkipTarget] = useState(null);
+
+  // Entering any subsection scrolls to the top of the page. "home" is excluded
+  // because the ladder/grid restores its own last scroll position.
+  useEffect(() => {
+    if (screen && screen !== "home") {
+      window.scrollTo(0, 0);
+    }
+  }, [screen, secWalk]);
+
   const [kcheckTopic, setKcheckTopic] = useState(null);
   const [kcheckRun, setKcheckRun] = useState(0);
   const [summary, setSummary] = useState(null);
@@ -604,6 +622,11 @@ function AppBody({ onGateChange }) {
     progress,
     setProgress,
     preview,
+    showBack: true,
+    onBack: () => {
+      setHomeSection(1);
+      setScreen("home");
+    },
     onExit: () => setScreen("home"),
     onFinished: (result) => {
       setSecWalk(null);
@@ -840,6 +863,13 @@ function AppBody({ onGateChange }) {
           preview={preview}
           onExit={() => {
             setSecWalk(null);
+            setHomeSection(null);
+            setScreen("home");
+          }}
+          onBack={() => {
+            const sec = secWalk.section;
+            setSecWalk(null);
+            setHomeSection(sec);
             setScreen("home");
           }}
           onContinue={(id) => {
@@ -874,16 +904,22 @@ function AppBody({ onGateChange }) {
 
   if (screen === "lesson" && lesson) {
     const bank = lesson.bankId ? questionBankForId(lesson.bankId) : null;
+    const lessonSection = bank?.topicId || lesson.topicId;
     return (
       <Lesson
         allQuestions={questions}
-        topicId={bank?.topicId || lesson.topicId}
+        topicId={lessonSection}
         difficulty={lesson.difficulty}
         bankId={bank?.id}
         bankTitle={bank?.title}
         progress={progress}
         setProgress={setProgress}
         preview={isAdmin(session)}
+        showBack={true}
+        onBack={() => {
+          setHomeSection(lessonSection);
+          setScreen("home");
+        }}
         onExit={() => setScreen("home")}
         onFinished={(result) => {
           setSummary(result);
@@ -942,6 +978,7 @@ function AppBody({ onGateChange }) {
       counts={counts}
       bankCounts={bankCounts}
       pastPapers={pastPapers}
+      openSection={homeSection}
       onStart={(topicId, difficulty) => {
         setLesson({ topicId, difficulty });
         setScreen("lesson");

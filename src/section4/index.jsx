@@ -1,10 +1,12 @@
 import WalkLesson, { makeCatalog } from "../components/WalkLesson";
+import Lesson from "../pages/Lesson";
 import Section4Schematic from "./Schematics";
 import FreeCQuizDragBoard from "./FreeCQuizDragBoard";
 import FreeLQuizDragBoard from "./FreeLQuizDragBoard";
 import StepCQuizDragBoard from "./StepCQuizDragBoard";
 import StepLQuizDragBoard from "./StepLQuizDragBoard";
 import { FREEC, FREEL, STEPRC, STEPRL } from "./labs";
+import { FOC_EASY, FOC_AVERAGE, FOC_CHALLENGING } from "./focLabs";
 import {
   FREEC_QUIZ,
   FREEC_QUIZ_DRAG,
@@ -39,13 +41,14 @@ function testLab(id, title, icon, formula, doneBlurb) {
     id: `${id}-test`,
     progressId: id,
     testOnly: true,
-    title: `${title} test`,
+    title: `${title} Test`,
     icon,
     count: `${testGroupCount(questions)} Qs · XP`,
     formula,
     doneBlurb,
     standalonePractice: questions,
     PracticeBoard: AdvancedPracticeBoard,
+    showBack: true,
   };
 }
 
@@ -67,21 +70,21 @@ export const SECTION4_LABS = [
     doneBlurb: "Reduce the network to one R if you need to.",
     steps: FREEC.steps,
     practice: FREEC.practice,
+    showBack: true,
   },
   {
     id: "freecq",
-    title: "Source-Free Capacitor Practice",
+    progressId: "freecq",
+    testOnly: true,
+    title: "Source-Free Capacitor Test",
     icon: "C?",
-    count: "5 quiz + 5 drag",
+    count: `${FREEC_QUIZ.length} Qs · XP`,
     boardHint: "",
     formula: "$v(t)=v(0)e^{-t/RC}$",
     doneBlurb: "Use the R that C actually sees. τ is the 1/e time.",
-    practice: FREEC_QUIZ,
-    drag: FREEC_QUIZ_DRAG,
-    DragBoard: FreeCQuizDragBoard,
-    dragPrompt: freeCQuizDragPrompt,
-    dragLabel: freeCQuizDragLabel,
-    dragHint: "Hold a value and drop it on the gap, or tap it.",
+    standalonePractice: FREEC_QUIZ,
+    PracticeBoard: Section4Schematic,
+    showBack: true,
   },
   {
     id: "freel",
@@ -98,6 +101,7 @@ export const SECTION4_LABS = [
     dragPrompt: freeLQuizDragPrompt,
     dragLabel: freeLQuizDragLabel,
     dragHint: "Hold a value and drop it on the gap, or tap it.",
+    showBack: true,
   },
   testLab(
     "freel",
@@ -121,6 +125,7 @@ export const SECTION4_LABS = [
     dragPrompt: stepCQuizDragPrompt,
     dragLabel: stepCQuizDragLabel,
     dragHint: "Hold a value and drop it on the gap, or tap it.",
+    showBack: true,
   },
   testLab(
     "stepc",
@@ -144,6 +149,7 @@ export const SECTION4_LABS = [
     dragPrompt: stepLQuizDragPrompt,
     dragLabel: stepLQuizDragLabel,
     dragHint: "Hold a value and drop it on the gap, or tap it.",
+    showBack: true,
   },
   testLab(
     "stepl",
@@ -152,12 +158,61 @@ export const SECTION4_LABS = [
     "$i_L(t)=i_L(\\infty)+[i_L(0^+)-i_L(\\infty)]e^{-t/\\tau}$",
     "iL cannot jump. Final value from the DC circuit, τ = L/Rth."
   ),
+  {
+    id: "foc-easy",
+    title: "Easy",
+    icon: "1",
+    count: "Step-by-step question",
+    boardHint: "",
+    formula: "$v_C(t)=v_C(0)e^{-t/\\tau}$",
+    doneBlurb: "Source-free RC discharge: voltage decays through one R.",
+    pack: FOC_EASY,
+    showBack: true,
+  },
+  {
+    id: "foc-average",
+    title: "Average",
+    icon: "2",
+    count: "Step-by-step question",
+    boardHint: "",
+    formula: "$i_L(t)=i_L(0)e^{-t/\\tau},\\ \\tau=L/R$",
+    doneBlurb: "Source-free RL discharge: current decays, cannot jump.",
+    pack: FOC_AVERAGE,
+    showBack: true,
+  },
+  {
+    id: "foc-challenging",
+    title: "Challenging",
+    icon: "3",
+    count: "Step-by-step question",
+    boardHint: "",
+    formula: "$v_C(t)=v_C(\\infty)+[v_C(0)-v_C(\\infty)]e^{-t/\\tau}$",
+    doneBlurb: "RC step response: charge from initial toward final value.",
+    pack: FOC_CHALLENGING,
+    showBack: true,
+  },
 ];
 
 export const section4Catalog = makeCatalog("First-order circuits", SECTION4_LABS);
 
 export default function Section4Lesson({ labId, onExit, onContinue, ...rest }) {
   const lab = section4Catalog.getLab(labId);
+  if (lab.pack) {
+    // FOC step-by-step subsections run as a quiz (progress bar + leave prompt).
+    return (
+      <Lesson
+        pack={lab.pack}
+        topicId={4}
+        progress={rest.progress}
+        setProgress={rest.setProgress}
+        preview={rest.preview}
+        showBack={rest.showBack !== undefined ? rest.showBack : lab.showBack}
+        onBack={rest.onBack}
+        onExit={onExit}
+        onFinished={rest.onFinished}
+      />
+    );
+  }
   return (
     <WalkLesson
       labId={labId}

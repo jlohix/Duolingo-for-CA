@@ -477,7 +477,7 @@ const WARMUPS = {
       );
     },
   ],
-  8: [
+  9: [
     () => {
       const vm = pick([6, 8, 10, 12, 14, 20]);
       const rms = Math.round((vm / Math.SQRT2) * 100) / 100;
@@ -599,18 +599,18 @@ const PRIMERS = {
     ],
   },
   7: {
-    title: "Network functions",
+    title: "Network Functions",
     intro:
-      "$H(s)$ is output over input with zero initial conditions. Two-port parameters are just organized ways to write port voltages and currents.",
+      "A network function relates a chosen input to a chosen response with zero initial conditions. The same circuit can have several useful network functions.",
     formulas: [
-      { name: "Transfer function", expr: "$H(s) = Y(s)/X(s)$ (zero ICs)" },
-      { name: "Voltage gain", expr: "$H(s) = V_{out}(s)/V_{in}(s)$" },
-      { name: "Impedance function", expr: "$Z(s) = V(s)/I(s)$" },
-      { name: "One-port", expr: "driving-point $V/I$ at the same port" },
+      { name: "Transfer function", expr: "$H(s)=Y(s)/X(s)$" },
+      { name: "Driving-point impedance", expr: "$Z(s)=V(s)/I(s)$" },
+      { name: "Driving-point admittance", expr: "$Y(s)=I(s)/V(s)$" },
+      { name: "Step steady state", expr: "$A H(0)$ for a stable circuit" },
     ],
   },
-  8: {
-    title: "Frequency domain",
+  9: {
+    title: "Frequency Domain",
     intro:
       "Sinusoids become phasors. Use RMS for average power. Superposition if DC and AC sources share a circuit.",
     formulas: [

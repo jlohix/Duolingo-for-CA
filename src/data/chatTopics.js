@@ -26,10 +26,9 @@ export const CHAT_TOPICS = [
   { id: 4, name: "First-order circuits" },
   { id: 5, name: "Laplace Transform" },
   { id: 6, name: "Poles and Zeros" },
-  { id: 7, name: "Network functions" },
-  { id: 8, name: "Frequency domain" },
-  // Future topics go here, e.g.:
-  // { id: 8, name: "Two-port networks" },
+  { id: 7, name: "Network Functions" },
+  { id: 8, name: "Two-Port Networks" },
+  { id: 9, name: "Frequency Domain" },
 ];
 
 // Keyword rules over text — MIRROR of the Edge Function's KEYWORD_RULES.
@@ -37,9 +36,11 @@ export const CHAT_TOPICS = [
 export const KEYWORD_RULES = [
   [/\b(op[-\s]?amp|opamp|operational amplifier|inverting|non[-\s]?inverting|feedback)\b/i, "Op-amps"],
   [/\b(pole|zero|stability|left half plane|right half plane|complex plane|phase angle|euler|sigma\s*\+\s*j\s*omega)\b/i, "Poles and Zeros"],
+  [/\b(two[-\s]?port|one[-\s]?port|port condition|z[-\s]?parameter|impedance parameter|y[-\s]?parameter|admittance parameter|h[-\s]?parameter|hybrid parameter|ABCD|transmission parameter|reciproc(al|ity)|symmetr(y|ical network)|cascade connection|series two[-\s]?port|parallel two[-\s]?port)\b/i, "Two-Port Networks"],
+  [/\b(network function|driving[-\s]?point|impulse response|transfer impedance|transfer admittance|voltage transfer ratio|current transfer ratio)\b/i, "Network Functions"],
+  [/H\s*\(\s*0\s*\)/i, "Network Functions"],
   [/\b(laplace|s[-\s]?domain|inverse transform|partial fraction|initial condition|transfer function)\b/i, "Laplace Transform"],
-  [/\b(network function|two[-\s]?port|one[-\s]?port|transfer parameter|network parameter)\b/i, "Network functions"],
-  [/\b(phasor|sinusoid|impedance|admittance|reactance|ac power|rms|power factor|three[-\s]?phase|frequency[-\s]?domain)\b/i, "Frequency domain"],
+  [/\b(phasor|sinusoid|impedance|admittance|reactance|ac power|rms|power factor|three[-\s]?phase|frequency[-\s]?domain)\b/i, "Frequency Domain"],
   [/\b(first[-\s]?order|source[-\s]?free|natural response|time constant|charging|discharging)\b/i, "First-order circuits"],
   [/\b(transient|capacitor|inductor|second[-\s]?order|rc circuit|rl circuit|rlc)\b/i, "Transients"],
   [/\b(ohm|kcl|kvl|kirchhoff|nodal|mesh|supernode|supermesh|thevenin|norton|superposition|source transformation|max(imum)? power|voltage divider|current divider)\b/i, "Basic laws"],

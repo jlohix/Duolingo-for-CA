@@ -54,6 +54,8 @@ export default function LabTeach({
   onPractice,
   onChain,
   onCheck,
+  onBack,
+  showBack = false,
 }) {
   const [index, setIndex] = useState(0);
   const [selected, setSelected] = useState("");
@@ -108,20 +110,42 @@ export default function LabTeach({
 
   return (
     <div className="page drag-lab opamp-lab">
+      {showBack ? (
+        <div className="lesson-close-row">
+          <button type="button" className="ghost" onClick={onExit}>
+            Close
+          </button>
+        </div>
+      ) : null}
       <header className="lesson-bar">
-        <button type="button" className="ghost" onClick={onExit}>
-          Close
-        </button>
+        {showBack ? (
+          <button
+            type="button"
+            className="ghost back-link back-sticky"
+            onClick={onBack || onExit}
+          >
+            ← Back
+          </button>
+        ) : (
+          <button type="button" className="ghost" onClick={onExit}>
+            Close
+          </button>
+        )}
         <p className="lesson-meta">
           {progressLabel ? `${progressLabel} · ` : ""}
           {title}, step {index + 1} of {steps.length}
         </p>
-        <ThemeSwitch compact />
+        <ThemeSwitch compact className={showBack ? "theme-sticky" : ""} />
       </header>
       {skipLabel ? (
         <button type="button" className="ghost back-link" onClick={onPractice}>
           {skipLabel}
         </button>
+      ) : null}
+      {step.image ? (
+        <div className="question-image">
+          <img src={step.image} alt={step.imageAlt || "Circuit diagram"} />
+        </div>
       ) : null}
       {Schematic && !step.hideBoard ? (
         <div className="circuit-board">
@@ -176,3 +200,4 @@ export default function LabTeach({
     </div>
   );
 }
+

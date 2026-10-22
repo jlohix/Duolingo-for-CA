@@ -59,6 +59,21 @@ const SECTION6 = [
   ["complex-phase", "Complex Numbers and Phase Angles"],
 ];
 
+const SECTION7 = [
+  ["network-function-types", "Network Functions and Types"],
+  ["network-responses", "Impulse and Step Response"],
+  ["steady-state-response", "DC and AC Steady-State"],
+];
+
+const SECTION8 = [
+  ["two-port-basics", "Ports and Two-Port Basics"],
+  ["y-parameters", "Y Parameters"],
+  ["z-parameters", "Z Parameters"],
+  ["h-abcd-parameters", "h and ABCD Parameters"],
+  ["two-port-properties", "Relations, Reciprocity and Symmetry"],
+  ["two-port-interconnections", "Interconnecting Two-Ports"],
+];
+
 function fromPairs(section, pairs) {
   return pairs.map(([idOrKey, title]) => {
     const key = idOrKey.startsWith("walk-") || idOrKey.startsWith("test-")
@@ -80,6 +95,8 @@ export const WALK_TITLES = [
   ...fromPairs(4, SECTION4),
   ...fromPairs(5, SECTION5),
   ...fromPairs(6, SECTION6),
+  ...fromPairs(7, SECTION7),
+  ...fromPairs(8, SECTION8),
 ];
 
 const TITLE_BY_KEY = new Map(WALK_TITLES.map((row) => [row.key, row]));

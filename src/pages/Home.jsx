@@ -1,4 +1,4 @@
-import { Fragment, useState } from "react";
+import { Fragment, useEffect, useLayoutEffect, useState } from "react";
 import { DIFFICULTIES, hasTopicQuiz, lessonKey } from "../data/topics";
 import {
   QUESTION_BANKS,
@@ -12,6 +12,8 @@ import { SECTION3_LABS } from "../section3/index.jsx";
 import { SECTION4_LABS } from "../section4/index.jsx";
 import { SECTION5_LABS } from "../section5/index.jsx";
 import { SECTION6_LABS } from "../section6/index.jsx";
+import { SECTION7_LABS } from "../section7/index.jsx";
+import { SECTION8_LABS } from "../section8/index.jsx";
 import {
   isTopicUnlocked,
   SKIP_QUIZ_SIZE,
@@ -35,6 +37,21 @@ function DoodlePage({ children }) {
       <LabDoodles />
       {children}
     </div>
+  );
+}
+
+// Remembers the last scroll position of the Section 4 ladder, so returning to
+// it (via Back from a subsection, or re-entering from Your Path) restores the
+// exact spot instead of jumping to the top/middle. Survives Home remounts.
+const sectionScrollStore = {};
+
+// Render a lab title, italicising the word "Test" wherever it appears.
+function renderTitleWithTest(title) {
+  const text = String(title ?? "");
+  if (!/\bTest\b/.test(text)) return text;
+  const parts = text.split(/(\bTest\b)/g);
+  return parts.map((part, i) =>
+    part === "Test" ? <i key={i}>Test</i> : <Fragment key={i}>{part}</Fragment>
   );
 }
 
@@ -373,18 +390,19 @@ function SectionWalks({
         const done = Boolean(progress?.completed?.includes(key));
         const canOpen = unlocked;
         const banks = banksForWalkthroughKey(key);
+        const isTest = /\bTest\b/.test(String(lab.title || ""));
         return (
           <Fragment key={lab.id}>
             <button
               type="button"
               className={`node ${done ? "done" : ""} ${
                 canOpen ? "" : "off"
-              }`}
+              } ${isTest ? "is-test" : ""}`.replace(/\s+/g, " ").trim()}
               disabled={!canOpen}
               onClick={() => onOpen(lab.id)}
             >
               <span className="node-icon">{done ? "✓" : lab.icon}</span>
-              <span className="node-name">{lab.title}</span>
+              <span className="node-name">{renderTitleWithTest(lab.title)}</span>
               <span className="node-count">{lab.count}</span>
             </button>
             {banks.map((bank) => (
@@ -412,6 +430,8 @@ const SECTION_LAB_LISTS = {
   4: SECTION4_LABS,
   5: SECTION5_LABS,
   6: SECTION6_LABS,
+  7: SECTION7_LABS,
+  8: SECTION8_LABS,
 };
 
 function TopicLadder({
@@ -434,7 +454,11 @@ function TopicLadder({
     <div className="page">
       <header className="topbar">
         <div>
-          <button type="button" className="ghost back-link" onClick={onBack}>
+          <button
+            type="button"
+            className="ghost back-link back-sticky"
+            onClick={onBack}
+          >
             ← Back
           </button>
           <p className="eyebrow">Section {index}</p>
@@ -535,9 +559,31 @@ export default function Home({
   onKnowledgeCheck,
   questions = [],
   allOpen = false,
+  openSection = null,
 }) {
-  const [section, setSection] = useState(null);
+  const [section, setSection] = useState(openSection);
   const [eventOpen, setEventOpen] = useState(false);
+
+  // Key for the current Home view: "path" is the Your Path grid, a number is
+  // that section's ladder.
+  const scrollKey = section == null ? "path" : section;
+
+  // Remember the scroll position of the current view continuously, so leaving
+  // and returning restores the exact spot.
+  useEffect(() => {
+    const save = () => {
+      sectionScrollStore[scrollKey] = window.scrollY;
+    };
+    window.addEventListener("scroll", save, { passive: true });
+    return () => window.removeEventListener("scroll", save);
+  }, [scrollKey]);
+
+  // When a view renders, restore its remembered position for the Your Path
+  // grid and every section ladder, so Back lands where you last were.
+  useLayoutEffect(() => {
+    const y = sectionScrollStore[scrollKey] || 0;
+    window.scrollTo(0, y);
+  }, [scrollKey]);
   const firstLockedIndex = allOpen
     ? -1
     : topics.findIndex(
@@ -575,7 +621,7 @@ export default function Home({
               ← Back
             </button>
             <p className="eyebrow">Exam practice</p>
-            <h1>Past year papers</h1>
+            <h1>Past Year Papers</h1>
           </div>
         </header>
         {pastPapers.length === 0 ? (
@@ -693,7 +739,7 @@ export default function Home({
       )}
       <div className="section-list">
         {topics.map((topic, index) => {
-          const comingSoon = topic.id >= 8;
+          const comingSoon = topic.id >= 9;
           const unlocked =
             !comingSoon &&
             (allOpen ||
@@ -731,7 +777,7 @@ export default function Home({
         })}
         <SectionCard
           kicker="Exam practice"
-          title="Past year papers"
+          title="Past Year Papers"
           blurb={
             pastPapers.length
               ? `${pastPapers.length} ${pastPapers.length === 1 ? "paper" : "papers"} ready to sit.`

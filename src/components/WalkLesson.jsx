@@ -23,7 +23,7 @@ function resolvePracticeView(question, lab, practiceView) {
   return step?.view || null;
 }
 
-function PracticeView({ title, progressLabel, practice, Schematic, boardHint, practiceView, lab, lastLabel = "See score", onExit, onDone, onCheck }) {
+function PracticeView({ title, progressLabel, practice, Schematic, boardHint, practiceView, lab, lastLabel = "See score", onExit, onBack, showBack = false, onDone, onCheck }) {
   const originalTotal = practice.length;
   const [queue, setQueue] = useState(practice);
   const [index, setIndex] = useState(0);
@@ -81,15 +81,32 @@ function PracticeView({ title, progressLabel, practice, Schematic, boardHint, pr
 
   return (
     <div className="page drag-lab opamp-lab">
+      {showBack ? (
+        <div className="lesson-close-row">
+          <button type="button" className="ghost" onClick={onExit}>
+            Close
+          </button>
+        </div>
+      ) : null}
       <header className="lesson-bar">
-        <button type="button" className="ghost" onClick={onExit}>
-          Close
-        </button>
+        {showBack ? (
+          <button
+            type="button"
+            className="ghost back-link back-sticky"
+            onClick={onBack || onExit}
+          >
+            ← Back
+          </button>
+        ) : (
+          <button type="button" className="ghost" onClick={onExit}>
+            Close
+          </button>
+        )}
         <p className="lesson-meta">
           {progressLabel ? `${progressLabel} · ` : ""}
           {title}, try {index + 1} of {queue.length}
         </p>
-        <ThemeSwitch compact />
+        <ThemeSwitch compact className={showBack ? "theme-sticky" : ""} />
       </header>
       {reviewOpen ? (
         <ReviewGate
@@ -138,6 +155,7 @@ export default function WalkLesson({
   Schematic,
   onExit,
   onContinue,
+  onBack,
   topicId,
   preview = false,
   progress,
@@ -311,6 +329,8 @@ export default function WalkLesson({
         labelFor={lab.dragLabel}
         hint={lab.dragHint}
         onExit={onExit}
+        onBack={onBack}
+        showBack={Boolean(lab.showBack) || Boolean(onBack)}
         onCheck={payCheck}
         onDone={(ok, total) => {
           finishWalk({
@@ -333,6 +353,8 @@ export default function WalkLesson({
         xpEach={standaloneXp}
         Board={lab.PracticeBoard}
         onExit={onExit}
+        onBack={onBack}
+        showBack={Boolean(lab.showBack) || Boolean(onBack)}
         onCheck={(outcome) =>
           payGuidedCheck(setProgress, {
             preview,
@@ -360,6 +382,8 @@ export default function WalkLesson({
         lab={lab}
         lastLabel={hasDrag ? "Drag values" : "See score"}
         onExit={onExit}
+        onBack={onBack}
+        showBack={Boolean(lab.showBack) || Boolean(onBack)}
         onCheck={payCheck}
         onDone={afterPractice}
       />
@@ -375,6 +399,8 @@ export default function WalkLesson({
       steps={lab.steps}
       Schematic={Schematic}
       boardHint={lab.boardHint}
+      onBack={onBack}
+      showBack={Boolean(lab.showBack) || Boolean(onBack)}
       practiceLabel={hasPractice ? "Try a few" : hasDrag ? "Drag values" : "Finish"}
       skipLabel={
         hasPractice
@@ -410,3 +436,7 @@ export function makeCatalog(label, labs) {
     },
   };
 }
+
+
+
+

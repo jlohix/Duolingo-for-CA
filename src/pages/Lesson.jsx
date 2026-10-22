@@ -30,6 +30,8 @@ export default function Lesson({
   progress,
   setProgress,
   onExit,
+  onBack,
+  showBack = false,
   onFinished,
   preview = false,
   pack = null,
@@ -68,6 +70,7 @@ export default function Lesson({
     familyTotal,
   });
   const [leaveOpen, setLeaveOpen] = useState(false);
+  const [leaveTo, setLeaveTo] = useState("exit");
   const [stage, setStage] = useState(
     paperMode || bankMode ? "quiz" : "teach"
   );
@@ -207,15 +210,32 @@ export default function Lesson({
 
   return (
     <div className="page lesson">
+      {showBack ? (
+        <div className="lesson-close-row">
+          <button type="button" className="ghost" onClick={() => { setLeaveTo("exit"); setLeaveOpen(true); }}>
+            Close
+          </button>
+        </div>
+      ) : null}
       <header className="lesson-bar">
-        <button type="button" className="ghost" onClick={() => setLeaveOpen(true)}>
-          Close
-        </button>
+        {showBack ? (
+          <button
+            type="button"
+            className="ghost back-link back-sticky"
+            onClick={() => { setLeaveTo("back"); setLeaveOpen(true); }}
+          >
+            ← Back
+          </button>
+        ) : (
+          <button type="button" className="ghost" onClick={() => { setLeaveTo("exit"); setLeaveOpen(true); }}>
+            Close
+          </button>
+        )}
         <div className="meter">
           <div className="meter-fill" style={{ width: `${meter}%` }} />
         </div>
         <StreakChip progress={progress} />
-        <ThemeSwitch compact />
+        <ThemeSwitch compact className={showBack ? "theme-sticky" : ""} />
       </header>
       <p className="lesson-meta">
         {metaBits.join(" · ")}
@@ -271,7 +291,7 @@ export default function Lesson({
       <CloseWarning
         open={leaveOpen}
         onStay={() => setLeaveOpen(false)}
-        onLeave={onExit}
+        onLeave={leaveTo === "back" && onBack ? onBack : onExit}
         preview={preview}
       />
     </div>

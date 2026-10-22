@@ -4,9 +4,10 @@ const TOPIC_HINTS = {
   3: "Write the time-constant or phasor relationship first, then solve for the asked value.",
   4: "Use ideal op-amp rules: no input current, and the input terminals are at the same voltage when linear.",
   5: "Replace elements with s-domain models, then solve the circuit algebra in s.",
-  6: "Find H(s) = output / input with zero initial conditions, or use the two-port parameters.",
-  7: "Write the port equations for the parameter set you need (Y, Z, h, or ABCD), then read the matrix from the coefficients.",
-  8: "Work in the frequency domain: convert impedances and sources, then use RMS or superposition if needed.",
+  6: "Poles are denominator roots and zeros are numerator roots. Left-half-plane poles decay.",
+  7: "Choose the input and the response, then write H(s)=Y(s)/X(s) with zero initial conditions.",
+  8: "Write the port equations for the parameter set you need (Y, Z, h, or ABCD), then read the matrix from the coefficients.",
+  9: "Work in the frequency domain: convert impedances and sources, then use RMS or superposition if needed.",
 };
 
 function sentences(text) {

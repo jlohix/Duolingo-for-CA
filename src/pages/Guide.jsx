@@ -5,7 +5,7 @@ const STEPS = [
   },
   {
     title: "Learn path",
-    text: "Open Learn in the sidebar. You see sections as cards: Basic laws, Op-amps, Transients, First-order circuits, Laplace Transform, Poles and Zeros, Network functions, and Frequency domain. Walkthroughs are optional. Every section with lessons is already open — play Easy, Average, and Challenging in any order. Under Open on each section there is a Knowledge check: five random step-by-step questions from that section. Your score is first-try steps over every part of those five — if four questions have 5 steps and one has 4, that is 24 parts, so 19/24 is 79%. Each attempt draws a new random five, and skips the set you just did when the section has extras. Your first percent is saved, and later tries are tracked separately — Learn and Profile show the best later percent. The finish screen lists Question 1, Question 2, and so on, each with first-try steps over that question’s length. Frequency domain is coming soon. Basic laws has Ohm through Superposition walkthroughs and banks. Op-amps has the op-amp walkthroughs. Laplace Transform and Poles and Zeros are walkthroughs; each walkthrough ends on its own complete screen. Network functions has two-port Easy through Challenging questions. Past year papers sit at the bottom of Learn for exam practice.",
+    text: "Open Learn in the sidebar. You see sections as cards: Basic laws, Op-amps, Transients, First-order circuits, Laplace Transform, Poles and Zeros, Network Functions, Two-Port Networks, and Frequency Domain. Walkthroughs are optional. Every section with lessons is already open — play Easy, Average, and Challenging in any order. Under Open on each section there is a Knowledge check: five random step-by-step questions from that section. Your score is first-try steps over every part of those five — if four questions have 5 steps and one has 4, that is 24 parts, so 19/24 is 79%. Each attempt draws a new random five, and skips the set you just did when the section has extras. Your first percent is saved, and later tries are tracked separately — Learn and Profile show the best later percent. The finish screen lists Question 1, Question 2, and so on, each with first-try steps over that question’s length. Frequency Domain is coming soon. Basic laws has Ohm through Superposition walkthroughs and banks. Op-amps has the op-amp walkthroughs. Laplace Transform and Poles and Zeros are walkthroughs; each walkthrough ends on its own complete screen. Network Functions and Two-Port Networks have walkthroughs. Two-Port Networks also contains the existing Easy through Challenging step-by-step question bank and its Knowledge Check. Past year papers sit at the bottom of Learn for exam practice.",
   },
   {
     title: "Lessons",
@@ -21,7 +21,7 @@ const STEPS = [
   },
   {
     title: "Skip a locked topic",
-    text: "Sections 1–7 are already open, so you do not need a skip quiz. Frequency domain stays coming soon.",
+    text: "Sections 1–8 are already open, so you do not need a skip quiz. Frequency Domain stays coming soon.",
   },
   {
     title: "Profile and Progress",
