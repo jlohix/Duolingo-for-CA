@@ -3,6 +3,9 @@ import ThemeSwitch from "../components/ThemeSwitch";
 import StreakCelebrate from "../components/StreakCelebrate";
 import WalkRating from "../components/WalkRating";
 import { knowledgeCheckPercent } from "../state/progress";
+import BrainScorecard from "../components/BrainScorecard";
+import BrainReport from "../components/BrainReport";
+import { BRAIN_REMARK_BANDS } from "../data/brainVerdict";
 
 export default function Results({
   summary,
@@ -14,6 +17,13 @@ export default function Results({
 }) {
   const skip = summary.kind === "skip";
   const kcheck = summary.kind === "kcheck";
+  const brain = summary.kind === "brain";
+  const [remarkBand, setRemarkBand] = useState("run");
+  const remarkMarks =
+    remarkBand === "run"
+      ? summary.correct
+      : BRAIN_REMARK_BANDS.find((band) => band.id === remarkBand)?.marks ??
+        summary.correct;
   const failedSkip = skip && !summary.passed;
   const title = skip
     ? failedSkip
@@ -25,7 +35,9 @@ export default function Results({
         ? "Walkthrough completed"
         : summary.kind === "lab"
           ? "Lab complete"
-          : "Lesson complete";
+          : brain
+            ? "Your marks"
+            : "Lesson complete";
   const showStreak = Boolean(summary.streakGrew);
   const finalStreak = summary.streak ?? 0;
   const [streakShown, setStreakShown] = useState(
@@ -93,11 +105,41 @@ export default function Results({
           onTick={onTick}
         />
       ) : null}
-      <ul className="stats">
+      {brain && summary.preview ? (
+        <div className="staff-remarks">
+          <p>Staff preview. Tap a band to see that remark. Nothing is saved.</p>
+          <div className="staff-remark-row">
+            <button
+              type="button"
+              className={remarkBand === "run" ? "on" : ""}
+              onClick={() => setRemarkBand("run")}
+            >
+              This run · {summary.correct}
+            </button>
+            {BRAIN_REMARK_BANDS.map((band) => (
+              <button
+                key={band.id}
+                type="button"
+                className={remarkBand === band.id ? "on" : ""}
+                onClick={() => setRemarkBand(band.id)}
+              >
+                {band.label}
+              </button>
+            ))}
+          </div>
+        </div>
+      ) : null}
+      {brain ? (
+        <BrainScorecard correct={remarkMarks} total={summary.total} />
+      ) : null}
+      {brain ? <BrainReport rows={summary.brainReport} /> : null}
+      <ul className={`stats${brain ? " stats-aside" : ""}`}>
+        {brain ? null : (
         <li>
           <strong>{kcheck ? `${kcheckPct}%` : summary.correct}</strong>
           <span>{kcheck ? "score" : "correct"}</span>
         </li>
+        )}
         {kcheck ? (
           <li>
             <strong>

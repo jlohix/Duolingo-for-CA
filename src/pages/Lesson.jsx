@@ -5,8 +5,9 @@ import {
   isAnswerCorrect,
   shuffle,
 } from "../data/loadQuestions";
+import { brainSectionReport } from "../data/brainVerdict";
 import { DIFFICULTIES, TOPICS, lessonKey } from "../data/topics";
-import { bankLessonKey } from "../data/questionBanks";
+import { bankLessonKey, questionBankForId } from "../data/questionBanks";
 import { addXp, completeLesson, visibleStreak, wouldExtendStreak, xpForCorrect, xpForLessonBonus, recordFirstTry } from "../state/progress";
 import { useQuizQueue } from "../hooks/useQuizQueue";
 import QuestionCard from "../components/QuestionCard";
@@ -113,7 +114,12 @@ export default function Lesson({
     : bankMode
       ? bankTitle
       : topic?.name;
-  const difficultyName = paperMode ? "Past paper" : diff?.name;
+  const bankMeta = bankMode ? questionBankForId(bankId) : null;
+  const difficultyName = paperMode
+    ? "Past paper"
+    : bankMeta?.singleSet
+      ? "Conceptual"
+      : diff?.name;
 
   if (stage === "teach") {
     return (
@@ -129,11 +135,16 @@ export default function Lesson({
   }
 
   function finish() {
+    const report = bankMeta?.singleSet
+      ? brainSectionReport(initial, quiz.firstPassIds)
+      : undefined;
     if (preview) {
       onFinished({
         status: "complete",
+        kind: bankMeta?.singleSet ? "brain" : undefined,
         correct: quiz.firstPassCorrect,
         total: bankMode ? familyTotal : quiz.originalTotal,
+        brainReport: report,
         xpGained: 0,
         streak: visibleStreak(progress),
         streakFrom: visibleStreak(progress),
@@ -141,6 +152,7 @@ export default function Lesson({
         topicName,
         difficultyName,
         lessonKey: key,
+        preview: true,
       });
       return;
     }
@@ -159,8 +171,10 @@ export default function Lesson({
     });
     onFinished({
       status: "complete",
+      kind: bankMeta?.singleSet ? "brain" : undefined,
       correct: quiz.firstPassCorrect,
       total: bankMode ? familyTotal : quiz.originalTotal,
+      brainReport: report,
       xpGained: quiz.xpGained + xpBonus,
       streak: visibleStreak(next),
       streakFrom,
@@ -189,13 +203,13 @@ export default function Lesson({
 
   const q = quiz.question;
   const multiStep = (Number(q.stepCount) || 1) > 1;
-  const meter = bankMode
-    ? familyTotal
-      ? (quiz.completedFamilyCount / familyTotal) * 100
-      : 0
-    : quiz.originalTotal
-      ? (quiz.solvedCount / quiz.originalTotal) * 100
-      : 0;
+  const finishedCount = bankMeta?.singleSet
+    ? quiz.attemptedCount
+    : bankMode
+      ? quiz.completedFamilyCount
+      : quiz.solvedCount;
+  const meterTotal = bankMode ? familyTotal : quiz.originalTotal;
+  const meter = meterTotal ? (finishedCount / meterTotal) * 100 : 0;
 
   const metaBits = [topicName, difficultyName];
   if (bankMode && q.questionFamilyId) {
@@ -231,7 +245,14 @@ export default function Lesson({
             Close
           </button>
         )}
-        <div className="meter">
+        <div
+          className="meter"
+          role="progressbar"
+          aria-valuemin={0}
+          aria-valuemax={meterTotal || 0}
+          aria-valuenow={finishedCount}
+          aria-label="Questions completed"
+        >
           <div className="meter-fill" style={{ width: `${meter}%` }} />
         </div>
         <StreakChip progress={progress} />
@@ -241,6 +262,14 @@ export default function Lesson({
         {metaBits.join(" · ")}
         {preview ? " · staff preview · no XP" : xpEach ? ` · +${xpEach} XP` : " · practice"}
       </p>
+      {bankMeta?.singleSet && topic?.tagline ? (
+        <p className="lesson-slogan">{topic.tagline}</p>
+      ) : null}
+      {preview && bankMeta?.singleSet ? (
+        <button type="button" className="jump-end" onClick={finish}>
+          Jump to the end
+        </button>
+      ) : null}
       {quiz.reviewOpen ? (
         <ReviewGate count={quiz.reviewCount} onContinue={quiz.startReview} />
       ) : (

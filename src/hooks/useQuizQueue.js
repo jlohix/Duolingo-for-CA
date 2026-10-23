@@ -25,6 +25,7 @@ export function useQuizQueue(
   const [attemptedIds, setAttemptedIds] = useState(() => new Set());
   const [completedFamilies, setCompletedFamilies] = useState(() => new Set());
   const [firstPassCorrect, setFirstPassCorrect] = useState(0);
+  const [firstPassIds, setFirstPassIds] = useState(() => new Set());
   const [xpGained, setXpGained] = useState(0);
 
   const [reviewOpen, setReviewOpen] = useState(false);
@@ -39,7 +40,10 @@ export function useQuizQueue(
     const awardXp = ok && !solvedIds.has(question.id);
     setAttemptedIds((ids) => new Set(ids).add(question.id));
     setRevealed(true);
-    if (firstTry && ok) setFirstPassCorrect((n) => n + 1);
+    if (firstTry && ok) {
+      setFirstPassCorrect((n) => n + 1);
+      setFirstPassIds((ids) => new Set(ids).add(question.id));
+    }
     if (awardXp) {
       setSolvedIds((ids) => new Set(ids).add(question.id));
       setXpGained((n) => n + xpPerCorrect);
@@ -107,11 +111,13 @@ export function useQuizQueue(
     originalTotal,
     familyTotal,
     completedFamilyCount: completedFamilies.size,
+    attemptedCount: attemptedIds.size,
     selected,
     setSelected,
     revealed,
     solvedCount: solvedIds.size,
     firstPassCorrect,
+    firstPassIds,
     xpGained,
     reviewOpen,
     reviewCount,

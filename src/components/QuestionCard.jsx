@@ -1,5 +1,6 @@
 import MathText from "./MathText";
 import QuestionReport from "./QuestionReport";
+import MatchQuestion from "./MatchQuestion";
 
 const LABELS = ["A", "B", "C", "D"];
 
@@ -23,6 +24,15 @@ export default function QuestionCard({
   revealed,
   onSelect,
 }) {
+  if (question.kind === "match") {
+    return (
+      <MatchQuestion
+        question={question}
+        revealed={revealed}
+        onSelect={onSelect}
+      />
+    );
+  }
   const mainQuestion = String(question.mainQuestion || "").trim();
   return (
     <article className="question-card">

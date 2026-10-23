@@ -1,6 +1,10 @@
 import Papa from "papaparse";
 import pastYearCsv from "./pastYearPapers.csv?raw";
-import { LOCAL_BANK_FOLDERS, QUESTION_BANKS } from "./questionBanks";
+import {
+  LOCAL_BANK_FOLDERS,
+  QUESTION_BANKS,
+  questionBankForId,
+} from "./questionBanks";
 
 const LETTERS = ["a", "b", "c", "d"];
 
@@ -59,11 +63,23 @@ function compareFamilyIds(a, b) {
 }
 
 export function isAnswerCorrect(question, choice) {
+  if (question?.kind === "match") {
+    const assigned = Object.fromEntries(
+      String(choice || "")
+        .split("|")
+        .filter(Boolean)
+        .map((part) => part.split("="))
+    );
+    const pairs = question.pairs || [];
+    return (
+      pairs.length > 0 && pairs.every((pair) => assigned[pair.id] === pair.id)
+    );
+  }
   const letter = clean(choice).toLowerCase();
   const answer = question.answer;
   if (letter === answer) return true;
-  const chosen = question.options[letter];
-  const correct = question.options[answer];
+  const chosen = question.options?.[letter];
+  const correct = question.options?.[answer];
   return Boolean(chosen && correct && chosen === correct);
 }
 
@@ -102,6 +118,47 @@ function dressLatex(text) {
   return raw;
 }
 
+function parseMatchPairs(raw) {
+  return String(raw || "")
+    .split(";;")
+    .map((chunk) => chunk.trim())
+    .filter(Boolean)
+    .map((chunk, index) => {
+      const splitAt = chunk.indexOf("||");
+      if (splitAt < 0) return null;
+      const prompt = dressLatex(chunk.slice(0, splitAt));
+      const answer = dressLatex(chunk.slice(splitAt + 2));
+      if (!prompt || !answer) return null;
+      return { id: `p${index + 1}`, prompt, answer };
+    })
+    .filter(Boolean);
+}
+
+function baseQuestion(row, question, extra) {
+  const image = normalizeImage(cell(row, "image"));
+  const mainQuestion = dressLatex(cell(row, "main_question", "mainQuestion"));
+  const topicRaw = cell(row, "topicId", "topicid");
+  const rawId = clean(cell(row, "id")) || `${topicRaw || "p"}-x`;
+  const { csvId, questionFamilyId, stepNumber } = parseFamilyStep(rawId);
+  return {
+    id: csvId,
+    csvId,
+    questionFamilyId,
+    stepNumber,
+    topicId: Number(topicRaw) || 0,
+    mainQuestion,
+    question,
+    options: extra.options || { a: "", b: "", c: "", d: "" },
+    answer: extra.answer || "",
+    image,
+    explanation: dressLatex(cell(row, "explanation")),
+    difficulty: parseDifficulty(cell(row, "difficulty")),
+    walkthroughTag: clean(cell(row, "walkthrough_tag", "walkthroughTag")),
+    kind: extra.kind || "mcq",
+    pairs: extra.pairs || [],
+  };
+}
+
 function parseQuestionRows(text, { withPaper = false } = {}) {
   const parsed = Papa.parse(String(text ?? "").replace(/^\uFEFF/, ""), {
     header: true,
@@ -112,6 +169,13 @@ function parseQuestionRows(text, { withPaper = false } = {}) {
   const questions = [];
   for (const row of parsed.data) {
     const question = dressLatex(cell(row, "question"));
+    const kind = clean(cell(row, "type")).toLowerCase();
+    if (kind === "match") {
+      const pairs = parseMatchPairs(cell(row, "pairs"));
+      if (!question || pairs.length < 2) continue;
+      questions.push(baseQuestion(row, question, { kind: "match", pairs }));
+      continue;
+    }
     const answer = parseAnswerLetter(cell(row, "answer"));
     if (!question || !LETTERS.includes(answer)) continue;
 
@@ -123,31 +187,11 @@ function parseQuestionRows(text, { withPaper = false } = {}) {
     };
     if (!options[answer]) continue;
 
-    const image = normalizeImage(cell(row, "image"));
-    const mainQuestion = dressLatex(cell(row, "main_question", "mainQuestion"));
-    const topicRaw = cell(row, "topicId", "topicid");
-    const rawId =
-      clean(cell(row, "id")) || `${topicRaw || "p"}-${questions.length}`;
-    const { csvId, questionFamilyId, stepNumber } = parseFamilyStep(rawId);
-    const item = {
-      id: csvId,
-      csvId,
-      questionFamilyId,
-      stepNumber,
-      topicId: Number(topicRaw) || 0,
-      mainQuestion,
-      question,
-      options,
-      answer,
-      image,
-      explanation: dressLatex(cell(row, "explanation")),
-      difficulty: parseDifficulty(cell(row, "difficulty")),
-      walkthroughTag: clean(cell(row, "walkthrough_tag", "walkthroughTag")),
-    };
+    const item = baseQuestion(row, question, { options, answer });
     if (withPaper) {
       item.paper =
         clean(cell(row, "paper", "year")) ||
-        paperFromImage(image) ||
+        paperFromImage(item.image) ||
         "Past papers";
     }
     questions.push(item);
@@ -174,7 +218,9 @@ function resolveBankImage(image, bank) {
 }
 
 async function loadQuestionBank(bank) {
-  const res = await fetch(`/question-bank/csv/${bank.csv}`);
+  const res = await fetch(
+    `/question-bank/csv/${encodeURI(bank.csv)}`
+  );
   if (!res.ok) throw new Error(`Could not load ${bank.csv}`);
   const rows = parseQuestionRows(await res.text());
   return rows.map((question) => ({
@@ -250,9 +296,27 @@ export function questionsForLesson(all, topicId, difficulty) {
   );
 }
 
+/** Put the correct choice in a random slot. Empty choices stay empty. */
+function randomizeOptionOrder(question) {
+  const filled = LETTERS.map((letter) => question.options?.[letter]).filter(
+    (text) => String(text || "").trim()
+  );
+  const correctText = question.options?.[question.answer];
+  const order = shuffle(filled);
+  const options = { a: "", b: "", c: "", d: "" };
+  let answer = question.answer;
+  order.forEach((text, index) => {
+    const letter = LETTERS[index];
+    options[letter] = text;
+    if (text === correctText) answer = letter;
+  });
+  return { ...question, options, answer };
+}
+
 /**
  * Bank lessons: group CSV rows by questionFamilyId, sort steps numerically,
  * keep families in numeric order. Flat list of steps for the quiz queue.
+ * Single-set banks shuffle which slot the correct choice sits in.
  */
 export function questionsForBank(all, bankId, difficulty) {
   const rows = all.filter(
@@ -276,13 +340,14 @@ export function questionsForBank(all, bankId, difficulty) {
   }
 
   const familyIds = [...byFamily.keys()].sort(compareFamilyIds);
+  const mixChoices = Boolean(questionBankForId(bankId)?.singleSet);
   const out = [];
   familyIds.forEach((familyId, familyIndex) => {
     const steps = byFamily.get(familyId);
     const familyMain = steps.map((step) => step.mainQuestion).find(Boolean) || "";
     const familyImage = steps.map((step) => step.image).find(Boolean) || "";
     steps.forEach((step, stepIndex) => {
-      out.push({
+      const item = {
         ...step,
         questionFamilyId: familyId,
         mainQuestion: step.mainQuestion || familyMain,
@@ -292,7 +357,10 @@ export function questionsForBank(all, bankId, difficulty) {
         stepIndex: stepIndex + 1,
         stepCount: steps.length,
         isFamilyFinal: stepIndex === steps.length - 1,
-      });
+      };
+      out.push(
+        mixChoices && item.kind !== "match" ? randomizeOptionOrder(item) : item
+      );
     });
   });
   return out;
