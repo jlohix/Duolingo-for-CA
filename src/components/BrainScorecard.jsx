@@ -24,9 +24,9 @@ export default function BrainScorecard({ correct = 0, total = 0 }) {
       ) : null}
       {verdict.calling ? (
         <img
-          className="brain-call"
-          src="/mascots/kirchhoff-calling.png"
-          alt="Gustav Kirchhoff is calling"
+          className="brain-portrait"
+          src="/mascots/kirchhoff.png"
+          alt="Kirchhoff"
         />
       ) : null}
       {verdict.prize ? (
