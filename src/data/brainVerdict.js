@@ -25,7 +25,11 @@ export function brainVerdict(correct) {
     };
   }
   if (score >= 35) {
-    return { id: "solid", line: "Kirchhoff is almost impressed" };
+    return {
+      id: "solid",
+      line: "Kirchhoff is almost impressed",
+      calling: true,
+    };
   }
   if (score >= 25) {
     return { id: "hope", line: "We asked for brainpower, not thoughts and prayers" };
