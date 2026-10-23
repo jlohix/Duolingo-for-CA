@@ -21,6 +21,7 @@ export function brainVerdict(correct) {
     return {
       id: "nobel",
       line: "At this point, you might be future Nobel Prize winner",
+      prize: true,
     };
   }
   if (score >= 35) {

@@ -22,6 +22,13 @@ export default function BrainScorecard({ correct = 0, total = 0 }) {
           alt="Kirchhoff"
         />
       ) : null}
+      {verdict.prize ? (
+        <img
+          className="brain-prize"
+          src="/mascots/nobel-pizza.png"
+          alt="Nobel Pizza Prize"
+        />
+      ) : null}
       <p className="brain-marks">
         {marks}
         <span className="brain-of"> / {outOf}</span>

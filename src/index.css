@@ -2632,6 +2632,14 @@ h2 {
   background: color-mix(in srgb, #146b14 18%, var(--card));
 }
 
+.brain-prize {
+  width: min(240px, 70vw);
+  height: auto;
+  display: block;
+  margin: 0 auto 12px;
+  border-radius: 18px;
+}
+
 .brain-portrait {
   width: min(220px, 62vw);
   height: auto;
