@@ -32,11 +32,11 @@ export function brainVerdict(correct) {
     };
   }
   if (score >= 25) {
-    return { id: "hope", line: "We asked for brainpower, not thoughts and prayers" };
+    return { id: "hope", line: "Sending you thoughts and prayers for your finals" };
   }
   return {
     id: "kirchhoff",
-    line: "Kirchhoff is disappointed in you",
+    line: "Even Kirchhoff is disappointed in you",
     portrait: true,
   };
 }
