@@ -32,7 +32,11 @@ export function brainVerdict(correct) {
     };
   }
   if (score >= 25) {
-    return { id: "hope", line: "Sending you thoughts and prayers for your finals" };
+    return {
+      id: "hope",
+      line: "Start praying to the bell curve god",
+      bell: true,
+    };
   }
   return {
     id: "kirchhoff",

@@ -2640,6 +2640,14 @@ h2 {
   border-radius: 18px;
 }
 
+.brain-bell {
+  width: min(260px, 74vw);
+  height: auto;
+  display: block;
+  margin: 0 auto 12px;
+  border-radius: 18px;
+}
+
 .brain-portrait {
   width: min(220px, 62vw);
   height: auto;

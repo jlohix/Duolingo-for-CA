@@ -36,6 +36,13 @@ export default function BrainScorecard({ correct = 0, total = 0 }) {
           alt="Nobel Pizza Prize"
         />
       ) : null}
+      {verdict.bell ? (
+        <img
+          className="brain-bell"
+          src="/mascots/bell-curve-god.png"
+          alt="Bell Curve God"
+        />
+      ) : null}
       <p className="brain-marks">
         {marks}
         <span className="brain-of"> / {outOf}</span>
