@@ -53,7 +53,9 @@ export default function Lesson({
   const initial = useMemo(
     () =>
       paperMode
-        ? shuffle(pack.questions)
+        ? (pack.familyId || pack.questions?.[0]?.questionFamilyId
+            ? pack.questions
+            : shuffle(pack.questions))
         : bankMode
           ? questionsForBank(allQuestions, bankId, difficulty)
         : questionsForLesson(allQuestions, topicId, difficulty),
@@ -109,11 +111,13 @@ export default function Lesson({
   const topic = TOPICS.find((t) => t.id === topicId);
   const diff = DIFFICULTIES.find((d) => d.id === difficulty);
   const topicName = paperMode
-    ? pack.title
+    ? pack.topicName || pack.title
     : bankMode
       ? bankTitle
       : topic?.name;
-  const difficultyName = paperMode ? "Past paper" : diff?.name;
+  const difficultyName = paperMode
+    ? pack.difficultyName || "Past paper"
+    : diff?.name;
 
   if (stage === "teach") {
     return (
@@ -204,6 +208,12 @@ export default function Lesson({
       metaBits.push(`step ${q.stepIndex}/${q.stepCount}`);
     }
     metaBits.push(`${q.familyIndex}/${q.familyTotal}`);
+  } else if (paperMode && q.questionFamilyId) {
+    metaBits.push(`question ${q.questionFamilyId}`);
+    metaBits.push(`step ${q.stepIndex}/${q.stepCount}`);
+  } else if (paperMode && pack.familyId) {
+    metaBits.push(`question ${pack.familyId}`);
+    metaBits.push(`step ${quiz.index + 1}/${quiz.queueLength}`);
   } else {
     metaBits.push(`${quiz.index + 1}/${quiz.queueLength}`);
   }

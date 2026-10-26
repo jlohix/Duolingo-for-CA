@@ -4,6 +4,9 @@
 
 export const FOC_EASY = {
   key: "walk-foc-easy",
+  topicName: "First order circuit",
+  difficultyName: "Easy",
+  familyId: "201",
   questions: [
     {
       id: "201-1",
@@ -66,6 +69,9 @@ export const FOC_EASY = {
 
 export const FOC_AVERAGE = {
   key: "walk-foc-average",
+  topicName: "First order circuit",
+  difficultyName: "Average",
+  familyId: "202",
   questions: [
     {
       id: "202-1",
@@ -128,6 +134,9 @@ export const FOC_AVERAGE = {
 
 export const FOC_CHALLENGING = {
   key: "walk-foc-challenging",
+  topicName: "First order circuit",
+  difficultyName: "Challenging",
+  familyId: "203",
   questions: [
     {
       id: "203-1",
