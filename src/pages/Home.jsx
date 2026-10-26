@@ -114,6 +114,7 @@ function SkipSheet({ topic, needed, onSkip, onClose }) {
 function SectionCard({
   kicker,
   title,
+  tagline = "",
   blurb,
   index,
   badge,
@@ -149,6 +150,7 @@ function SectionCard({
       <div className="section-copy">
         <p className="eyebrow">{kicker}</p>
         <h2>{title}</h2>
+        {tagline ? <p className="section-slogan">{tagline}</p> : null}
         {showMeter && unlocked ? (
           <div className="section-meter">
             <div className="meter">
@@ -230,6 +232,32 @@ function BankDifficultyNodes({
 }) {
   const bank = questionBankForId(bankId);
   if (!bank) return null;
+  if (bank.singleSet) {
+    const key = bankLessonKey(bank.id, 1);
+    const count = counts[key] || 0;
+    if (!count && !allOpen) return null;
+    const done = progress.completed?.includes(key);
+    const canPlay = unlocked && count > 0;
+    return (
+      <button
+        key={key}
+        type="button"
+        className={`node ${done ? "done" : ""} ${canPlay ? "" : "off"}`}
+        disabled={!canPlay}
+        onClick={() => onStart(bank.id, 1)}
+      >
+        <span className="node-icon">{done ? "✓" : "Q"}</span>
+        <span className="node-name">{bank.title}</span>
+        <span className="node-count">
+          {!count
+            ? "No questions"
+            : canPlay
+              ? `${count} questions`
+              : "Locked"}
+        </span>
+      </button>
+    );
+  }
   return DIFFICULTIES.map((difficulty) => {
     const key = bankLessonKey(bank.id, difficulty.id);
     const count = counts[key] || 0;
@@ -463,10 +491,11 @@ function TopicLadder({
           </button>
           <p className="eyebrow">Section {index}</p>
           <h1>{topic.name}</h1>
+          {topic.tagline ? <p className="section-slogan">{topic.tagline}</p> : null}
         </div>
       </header>
       <p className="login-hint">{topic.blurb}</p>
-      {QUESTION_BANKS.some((bank) => bank.topicId === topic.id) ? (
+      {QUESTION_BANKS.some((bank) => bank.topicId === topic.id && !bank.singleSet) ? (
         <p className="login-hint">
           Easy, Average, and Challenging are all open. Play them in any order.
         </p>
@@ -739,7 +768,7 @@ export default function Home({
       )}
       <div className="section-list">
         {topics.map((topic, index) => {
-          const comingSoon = topic.id >= 9;
+          const comingSoon = Boolean(topic.comingSoon);
           const unlocked =
             !comingSoon &&
             (allOpen ||
@@ -755,6 +784,7 @@ export default function Home({
               key={topic.id}
               kicker={`Section ${index + 1}`}
               title={topic.name}
+              tagline={topic.tagline || ""}
               blurb={
                 topic.id === 4
                   ? "There are no practice questions in here."

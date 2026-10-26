@@ -17,6 +17,18 @@ function sectionForBank(bank) {
 }
 
 function pushBankUnits(units, bank, bankCounts) {
+  if (bank.singleSet) {
+    const key = bankLessonKey(bank.id, 1);
+    const n = bankCounts[key] || 0;
+    if (!n) return;
+    units.push({
+      key,
+      label: bank.title,
+      kind: "bank",
+      n,
+    });
+    return;
+  }
   for (const diff of DIFFICULTIES) {
     const key = bankLessonKey(bank.id, diff.id);
     const n = bankCounts[key] || 0;

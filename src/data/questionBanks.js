@@ -143,6 +143,16 @@ export const QUESTION_BANKS = [
     walkthroughKey: "",
     topicId: 8,
   },
+  {
+    id: "test-1",
+    title: "No Pen, Just Brains",
+    csv: "No Pen, Just Brains.csv",
+    assetFolder: "test1",
+    walkthroughKey: "",
+    topicId: 10,
+    // One set. Do not split into Easy / Average / Challenging.
+    singleSet: true,
+  },
 ];
 
 /** Local fallbacks only when a CSV image is a filename, not a GitHub URL. */

@@ -245,7 +245,7 @@ function csvSections(questions) {
       if (!items.length) continue;
       sections.push({
         id: `bank-${bank.id}-${level.id}`,
-        title: `${bank.title} bank · ${level.name}`,
+        title: bank.singleSet ? bank.title : `${bank.title} bank · ${level.name}`,
         items: items.map((question) => mcq(question, { board: "image" })),
       });
     }

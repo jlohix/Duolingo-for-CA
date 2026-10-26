@@ -202,6 +202,8 @@ Learn shows eight sections:
 7. Network functions — **coming soon**  
 8. Frequency domain — **coming soon**  
 
+**No Pen, Just Brains** is the folder directly under Frequency Domain. It is one set of 50 conceptual questions drawn from every Learn section, with no pen-and-paper working. Multiple-choice answers are shuffled each time you start the set, and some questions are drag-and-drop matches. Frequency Domain itself stays coming soon.
+
 Walkthroughs are **optional**. Every section that has lessons is already open.
 Students can play **Easy, Average, and Challenging in any order**. Progress bars
 still fill as they complete banks. Staff preview does not award XP.

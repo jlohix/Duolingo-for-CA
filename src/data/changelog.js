@@ -1,5 +1,11 @@
 export const BUILT_IN_LOGS = [
   {
+    id: "built-2026-10-23-no-pen",
+    date: "2026-10-23",
+    title: "No Pen, Just Brains shows your marks",
+    body: "The set is now called No Pen, Just Brains, with the line “If you need a pen, you're cooked” under the title. The green bar fills one step for each question you finish. The end screen shows your marks out of 50 and a Brain Report for each Learn section. Staff can jump to that screen and flip through each remark.",
+  },
+  {
     id: "built-2026-10-19-kcheck-tidy",
     date: "2026-10-19",
     title: "Simpler Knowledge check stats",
