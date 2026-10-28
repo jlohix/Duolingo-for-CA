@@ -1288,6 +1288,48 @@ html[data-theme="dark"] .hex-spoke {
   background: var(--green);
 }
 
+.brain-dash {
+  display: grid;
+  gap: 12px;
+}
+
+.brain-dash .kcheck-score-pair {
+  margin-top: 4px;
+}
+
+.brain-dash .brain-card,
+.brain-dash .brain-report {
+  margin: 0;
+}
+
+.brain-dash .brain-report {
+  border: 2px solid var(--line);
+  box-shadow: none;
+}
+
+.brain-dash-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.brain-dash-tabs button {
+  border: 2px solid var(--line);
+  background: var(--cream);
+  color: var(--ink);
+  border-radius: 999px;
+  padding: 6px 12px;
+  font-weight: 800;
+  font-size: 12px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.brain-dash-tabs button.on {
+  border-color: var(--green);
+  background: var(--done-bg);
+}
+
 .topbar,
 .lesson-bar {
   display: flex;

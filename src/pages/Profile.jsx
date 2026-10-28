@@ -7,6 +7,7 @@ import {
   knowledgeCheckSummary,
   knowledgeCheckPercent,
   formatKnowledgeCheckScore,
+  brainAttemptSummary,
 } from "../state/progress";
 import { KNOWLEDGE_CHECK_TOPIC_IDS } from "../data/knowledgeCheck";
 import { DEFAULT_CLASS, normalizeClassId } from "../data/classes";
@@ -25,6 +26,8 @@ import {
   mergeKnowledgeCheckRows,
   loadMyKnowledgeCheckAttempts,
 } from "../state/knowledgeCheckAttempts";
+import BrainScorecard from "../components/BrainScorecard";
+import BrainReport from "../components/BrainReport";
 import { useEffect, useMemo, useState } from "react";
 
 // Resize/compress an image file to a small square PNG blob for the avatar.
@@ -331,6 +334,16 @@ export default function Profile({
       ) : null}
 
       <section className="profile-block">
+        <h2>No Pen, Just Brains</h2>
+        <p className="login-hint">
+          50 conceptual questions from every Learn section. Your first marks
+          stay locked. Later tries keep the best score, with a Brain Report
+          for each section.
+        </p>
+        <BrainDashboard progress={progress} />
+      </section>
+
+      <section className="profile-block">
         <h2>Knowledge checks</h2>
         <p className="login-hint">
           Five random step-by-step questions per section. Your score is
@@ -353,6 +366,107 @@ export default function Profile({
         </p>
         <TopicList rows={insideRows} completed={completed} showUnits />
       </section>
+    </div>
+  );
+}
+
+function BrainDashboard({ progress }) {
+  const summary = brainAttemptSummary(progress);
+  const laterBest = summary?.laterBest || null;
+  const [view, setView] = useState(laterBest ? "best" : "first");
+  if (!summary) {
+    return (
+      <p className="login-hint">
+        Open No Pen, Just Brains on Learn to sit the set. Your marks and Brain
+        Report will show here.
+      </p>
+    );
+  }
+  const firstPct = knowledgeCheckPercent(
+    summary.firstCorrect,
+    summary.firstTotal
+  );
+  const laterPct = laterBest
+    ? knowledgeCheckPercent(laterBest.correct, laterBest.total)
+    : 0;
+  const shown = view === "best" && laterBest ? laterBest : null;
+  const shownCorrect = shown ? shown.correct : summary.firstCorrect;
+  const shownTotal = shown ? shown.total : summary.firstTotal;
+  const shownReport = shown ? shown.report : summary.firstReport;
+  const attemptCount = 1 + (summary.laterCount || 0);
+  return (
+    <div className="brain-dash">
+      <div className="kcheck-score-pair">
+        <div>
+          <span>First attempt</span>
+          <strong>
+            {summary.firstCorrect}/{summary.firstTotal}
+          </strong>
+          <span className="kcheck-score-frac">{firstPct}% marks</span>
+          <div className="insight-meter" aria-hidden="true">
+            <div
+              className={`insight-fill ${scoreKind(
+                summary.firstCorrect,
+                summary.firstTotal
+              )}`}
+              style={{ width: `${firstPct}%` }}
+            />
+          </div>
+        </div>
+        <div>
+          <span>Best attempt</span>
+          <strong>
+            {laterBest ? `${laterBest.correct}/${laterBest.total}` : "—"}
+          </strong>
+          <span className="kcheck-score-frac">
+            {laterBest ? `${laterPct}% marks` : "No retake yet"}
+          </span>
+          <div className="insight-meter kcheck-improve-meter" aria-hidden="true">
+            {laterBest ? (
+              <>
+                <div
+                  className="insight-fill kcheck-improve-base"
+                  style={{ width: `${Math.min(firstPct, laterPct)}%` }}
+                />
+                {laterPct > firstPct ? (
+                  <div
+                    className="insight-fill kcheck-improve-gain"
+                    style={{ width: `${laterPct - firstPct}%` }}
+                  />
+                ) : null}
+              </>
+            ) : null}
+          </div>
+        </div>
+      </div>
+      <p className="login-hint">
+        {attemptCount} {attemptCount === 1 ? "attempt" : "attempts"} saved.
+        {laterBest ? " Showing your best later run unless you pick First." : ""}
+      </p>
+      {laterBest ? (
+        <div className="brain-dash-tabs" role="tablist" aria-label="Attempt">
+          <button
+            type="button"
+            role="tab"
+            aria-selected={view !== "best"}
+            className={view !== "best" ? "on" : ""}
+            onClick={() => setView("first")}
+          >
+            First
+          </button>
+          <button
+            type="button"
+            role="tab"
+            aria-selected={view === "best"}
+            className={view === "best" ? "on" : ""}
+            onClick={() => setView("best")}
+          >
+            Best
+          </button>
+        </div>
+      ) : null}
+      <BrainScorecard correct={shownCorrect} total={shownTotal} />
+      <BrainReport rows={shownReport} />
     </div>
   );
 }

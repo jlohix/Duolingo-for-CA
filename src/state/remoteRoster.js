@@ -1,6 +1,6 @@
 import { DEFAULT_CLASS, normalizeClassId } from "../data/classes";
 import { listStudentProgress } from "../supabaseClient";
-import { parseKnowledgeChecks } from "./progress";
+import { parseBrainAttempts, parseKnowledgeChecks } from "./progress";
 
 function displayFromUsername(username) {
   const raw = String(username || "").trim();
@@ -48,6 +48,12 @@ export function normalizeRemoteStudent(row) {
         row.knowledge_checks ||
         row.topicStats?.__kc ||
         row.topic_stats?.__kc
+    ),
+    brainAttempts: parseBrainAttempts(
+      row.brainAttempts ||
+        row.brain_attempts ||
+        row.topicStats?.__brain ||
+        row.topic_stats?.__brain
     ),
     completed: Array.isArray(row.completed) ? row.completed : [],
     avatarUrl: String(row.avatarUrl || row.avatar_url || "").trim(),

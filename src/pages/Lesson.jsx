@@ -8,7 +8,7 @@ import {
 import { brainSectionReport } from "../data/brainVerdict";
 import { DIFFICULTIES, TOPICS, lessonKey } from "../data/topics";
 import { bankLessonKey, questionBankForId } from "../data/questionBanks";
-import { addXp, completeLesson, visibleStreak, wouldExtendStreak, xpForCorrect, xpForLessonBonus, recordFirstTry } from "../state/progress";
+import { addXp, completeLesson, recordBrainAttempt, visibleStreak, wouldExtendStreak, xpForCorrect, xpForLessonBonus, recordFirstTry } from "../state/progress";
 import { useQuizQueue } from "../hooks/useQuizQueue";
 import QuestionCard from "../components/QuestionCard";
 import ReviewGate from "../components/ReviewGate";
@@ -169,6 +169,14 @@ export default function Lesson({
     let next = progress;
     setProgress((p) => {
       next = completeLesson(p, key, xpBonus);
+      if (bankMeta?.singleSet) {
+        next = recordBrainAttempt(
+          next,
+          quiz.firstPassCorrect,
+          familyTotal,
+          report
+        );
+      }
       return next;
     });
     onFinished({

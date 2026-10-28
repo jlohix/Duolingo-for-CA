@@ -27,6 +27,7 @@ function hasMeaningfulProgress(state) {
   if ((state.completed || []).length > 0) return true;
   if (Object.keys(state.topicStats || {}).length > 0) return true;
   if (Object.keys(state.knowledgeChecks || {}).length > 0) return true;
+  if (state.brainAttempts?.firstTotal) return true;
   if (String(state.displayName || "").trim()) return true;
   return false;
 }
