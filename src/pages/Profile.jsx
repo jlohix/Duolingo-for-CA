@@ -27,7 +27,6 @@ import {
   loadMyKnowledgeCheckAttempts,
 } from "../state/knowledgeCheckAttempts";
 import BrainScorecard from "../components/BrainScorecard";
-import BrainReport from "../components/BrainReport";
 import { useEffect, useMemo, useState } from "react";
 
 // Resize/compress an image file to a small square PNG blob for the avatar.
@@ -337,8 +336,7 @@ export default function Profile({
         <h2>No Pen, Just Brains</h2>
         <p className="login-hint">
           50 conceptual questions from every Learn section. Your first marks
-          stay locked. Later tries keep the best score, with a Brain Report
-          for each section.
+          stay locked. Later tries keep the best score.
         </p>
         <BrainDashboard progress={progress} />
       </section>
@@ -373,12 +371,11 @@ export default function Profile({
 function BrainDashboard({ progress }) {
   const summary = brainAttemptSummary(progress);
   const laterBest = summary?.laterBest || null;
-  const [view, setView] = useState(laterBest ? "best" : "first");
   if (!summary) {
     return (
       <p className="login-hint">
-        Open No Pen, Just Brains on Learn to sit the set. Your marks and Brain
-        Report will show here.
+        Open No Pen, Just Brains on Learn to sit the set. Your marks will show
+        here.
       </p>
     );
   }
@@ -389,11 +386,11 @@ function BrainDashboard({ progress }) {
   const laterPct = laterBest
     ? knowledgeCheckPercent(laterBest.correct, laterBest.total)
     : 0;
-  const shown = view === "best" && laterBest ? laterBest : null;
-  const shownCorrect = shown ? shown.correct : summary.firstCorrect;
-  const shownTotal = shown ? shown.total : summary.firstTotal;
-  const shownReport = shown ? shown.report : summary.firstReport;
   const attemptCount = 1 + (summary.laterCount || 0);
+  const shown = laterBest || {
+    correct: summary.firstCorrect,
+    total: summary.firstTotal,
+  };
   return (
     <div className="brain-dash">
       <div className="kcheck-score-pair">
@@ -441,32 +438,8 @@ function BrainDashboard({ progress }) {
       </div>
       <p className="login-hint">
         {attemptCount} {attemptCount === 1 ? "attempt" : "attempts"} saved.
-        {laterBest ? " Showing your best later run unless you pick First." : ""}
       </p>
-      {laterBest ? (
-        <div className="brain-dash-tabs" role="tablist" aria-label="Attempt">
-          <button
-            type="button"
-            role="tab"
-            aria-selected={view !== "best"}
-            className={view !== "best" ? "on" : ""}
-            onClick={() => setView("first")}
-          >
-            First
-          </button>
-          <button
-            type="button"
-            role="tab"
-            aria-selected={view === "best"}
-            className={view === "best" ? "on" : ""}
-            onClick={() => setView("best")}
-          >
-            Best
-          </button>
-        </div>
-      ) : null}
-      <BrainScorecard correct={shownCorrect} total={shownTotal} />
-      <BrainReport rows={shownReport} />
+      <BrainScorecard correct={shown.correct} total={shown.total} />
     </div>
   );
 }

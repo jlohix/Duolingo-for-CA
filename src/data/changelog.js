@@ -3,7 +3,7 @@ export const BUILT_IN_LOGS = [
     id: "built-2026-10-28-brain-profile",
     date: "2026-10-28",
     title: "No Pen, Just Brains on Profile",
-    body: "Profile now has a No Pen, Just Brains dashboard. Your first marks stay locked, later tries keep the best score, and you can switch between those attempts to see the remark and Brain Report.",
+    body: "Profile now has a No Pen, Just Brains dashboard. Your first marks stay locked, later tries keep the best score, and the remark picture sits under those attempts.",
   },
   {
     id: "built-2026-10-23-no-pen",
