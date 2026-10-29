@@ -470,10 +470,13 @@ export default function AnnouncementsAdmin() {
                         ? row.class_ids.map((c) => classLabel(c)).join(", ")
                         : "All classes"}
                     </td>
-                    <td>
-                      {fmtSgt(row.starts_at)}
-                      {" → "}
-                      {row.ends_at ? fmtSgt(row.ends_at) : "open-ended"}
+                    <td className="announcement-shows-cell">
+                      <span className="announcement-shows-start">
+                        {fmtSgt(row.starts_at)}
+                      </span>
+                      <span className="announcement-shows-end">
+                        → {row.ends_at ? fmtSgt(row.ends_at) : "open-ended"}
+                      </span>
                     </td>
                     <td>{row.frequency === "recurring" ? "Recurring" : "Once"}</td>
                     <td className="announcement-actions">
