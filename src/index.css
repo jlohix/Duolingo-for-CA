@@ -5558,6 +5558,11 @@ html[data-theme="dark"] .circuit-svg .board-step {
   border-radius: 10px;
   margin: 8px 0;
 }
+.announcement-desc a {
+  color: var(--green-dark);
+  text-decoration: underline;
+  overflow-wrap: anywhere;
+}
 .announcement-desc {
   margin: 0;
   font-size: 14px;
