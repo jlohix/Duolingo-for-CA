@@ -5720,41 +5720,46 @@ html[data-theme="dark"] .circuit-svg .board-step {
 .announcements-table td {
   vertical-align: top;
 }
-/* Only the free-text columns (Title, Description, Audience) wrap. */
+/* Wrapping columns: Title, Description, Audience, Shows. */
 .announcements-table td:nth-child(2),
 .announcements-table td:nth-child(3),
-.announcements-table td:nth-child(4) {
+.announcements-table td:nth-child(4),
+.announcements-table td:nth-child(5) {
   white-space: normal;
   overflow-wrap: anywhere;
   word-break: break-word;
 }
-/* Status, Shows, Frequency, Actions stay on one line so they read normally. */
+/* Status and Frequency are single words — never wrap them. */
 .announcements-table th:nth-child(1),
 .announcements-table td:nth-child(1),
-.announcements-table th:nth-child(5),
-.announcements-table td:nth-child(5),
 .announcements-table th:nth-child(6),
-.announcements-table td:nth-child(6),
-.announcements-table th:nth-child(7),
-.announcements-table td:nth-child(7) {
+.announcements-table td:nth-child(6) {
   white-space: nowrap;
 }
-/* Cap the wrapping columns so the Description doesn't balloon and push the
-   one-line columns around. The nowrap columns take only the width they need. */
+/* Cap the wrapping columns so none balloons and pushes the others around. */
 .announcements-table td:nth-child(2) { max-width: 180px; }  /* Title */
 .announcements-table td:nth-child(3) { max-width: 320px; }  /* Description */
-.announcements-table td:nth-child(4) { max-width: 160px; }  /* Audience */
+.announcements-table td:nth-child(4) { max-width: 90px; }   /* Audience (usually "All classes") */
+.announcements-table td:nth-child(5) { max-width: 120px; }  /* Shows (start / end on 2 lines) */
 .announcement-desc-cell {
   white-space: normal;
   overflow-wrap: anywhere;
 }
+/* Shows window: start on one line, "-> end" on the next. */
+.announcement-shows-cell {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.35;
+}
 .announcement-actions {
   display: flex;
+  flex-direction: column;
+  align-items: stretch;
   gap: 6px;
-  flex-wrap: nowrap;
 }
 .announcement-actions .admin-name-btn {
   white-space: nowrap;
+  text-align: center;
 }
 .admin-name-btn.danger {
   color: var(--red, #ff4b4b);
