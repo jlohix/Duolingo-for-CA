@@ -539,9 +539,12 @@ export async function uploadAnnouncementImage(file) {
   return `${SUPABASE_URL}/storage/v1/object/public/${ANNOUNCEMENT_BUCKET}/${path}`;
 }
 
-// Active announcements for the current moment (students). Newest first.
-export async function listActiveAnnouncementsRemote() {
-  const data = await rpc("list_active_announcements", {});
+// Active announcements for the current moment, targeted at the student's class.
+// Newest first.
+export async function listActiveAnnouncementsRemote(classId = null) {
+  const data = await rpc("list_active_announcements", {
+    p_class_id: classId || null,
+  });
   return Array.isArray(data) ? data : [];
 }
 
@@ -562,6 +565,8 @@ export async function createAnnouncementRemote({
   frequency,
   createdBy,
   color,
+  audience,
+  classIds,
 }) {
   return rpc("create_announcement", {
     p_title: String(title || ""),
@@ -572,6 +577,8 @@ export async function createAnnouncementRemote({
     p_frequency: frequency === "recurring" ? "recurring" : "once",
     p_created_by: createdBy || null,
     p_color: color || null,
+    p_audience: audience === "classes" ? "classes" : "all",
+    p_class_ids: Array.isArray(classIds) ? classIds : [],
   });
 }
 
@@ -585,6 +592,8 @@ export async function updateAnnouncementRemote({
   frequency,
   active,
   color,
+  audience,
+  classIds,
 }) {
   const data = await rpc("update_announcement", {
     p_id: id,
@@ -596,6 +605,8 @@ export async function updateAnnouncementRemote({
     p_frequency: frequency === "recurring" ? "recurring" : "once",
     p_active: active !== false,
     p_color: color || null,
+    p_audience: audience === "classes" ? "classes" : "all",
+    p_class_ids: Array.isArray(classIds) ? classIds : [],
   });
   return data === true;
 }

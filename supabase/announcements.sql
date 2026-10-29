@@ -38,6 +38,11 @@ create table if not exists public.announcements (
 -- Safe to re-run on an existing table.
 alter table public.announcements add column if not exists color text;
 
+-- Audience: 'all' = every class; 'classes' = only the classes in class_ids.
+-- Safe to re-run. Existing rows default to 'all'.
+alter table public.announcements add column if not exists audience text not null default 'all';
+alter table public.announcements add column if not exists class_ids text[] not null default '{}';
+
 -- Lock the table: RLS on, no policies -> no direct anon access; RPCs only.
 alter table public.announcements enable row level security;
 
@@ -57,7 +62,9 @@ create or replace function public.create_announcement(
   p_ends_at     text,
   p_frequency   text,
   p_created_by  text,
-  p_color       text default null
+  p_color       text default null,
+  p_audience    text default 'all',
+  p_class_ids   text[] default '{}'
 )
 returns uuid
 language plpgsql
@@ -68,6 +75,8 @@ declare
   v_id uuid;
   v_starts timestamptz;
   v_ends   timestamptz;
+  v_audience text;
+  v_class_ids text[];
 begin
   if coalesce(trim(p_title), '') = '' then
     raise exception 'Title is required';
@@ -83,8 +92,16 @@ begin
     else (p_ends_at::timestamp at time zone 'Asia/Singapore')
   end;
 
+  -- Audience: 'classes' only if a non-empty class list was given, else 'all'.
+  v_class_ids := coalesce(p_class_ids, '{}');
+  v_audience := case
+    when p_audience = 'classes' and array_length(v_class_ids, 1) >= 1 then 'classes'
+    else 'all'
+  end;
+  if v_audience = 'all' then v_class_ids := '{}'; end if;
+
   insert into public.announcements
-    (title, description, image_url, starts_at, ends_at, frequency, created_by, color)
+    (title, description, image_url, starts_at, ends_at, frequency, created_by, color, audience, class_ids)
   values (
     trim(p_title),
     nullif(trim(coalesce(p_description, '')), ''),
@@ -93,7 +110,9 @@ begin
     v_ends,
     case when p_frequency = 'recurring' then 'recurring' else 'once' end,
     nullif(trim(coalesce(p_created_by, '')), ''),
-    nullif(trim(coalesce(p_color, '')), '')
+    nullif(trim(coalesce(p_color, '')), ''),
+    v_audience,
+    v_class_ids
   )
   returning id into v_id;
 
@@ -112,7 +131,9 @@ create or replace function public.update_announcement(
   p_ends_at     text,
   p_frequency   text,
   p_active      boolean,
-  p_color       text default null
+  p_color       text default null,
+  p_audience    text default 'all',
+  p_class_ids   text[] default '{}'
 )
 returns boolean
 language plpgsql
@@ -122,6 +143,8 @@ as $$
 declare
   v_starts timestamptz;
   v_ends   timestamptz;
+  v_audience text;
+  v_class_ids text[];
 begin
   if coalesce(trim(p_title), '') = '' then
     raise exception 'Title is required';
@@ -136,6 +159,13 @@ begin
     else (p_ends_at::timestamp at time zone 'Asia/Singapore')
   end;
 
+  v_class_ids := coalesce(p_class_ids, '{}');
+  v_audience := case
+    when p_audience = 'classes' and array_length(v_class_ids, 1) >= 1 then 'classes'
+    else 'all'
+  end;
+  if v_audience = 'all' then v_class_ids := '{}'; end if;
+
   update public.announcements
   set
     title       = trim(p_title),
@@ -146,6 +176,8 @@ begin
     frequency   = case when p_frequency = 'recurring' then 'recurring' else 'once' end,
     active      = coalesce(p_active, true),
     color       = nullif(trim(coalesce(p_color, '')), ''),
+    audience    = v_audience,
+    class_ids   = v_class_ids,
     updated_at  = now()
   where id = p_id;
 
@@ -188,8 +220,12 @@ $$;
 
 
 -- ---------- 6. List active (students) ----------
--- Active + within the date window right now. Newest first.
-create or replace function public.list_active_announcements()
+-- Active + within the date window right now, AND targeted at the student's
+-- class (audience 'all', or their class is in class_ids). Newest first.
+-- Dropped first because we add the p_class_id parameter (new signature).
+drop function if exists public.list_active_announcements();
+drop function if exists public.list_active_announcements(text);
+create or replace function public.list_active_announcements(p_class_id text default null)
 returns setof public.announcements
 language sql
 security definer
@@ -200,6 +236,15 @@ as $$
   where active = true
     and starts_at <= now()
     and (ends_at is null or ends_at >= now())
+    and (
+      audience = 'all'
+      or (
+        p_class_id is not null
+        and upper(trim(p_class_id)) = any (
+          select upper(trim(c)) from unnest(class_ids) as c
+        )
+      )
+    )
   order by created_at desc;
 $$;
 
@@ -217,6 +262,8 @@ returns table (
   description text,
   image_url   text,
   color       text,
+  audience    text,
+  class_ids   text[],
   starts_at   timestamptz,
   ends_at     timestamptz,
   frequency   text,
@@ -231,7 +278,7 @@ security definer
 set search_path = public
 as $$
   select
-    a.id, a.title, a.description, a.image_url, a.color,
+    a.id, a.title, a.description, a.image_url, a.color, a.audience, a.class_ids,
     a.starts_at, a.ends_at, a.frequency, a.active,
     (a.active and a.starts_at <= now() and (a.ends_at is null or a.ends_at >= now())) as is_live,
     a.created_by, a.created_at, a.updated_at
@@ -247,13 +294,15 @@ $$;
 -- signatures remain (adding a param via CREATE OR REPLACE makes a NEW overload;
 -- we don't want two versions callable). Safe no-ops if they aren't present.
 drop function if exists public.create_announcement(text, text, text, text, text, text, text);
+drop function if exists public.create_announcement(text, text, text, text, text, text, text, text);
 drop function if exists public.update_announcement(uuid, text, text, text, text, text, text, boolean);
+drop function if exists public.update_announcement(uuid, text, text, text, text, text, text, boolean, text);
 
-grant execute on function public.create_announcement(text, text, text, text, text, text, text, text) to anon, authenticated;
-grant execute on function public.update_announcement(uuid, text, text, text, text, text, text, boolean, text) to anon, authenticated;
+grant execute on function public.create_announcement(text, text, text, text, text, text, text, text, text, text[]) to anon, authenticated;
+grant execute on function public.update_announcement(uuid, text, text, text, text, text, text, boolean, text, text, text[]) to anon, authenticated;
 grant execute on function public.terminate_announcement(uuid) to anon, authenticated;
 grant execute on function public.delete_announcement(uuid) to anon, authenticated;
-grant execute on function public.list_active_announcements() to anon, authenticated;
+grant execute on function public.list_active_announcements(text) to anon, authenticated;
 grant execute on function public.list_announcements() to anon, authenticated;
 
 
@@ -268,6 +317,8 @@ select
   a.description,
   a.image_url,
   a.color,
+  a.audience,
+  a.class_ids,
   (a.starts_at at time zone 'Asia/Singapore') as starts_at_sgt,
   (a.ends_at   at time zone 'Asia/Singapore') as ends_at_sgt,
   a.frequency,

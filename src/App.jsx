@@ -143,6 +143,7 @@ export default function App() {
           Admins don't get the pop-up (students only). */}
       <AnnouncementGate
         email={gate.email}
+        classId={gate.classId}
         enabled={
           Boolean(gate.email) && !gate.isAdmin && !gate.consentPending
         }
