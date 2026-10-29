@@ -5709,34 +5709,41 @@ html[data-theme="dark"] .circuit-svg .board-step {
   margin: 0;
   flex: none;
 }
-/* Fixed layout so columns respect their widths and the description wraps
-   inside its column instead of expanding and pushing the others. */
+/* Auto layout: the nowrap columns (status/shows/frequency/actions) size to
+   their content and stay on one line, while the free-text columns wrap via
+   their max-widths below. */
 .announcements-table {
-  table-layout: fixed;
+  table-layout: auto;
   width: 100%;
 }
 .announcements-table th,
 .announcements-table td {
+  vertical-align: top;
+}
+/* Only the free-text columns (Title, Description, Audience) wrap. */
+.announcements-table td:nth-child(2),
+.announcements-table td:nth-child(3),
+.announcements-table td:nth-child(4) {
   white-space: normal;
   overflow-wrap: anywhere;
   word-break: break-word;
-  vertical-align: top;
 }
-/* Column widths (7 cols): Status, Title, Description, Audience, Shows, Frequency, Actions */
+/* Status, Shows, Frequency, Actions stay on one line so they read normally. */
 .announcements-table th:nth-child(1),
-.announcements-table td:nth-child(1) { width: 8%; }   /* Status */
-.announcements-table th:nth-child(2),
-.announcements-table td:nth-child(2) { width: 16%; }  /* Title */
-.announcements-table th:nth-child(3),
-.announcements-table td:nth-child(3) { width: 28%; }  /* Description */
-.announcements-table th:nth-child(4),
-.announcements-table td:nth-child(4) { width: 13%; }  /* Audience */
+.announcements-table td:nth-child(1),
 .announcements-table th:nth-child(5),
-.announcements-table td:nth-child(5) { width: 15%; }  /* Shows (SGT) */
+.announcements-table td:nth-child(5),
 .announcements-table th:nth-child(6),
-.announcements-table td:nth-child(6) { width: 9%; }   /* Frequency */
+.announcements-table td:nth-child(6),
 .announcements-table th:nth-child(7),
-.announcements-table td:nth-child(7) { width: 11%; }  /* Actions */
+.announcements-table td:nth-child(7) {
+  white-space: nowrap;
+}
+/* Cap the wrapping columns so the Description doesn't balloon and push the
+   one-line columns around. The nowrap columns take only the width they need. */
+.announcements-table td:nth-child(2) { max-width: 180px; }  /* Title */
+.announcements-table td:nth-child(3) { max-width: 320px; }  /* Description */
+.announcements-table td:nth-child(4) { max-width: 160px; }  /* Audience */
 .announcement-desc-cell {
   white-space: normal;
   overflow-wrap: anywhere;
@@ -5744,7 +5751,10 @@ html[data-theme="dark"] .circuit-svg .board-step {
 .announcement-actions {
   display: flex;
   gap: 6px;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
+}
+.announcement-actions .admin-name-btn {
+  white-space: nowrap;
 }
 .admin-name-btn.danger {
   color: var(--red, #ff4b4b);
