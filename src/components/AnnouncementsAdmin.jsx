@@ -379,16 +379,24 @@ export default function AnnouncementsAdmin() {
           </div>
           {form.audience === "classes" ? (
             <div className="announcement-class-grid">
-              {CLASS_IDS.map((id) => (
-                <label key={id} className="announcement-class-check">
-                  <input
-                    type="checkbox"
-                    checked={form.classIds.includes(id)}
-                    onChange={() => toggleClass(id)}
-                  />
-                  {classLabel(id)}
-                </label>
-              ))}
+              {CLASS_IDS.map((id) => {
+                const checked = form.classIds.includes(id);
+                return (
+                  <label
+                    key={id}
+                    className={`announcement-class-check ${checked ? "on" : ""}`}
+                  >
+                    <span className="announcement-class-name">
+                      {classLabel(id)}
+                    </span>
+                    <input
+                      type="checkbox"
+                      checked={checked}
+                      onChange={() => toggleClass(id)}
+                    />
+                  </label>
+                );
+              })}
             </div>
           ) : null}
         </div>
