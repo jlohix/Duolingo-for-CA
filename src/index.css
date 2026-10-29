@@ -5671,22 +5671,43 @@ html[data-theme="dark"] .circuit-svg .board-step {
 }
 .announcement-class-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
-  gap: 6px 12px;
-  padding: 10px;
+  grid-template-columns: repeat(auto-fill, minmax(104px, 1fr));
+  gap: 8px;
+  padding: 12px;
   border: 1px solid var(--line);
   border-radius: 10px;
-  max-height: 180px;
+  max-height: 220px;
   overflow-y: auto;
 }
+/* Each class: name on the left, checkbox on the right, in a tidy chip that
+   highlights when selected. */
 .announcement-class-check {
   display: flex;
   align-items: center;
-  gap: 6px;
+  justify-content: space-between;
+  gap: 8px;
   font-size: 13px;
+  font-weight: 600;
+  padding: 7px 10px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--card);
+  cursor: pointer;
+}
+.announcement-class-check:hover {
+  border-color: var(--green);
+}
+.announcement-class-check.on {
+  border-color: var(--green);
+  background: var(--ok-bg);
+}
+.announcement-class-name {
+  white-space: nowrap;
 }
 .announcement-class-check input {
   width: auto;
+  margin: 0;
+  flex: none;
 }
 /* Fixed layout so columns respect their widths and the description wraps
    inside its column instead of expanding and pushing the others. */
