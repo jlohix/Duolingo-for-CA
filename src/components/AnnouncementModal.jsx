@@ -4,40 +4,15 @@ import {
   loadAnnouncementsForPopup,
 } from "../state/announcements";
 import { DEFAULT_ACCENT, textOn } from "../data/announcementColors";
-
-// Turn a plain-text description into React nodes where any http(s) URL becomes
-// a clickable link (opens in a new tab). Safe: we render real text + <a> nodes,
-// never raw HTML, so there's no injection risk. A trailing "." or "," etc. that
-// commonly follows a URL in prose is kept out of the link.
-const URL_RE = /(https?:\/\/[^\s]+)/g;
-
-function linkifyDescription(text) {
-  const str = String(text || "");
-  const parts = str.split(URL_RE);
-  return parts.map((part, i) => {
-    if (i % 2 === 1) {
-      const m = part.match(/^(.*?)([.,!?;:)\]]*)$/);
-      const url = m ? m[1] : part;
-      const trail = m ? m[2] : "";
-      return (
-        <span key={i}>
-          <a href={url} target="_blank" rel="noopener noreferrer">
-            {url}
-          </a>
-          {trail}
-        </span>
-      );
-    }
-    return part;
-  });
-}
+import { linkify } from "../data/linkify.jsx";
 
 // Self-contained gate: fetches the active announcements for a logged-in student
 // and shows the pop-up once per login session. Mounted at the app root; renders
 // nothing until there is something to show.
 //   email           - the logged-in student's email (null when not applicable)
+//   classId         - the student's class, for per-class targeting
 //   enabled         - only fetch when true (student, consent cleared, etc.)
-export function AnnouncementGate({ email, enabled }) {
+export function AnnouncementGate({ email, classId = null, enabled }) {
   const [items, setItems] = useState([]);
   const [shown, setShown] = useState(false);
 
@@ -47,7 +22,7 @@ export function AnnouncementGate({ email, enabled }) {
     setShown(false);
     if (!enabled || !email) return;
     let cancelled = false;
-    loadAnnouncementsForPopup().then((list) => {
+    loadAnnouncementsForPopup(classId).then((list) => {
       if (!cancelled && list.length > 0) {
         setItems(list);
         setShown(true);
@@ -56,7 +31,7 @@ export function AnnouncementGate({ email, enabled }) {
     return () => {
       cancelled = true;
     };
-  }, [email, enabled]);
+  }, [email, classId, enabled]);
 
   if (!shown) return null;
   return <AnnouncementModal items={items} onClose={() => setShown(false)} />;
@@ -116,7 +91,7 @@ export default function AnnouncementModal({ items, onClose }) {
               ) : null}
               {a.description ? (
                 <p className="announcement-desc">
-                  {linkifyDescription(a.description)}
+                  {linkify(a.description)}
                 </p>
               ) : null}
             </article>

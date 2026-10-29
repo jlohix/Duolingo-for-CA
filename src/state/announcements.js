@@ -41,10 +41,10 @@ function wasSeen(id) {
 //   - "recurring": always shown while active
 //   - "once": shown only if not already dismissed in this browser
 // Returns a (possibly empty) array, newest first.
-export async function loadAnnouncementsForPopup() {
+export async function loadAnnouncementsForPopup(classId = null) {
   let active = [];
   try {
-    active = await listActiveAnnouncementsRemote();
+    active = await listActiveAnnouncementsRemote(classId);
   } catch {
     return [];
   }

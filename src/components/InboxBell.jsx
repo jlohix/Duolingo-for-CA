@@ -5,6 +5,7 @@ import {
   markInboxAllRead,
   markInboxRead,
 } from "../state/inbox";
+import { linkify } from "../data/linkify.jsx";
 
 export default function InboxBell({ email, classId }) {
   const [open, setOpen] = useState(false);
@@ -93,10 +94,20 @@ export default function InboxBell({ email, classId }) {
               <ul className="inbox-list">
                 {items.map((row) => (
                   <li key={row.id}>
-                    <button
-                      type="button"
+                    {/* role=button (not <button>) so URL links in the body are
+                        valid nested interactive content. Links stop propagation
+                        so clicking one doesn't also mark-read. */}
+                    <div
+                      role="button"
+                      tabIndex={0}
                       className={`inbox-item ${row.read ? "" : "unread"}`}
                       onClick={() => readOne(row.id)}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter" || e.key === " ") {
+                          e.preventDefault();
+                          readOne(row.id);
+                        }
+                      }}
                     >
                       <span className="inbox-item-kind">
                         {row.kind === "report_resolved"
@@ -104,11 +115,11 @@ export default function InboxBell({ email, classId }) {
                           : "Assignment"}
                       </span>
                       <strong>{row.title}</strong>
-                      {row.body ? <span>{row.body}</span> : null}
+                      {row.body ? <span>{linkify(row.body)}</span> : null}
                       <span className="inbox-item-when">
                         {formatInboxWhen(row.createdAt)}
                       </span>
-                    </button>
+                    </div>
                   </li>
                 ))}
               </ul>
