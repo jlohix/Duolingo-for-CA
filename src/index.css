@@ -5652,8 +5652,33 @@ html[data-theme="dark"] .circuit-svg .board-step {
   vertical-align: middle;
   border: 1px solid var(--line);
 }
+/* Fixed layout so columns respect their widths and the description wraps
+   inside its column instead of expanding and pushing the others. */
+.announcements-table {
+  table-layout: fixed;
+  width: 100%;
+}
+.announcements-table th,
+.announcements-table td {
+  white-space: normal;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+  vertical-align: top;
+}
+/* Column widths (6 columns): Status, Title, Description, Shows, Frequency, Actions */
+.announcements-table th:nth-child(1),
+.announcements-table td:nth-child(1) { width: 9%; }   /* Status */
+.announcements-table th:nth-child(2),
+.announcements-table td:nth-child(2) { width: 18%; }  /* Title */
+.announcements-table th:nth-child(3),
+.announcements-table td:nth-child(3) { width: 34%; }  /* Description */
+.announcements-table th:nth-child(4),
+.announcements-table td:nth-child(4) { width: 16%; }  /* Shows (SGT) */
+.announcements-table th:nth-child(5),
+.announcements-table td:nth-child(5) { width: 10%; }  /* Frequency */
+.announcements-table th:nth-child(6),
+.announcements-table td:nth-child(6) { width: 13%; }  /* Actions */
 .announcement-desc-cell {
-  max-width: 260px;
   white-space: normal;
   overflow-wrap: anywhere;
 }
