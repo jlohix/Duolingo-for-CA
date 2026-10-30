@@ -19,6 +19,7 @@ import CloseWarning from "../components/CloseWarning";
 import ThemeSwitch from "../components/ThemeSwitch";
 import HintControl from "../components/HintControl";
 import StreakChip from "../components/StreakChip";
+import StaffSkipNext from "../components/StaffSkipNext";
 
 function familyStatsFromQueue(questions) {
   const map = new Map();
@@ -156,24 +157,35 @@ export default function KnowledgeCheck({
       {!quiz.revealed ? (
         <div className="quiz-actions">
           <HintControl question={q} />
-          <button
-            type="button"
-            className="primary check"
-            disabled={!quiz.selected}
-            onClick={() =>
-              quiz.check(({ ok, firstTry, question }) => {
-                if (!ok || !firstTry) return;
-                const familyId = String(
-                  question.questionFamilyId || question.id
-                );
-                const row = familyStats.current.get(familyId);
-                if (!row || row.correct >= row.total) return;
-                row.correct += 1;
-              })
-            }
-          >
-            Check
-          </button>
+          <div className="quiz-actions-row">
+            <button
+              type="button"
+              className="primary check"
+              disabled={!quiz.selected}
+              onClick={() =>
+                quiz.check(({ ok, firstTry, question }) => {
+                  if (!ok || !firstTry) return;
+                  const familyId = String(
+                    question.questionFamilyId || question.id
+                  );
+                  const row = familyStats.current.get(familyId);
+                  if (!row || row.correct >= row.total) return;
+                  row.correct += 1;
+                })
+              }
+            >
+              Check
+            </button>
+            {preview ? (
+              <StaffSkipNext
+                onClick={() => {
+                  if (!preview) return;
+                  const { done } = quiz.skipAhead();
+                  if (done) finish();
+                }}
+              />
+            ) : null}
+          </div>
         </div>
       ) : (
         <FeedbackBanner
@@ -181,7 +193,7 @@ export default function KnowledgeCheck({
           explanation={q.explanation || q.why || ""}
           willRepeat={false}
           onContinue={() => {
-            const { done } = quiz.goNext();
+            const { done } = preview ? quiz.skipAhead() : quiz.goNext();
             if (done) finish();
           }}
         />

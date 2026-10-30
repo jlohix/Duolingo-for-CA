@@ -120,6 +120,7 @@ export function QuickCheckCard({
   onCheck,
   onRetry,
   afterReveal,
+  skipControl = null,
   badge = "Quick check",
   progressLabel,
   willRepeat = false,
@@ -165,14 +166,17 @@ export function QuickCheckCard({
         })}
       </div>
       {!revealed ? (
-        <button
-          type="button"
-          className="qc-check"
-          disabled={!selected}
-          onClick={onCheck}
-        >
-          Check
-        </button>
+        <div className="qc-actions">
+          <button
+            type="button"
+            className="qc-check"
+            disabled={!selected}
+            onClick={onCheck}
+          >
+            Check
+          </button>
+          {skipControl}
+        </div>
       ) : (
         <div className={`qc-feedback ${ok ? "ok" : "bad"}`}>
           <QuizMascot mood={ok ? "happy" : "scary"} playKey={ok ? "ok" : "bad"} />
@@ -206,6 +210,7 @@ export function InlineKnowledgeCheck({
   onCheck,
   onRetry,
   afterReveal,
+  skipControl,
   badge,
   progressLabel,
   lockKey,
@@ -227,6 +232,7 @@ export function InlineKnowledgeCheck({
       onCheck={onCheck}
       onRetry={onRetry}
       afterReveal={afterReveal}
+      skipControl={skipControl}
       badge={badge}
       progressLabel={progressLabel}
       willRepeat={willRepeat}

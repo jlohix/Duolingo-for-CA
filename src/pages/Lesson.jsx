@@ -19,6 +19,7 @@ import CloseWarning from "../components/CloseWarning";
 import ThemeSwitch from "../components/ThemeSwitch";
 import HintControl from "../components/HintControl";
 import LessonWarmup from "../components/LessonWarmup";
+import StaffSkipNext from "../components/StaffSkipNext";
 import {
   startModuleAttempt,
   finishModuleAttempt,
@@ -195,8 +196,14 @@ export default function Lesson({
     });
   }
 
+  function skipPart() {
+    if (!preview) return;
+    const { done } = quiz.skipAhead();
+    if (done) finish();
+  }
+
   function continueLesson() {
-    const { done } = quiz.goNext();
+    const { done } = preview ? quiz.skipAhead() : quiz.goNext();
     if (done) finish();
   }
 
@@ -299,25 +306,28 @@ export default function Lesson({
           {!quiz.revealed ? (
             <div className="quiz-actions">
               <HintControl question={quiz.question} />
-              <button
-                type="button"
-                className="primary check"
-                disabled={!quiz.selected}
-                onClick={() =>
-                  quiz.check(({ ok, firstTry, awardXp, question }) => {
-                    if (preview) return;
-                    setProgress((p) => {
-                      let next = p;
-                      if (awardXp && xpEach) next = addXp(next, xpEach);
-                      if (firstTry && !paperMode && question.topicId)
-                        next = recordFirstTry(next, question.topicId, ok);
-                      return next;
-                    });
-                  })
-                }
-              >
-                Check
-              </button>
+              <div className="quiz-actions-row">
+                <button
+                  type="button"
+                  className="primary check"
+                  disabled={!quiz.selected}
+                  onClick={() =>
+                    quiz.check(({ ok, firstTry, awardXp, question }) => {
+                      if (preview) return;
+                      setProgress((p) => {
+                        let next = p;
+                        if (awardXp && xpEach) next = addXp(next, xpEach);
+                        if (firstTry && !paperMode && question.topicId)
+                          next = recordFirstTry(next, question.topicId, ok);
+                        return next;
+                      });
+                    })
+                  }
+                >
+                  Check
+                </button>
+                {preview ? <StaffSkipNext onClick={skipPart} /> : null}
+              </div>
             </div>
           ) : (
             <FeedbackBanner

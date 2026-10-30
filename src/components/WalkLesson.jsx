@@ -12,6 +12,7 @@ import {
   XP_CORRECT,
 } from "../state/progress";
 import PracticeStage from "../section3/PracticeStage";
+import StaffSkipNext from "./StaffSkipNext";
 
 function resolvePracticeView(question, lab, practiceView) {
   if (!question || question.hideBoard) return null;
@@ -23,7 +24,7 @@ function resolvePracticeView(question, lab, practiceView) {
   return step?.view || null;
 }
 
-function PracticeView({ title, progressLabel, practice, Schematic, boardHint, practiceView, lab, lastLabel = "See score", onExit, onBack, showBack = false, onDone, onCheck }) {
+function PracticeView({ title, progressLabel, practice, Schematic, boardHint, practiceView, lab, lastLabel = "See score", onExit, onBack, showBack = false, onDone, onCheck, preview = false }) {
   const originalTotal = practice.length;
   const [queue, setQueue] = useState(practice);
   const [index, setIndex] = useState(0);
@@ -58,6 +59,16 @@ function PracticeView({ title, progressLabel, practice, Schematic, boardHint, pr
     setRevealed(true);
     if (firstTry && pass) setFirstPass((n) => n + 1);
     onCheck?.({ ok: pass, firstTry, id: checkId });
+  }
+
+  function skipAhead() {
+    if (!preview) return;
+    if (index + 1 >= queue.length) {
+      onDone(firstPass, originalTotal);
+      return;
+    }
+    reset();
+    setIndex((n) => n + 1);
   }
 
   function next() {
@@ -136,6 +147,7 @@ function PracticeView({ title, progressLabel, practice, Schematic, boardHint, pr
               onCheck={check}
               willRepeat={willRepeat}
               progressLabel={`${index + 1} of ${queue.length}`}
+              skipControl={preview ? <StaffSkipNext className="qc-next" onClick={skipAhead} /> : null}
               afterReveal={
                 <button type="button" className="primary qc-next" onClick={next}>
                   {last ? lastLabel : "Next"}
@@ -386,6 +398,7 @@ export default function WalkLesson({
         showBack={Boolean(lab.showBack) || Boolean(onBack)}
         onCheck={payCheck}
         onDone={afterPractice}
+        preview={preview}
       />
     );
   }
@@ -401,6 +414,7 @@ export default function WalkLesson({
       boardHint={lab.boardHint}
       onBack={onBack}
       showBack={Boolean(lab.showBack) || Boolean(onBack)}
+      preview={preview}
       practiceLabel={hasPractice ? "Try a few" : hasDrag ? "Drag values" : "Finish"}
       skipLabel={
         hasPractice

@@ -326,6 +326,7 @@ export default function OpAmpWalkthrough({
       onExit={onExit}
       onPractice={() => setStage("practice")}
       onCheck={payCheck}
+      preview={preview}
     />
   );
 }

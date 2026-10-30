@@ -210,6 +210,7 @@ export default function DragCircuitLab({
         onBack={onBack}
         showBack={showBack}
         onPractice={() => setStage("lab")}
+        preview={preview}
         onCheck={(outcome) =>
           payGuidedCheck(setProgress, {
             preview,

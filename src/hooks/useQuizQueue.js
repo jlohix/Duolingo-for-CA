@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { isAnswerCorrect } from "../data/loadQuestions";
 import { XP_CORRECT } from "../state/progress";
+import { isAdmin, loadSession } from "../state/auth";
 
 export function useQuizQueue(
   initialQuestions,
@@ -58,6 +59,19 @@ export function useQuizQueue(
       );
     }
     onOutcome?.({ ok, firstTry, awardXp, question });
+  }
+
+  /** Staff preview: move to the next part without answering or recycling. */
+  function skipAhead() {
+    if (!isAdmin(loadSession())) return { done: false };
+    if (!question) return { done: true };
+    if (index + 1 >= queue.length) {
+      return { done: true };
+    }
+    setSelected("");
+    setRevealed(false);
+    setIndex((i) => i + 1);
+    return { done: false };
   }
 
   function goNext() {
@@ -123,6 +137,7 @@ export function useQuizQueue(
     reviewCount,
     check,
     goNext,
+    skipAhead,
     startReview,
   };
 }
