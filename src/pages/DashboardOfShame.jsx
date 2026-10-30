@@ -108,8 +108,7 @@ export default function DashboardOfShame({ canEdit = false }) {
       </header>
       <p className="focus-line">
         Every change ever made to a question — the wording, the answer options,
-        the correct answer, or the diagram. Each entry shows the question
-        before and after it was fixed, straight from the question-bank history.
+        the correct answer, or the diagram.
       </p>
 
       <div className="dos-filters">
