@@ -1,5 +1,17 @@
 export const BUILT_IN_LOGS = [
   {
+    id: "built-2026-10-31-brains-csv",
+    date: "2026-10-31",
+    title: "No Pen, Just Brains updated",
+    body: "No Pen, Just Brains explanations are tightened. The set is still 50 conceptual questions.",
+  },
+  {
+    id: "built-2026-10-31-power-csv",
+    date: "2026-10-31",
+    title: "Power questions updated",
+    body: "Power Easy question 204 now states the ammeter and 30 ohm power steps more clearly. Knowledge check uses the same questions.",
+  },
+  {
     id: "built-2026-10-31-opamp-csv",
     date: "2026-10-31",
     title: "Op-amp questions updated",
