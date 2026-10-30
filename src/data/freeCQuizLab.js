@@ -25,7 +25,7 @@ export const FREEC_QUIZ = [
       c: "$3\\,\\mathrm{mA}$ through $C$.",
     },
     answer: "b",
-    why: "Capacitor voltage is continuous: $v(0^+)=v(0^-)=24\\,\\mathrm{V}$. The battery being out only sets $v(\\infty)=0$.",
+    why: "Capacitor voltage is continuous: $v_C(0^+)=v_C(0^-)=24\\,\\mathrm{V}$. Opening the switch cannot make the capacitor voltage change instantaneously.",
   },
   {
     id: "p3",
