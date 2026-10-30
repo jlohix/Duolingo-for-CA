@@ -1,5 +1,11 @@
 export const BUILT_IN_LOGS = [
   {
+    id: "built-2026-10-31-laplace-212-diagram",
+    date: "2026-10-31",
+    title: "Laplace 212 current source",
+    body: "Laplace Circuit Application question 212 now shows the 5u(t) source as amperes, not volts. Knowledge check uses the same questions.",
+  },
+  {
     id: "built-2026-10-31-laplace-205",
     date: "2026-10-31",
     title: "Laplace initial-condition step",
