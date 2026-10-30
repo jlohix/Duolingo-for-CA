@@ -1,5 +1,11 @@
 export const BUILT_IN_LOGS = [
   {
+    id: "built-2026-10-30-opamp-206",
+    date: "2026-10-30",
+    title: "Op-amp virtual short step",
+    body: "Op-amp practice question 206 now takes the inverting-terminal voltage as equal to the input in DC steady state. Knowledge check uses the same questions.",
+  },
+  {
     id: "built-2026-10-30-four-banks",
     date: "2026-10-30",
     title: "Four question banks updated",
