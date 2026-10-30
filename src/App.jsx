@@ -54,6 +54,7 @@ import Leagues from "./pages/Leagues";
 import Guide from "./pages/Guide";
 import Updates from "./pages/Updates";
 import DashboardOfShame from "./pages/DashboardOfShame";
+import QuestionEditor from "./pages/QuestionEditor";
 import Lesson from "./pages/Lesson";
 import SkipQuiz from "./pages/SkipQuiz";
 import KnowledgeCheck from "./pages/KnowledgeCheck";
@@ -464,6 +465,7 @@ function AppBody({ onGateChange }) {
       "updates",
       "shame",
       "qpack",
+      "qedit",
     ].includes(screen)
       ? screen
       : "admin";
@@ -503,6 +505,8 @@ function AppBody({ onGateChange }) {
           <Suspense fallback={<div className="page"><p>Loading question pack…</p></div>}>
             <QuestionPack questions={questions} loaded={questionsLoaded} />
           </Suspense>
+        ) : adminNav === "qedit" ? (
+          <QuestionEditor questions={questions} loaded={questionsLoaded} />
         ) : (
           <Suspense fallback={<div className="page"><p>Loading admin…</p></div>}>
             <Admin

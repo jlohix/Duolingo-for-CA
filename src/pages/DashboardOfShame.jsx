@@ -1,5 +1,45 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { QUESTION_CHANGES } from "../data/questionChanges.generated";
+import { listQuestionOverridesRemote } from "../supabaseClient";
+
+const OPTION_FIELDS = [
+  ["optionA", "option_a", "Option A"],
+  ["optionB", "option_b", "Option B"],
+  ["optionC", "option_c", "Option C"],
+  ["optionD", "option_d", "Option D"],
+];
+
+// Convert a live Supabase override row into Dashboard-of-Shame change entries,
+// diffing its stored before-snapshot against the current (edited) values.
+function overrideToEntry(o) {
+  const before = o.before_json || {};
+  const changes = [];
+  const push = (field, label, b, a) => {
+    const bv = String(b ?? "").trim();
+    const av = String(a ?? "").trim();
+    if (av !== "" && bv !== av) {
+      changes.push({ field, label, before: bv, after: av });
+    }
+  };
+  push("question", "Question text", before.question, o.question);
+  for (const [field, col, label] of OPTION_FIELDS) {
+    push(field, label, before[field], o[col]);
+  }
+  push("answer", "Correct answer", before.answer, o.answer);
+  push("image", "Question image", before.image, o.image);
+  if (!changes.length) return null;
+  return {
+    id: `override-${o.question_id}`,
+    commit: "manual",
+    date: String(o.updated_at || "").slice(0, 10),
+    subject: o.edited_by ? `Edited by ${o.edited_by}` : "Manual admin edit",
+    bankId: o.bank_id || "",
+    bankTitle: o.bank_id || "Manual edit",
+    questionId: o.question_id,
+    changes,
+    manual: true,
+  };
+}
 
 const PREVIEW = 8;
 
@@ -77,23 +117,50 @@ export default function DashboardOfShame({ canEdit = false }) {
   const [expanded, setExpanded] = useState(false);
   const [bankFilter, setBankFilter] = useState("all");
   const [kindFilter, setKindFilter] = useState("all");
+  const [overrideEntries, setOverrideEntries] = useState([]);
+
+  // Pull live admin edits from Supabase and show them alongside the
+  // git-derived history. Failure is non-fatal — we just show the git list.
+  useEffect(() => {
+    let active = true;
+    listQuestionOverridesRemote()
+      .then((rows) => {
+        if (!active) return;
+        const entries = (rows || [])
+          .map(overrideToEntry)
+          .filter(Boolean);
+        setOverrideEntries(entries);
+      })
+      .catch(() => {
+        if (active) setOverrideEntries([]);
+      });
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  // Manual edits first (newest activity), then the git-derived history.
+  const allChanges = useMemo(
+    () => [...overrideEntries, ...QUESTION_CHANGES],
+    [overrideEntries]
+  );
 
   const banks = useMemo(() => {
     const seen = new Map();
-    for (const e of QUESTION_CHANGES) {
+    for (const e of allChanges) {
       if (!seen.has(e.bankId)) seen.set(e.bankId, e.bankTitle);
     }
     return [...seen.entries()];
-  }, []);
+  }, [allChanges]);
 
   const filtered = useMemo(() => {
-    return QUESTION_CHANGES.filter((e) => {
+    return allChanges.filter((e) => {
       if (bankFilter !== "all" && e.bankId !== bankFilter) return false;
       if (kindFilter !== "all" && !changeSummary(e.changes).includes(kindFilter))
         return false;
       return true;
     });
-  }, [bankFilter, kindFilter]);
+  }, [allChanges, bankFilter, kindFilter]);
 
   const visible = expanded ? filtered : filtered.slice(0, PREVIEW);
   const hiddenCount = Math.max(0, filtered.length - PREVIEW);

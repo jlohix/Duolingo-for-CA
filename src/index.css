@@ -6143,3 +6143,67 @@ html[data-theme="dark"] .circuit-svg .board-step {
   border: 1px solid var(--line);
   background: #fff;
 }
+
+/* Question editor (admin) */
+.qed-pickers {
+  display: grid;
+  gap: 12px;
+}
+
+.qed-pickers label,
+.qed-form label {
+  display: grid;
+  gap: 4px;
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+
+.qed-pickers select,
+.qed-form input,
+.qed-form textarea,
+.qed-form select {
+  border: 2px solid var(--line);
+  border-radius: 12px;
+  padding: 8px 10px;
+  background: var(--card);
+  color: var(--ink);
+  font: inherit;
+}
+
+.qed-form {
+  display: grid;
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.qed-flag {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--red);
+}
+
+.qed-preview {
+  max-width: 100%;
+  border-radius: 10px;
+  border: 1px solid var(--line);
+  background: #fff;
+  justify-self: start;
+}
+
+.qed-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.qed-ok {
+  color: var(--green-dark, var(--green));
+  font-weight: 600;
+  margin: 0;
+}
+
+.qed-err {
+  color: var(--red);
+  font-weight: 600;
+  margin: 0;
+}
