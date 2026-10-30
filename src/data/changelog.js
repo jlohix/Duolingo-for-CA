@@ -1,5 +1,17 @@
 export const BUILT_IN_LOGS = [
   {
+    id: "built-2026-10-31-superposition-csv",
+    date: "2026-10-31",
+    title: "Superposition questions updated",
+    body: "Superposition Average question 203 now keeps the voltage source on when it acts alone, and opens the current source. Knowledge check uses the same questions.",
+  },
+  {
+    id: "built-2026-10-31-brains-profile-copy",
+    date: "2026-10-31",
+    title: "No Pen, Just Brains line on Profile",
+    body: "The No Pen, Just Brains dashboard now says the set is 50 conceptual questions from each Learn section, and that your first attempt and your best attempt is recorded.",
+  },
+  {
     id: "built-2026-10-31-brains-csv",
     date: "2026-10-31",
     title: "No Pen, Just Brains updated",

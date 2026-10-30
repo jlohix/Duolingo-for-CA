@@ -335,8 +335,8 @@ export default function Profile({
       <section className="profile-block">
         <h2>No Pen, Just Brains</h2>
         <p className="login-hint">
-          50 conceptual questions from every Learn section. Your first marks
-          stay locked. Later tries keep the best score.
+          50 conceptual questions from each Learn section. Your first attempt
+          and your best attempt is recorded.
         </p>
         <BrainDashboard progress={progress} />
       </section>
