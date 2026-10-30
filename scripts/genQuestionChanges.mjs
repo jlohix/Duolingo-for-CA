@@ -43,10 +43,11 @@ function loadBankMap() {
 }
 
 function git(args) {
-  return execFileSync("git", args, {
+  return execFileSync("git", ["--no-pager", ...args], {
     cwd: REPO_ROOT,
     encoding: "utf8",
     maxBuffer: 64 * 1024 * 1024,
+    env: { ...process.env, GIT_PAGER: "cat", GIT_TERMINAL_PROMPT: "0" },
   });
 }
 
@@ -94,7 +95,7 @@ function parseQuestions(text) {
     if (!id) continue;
     map.set(id, {
       id,
-      question: clean(row.question ?? row.main_question ?? ""),
+      question: clean(row.question),
       optionA: clean(row.optionA),
       optionB: clean(row.optionB),
       optionC: clean(row.optionC),
@@ -180,10 +181,10 @@ function main() {
               id: `${commit.hash.slice(0, 8)}-${file}-${id}`,
               commit: commit.hash.slice(0, 8),
               date: commit.date.toISOString().slice(0, 10),
-              subject: commit.subject,
               bankId: bank.bankId,
               bankTitle: bank.bankTitle,
               questionId: id,
+              question: nextRec.question,
               changes,
             });
           }

@@ -6068,10 +6068,15 @@ html[data-theme="dark"] .circuit-svg .board-step {
   background: var(--done-bg);
 }
 
-.dos-subject {
-  margin: 0;
-  font-style: italic;
-  color: var(--muted);
+.dos-question {
+  display: block;
+  margin: 0 0 8px;
+  font-weight: 650;
+}
+
+.dos-spoiler-overlay {
+  z-index: 80;
+  place-items: center;
 }
 
 .dos-change {

@@ -38,10 +38,10 @@ function overrideToEntry(o) {
     id: `override-${o.question_id}`,
     commit: "manual",
     date: String(o.updated_at || "").slice(0, 10),
-    subject: o.edited_by ? `Edited by ${o.edited_by}` : "Manual admin edit",
     bankId: o.bank_id || "",
     bankTitle: o.bank_id || "Manual edit",
     questionId: o.question_id,
+    question: o.question || before.question || "",
     changes,
     manual: true,
   };
@@ -78,6 +78,18 @@ const KIND_LABEL = {
   answer: "Answer changed",
   image: "Image changed",
 };
+
+function discussedQuestion(entry, questions = []) {
+  const live =
+    questions.find((q) => q.id === entry.questionId) ||
+    questions.find(
+      (q) => q.bankId === entry.bankId && q.csvId === entry.questionId
+    );
+  if (live?.question) return live.question;
+  if (entry.question) return entry.question;
+  const changed = entry.changes?.find((c) => c.field === "question");
+  return changed?.after || changed?.before || "";
+}
 
 function isImageUrl(value) {
   return /^https?:\/\//i.test(value) && /\.(png|jpe?g|gif|webp|svg)/i.test(value);
@@ -119,13 +131,14 @@ function ChangeRow({ change }) {
   );
 }
 
-export default function DashboardOfShame({ canEdit = false }) {
+export default function DashboardOfShame({ canEdit = false, questions = [] }) {
   const [expanded, setExpanded] = useState(false);
   const [bankFilter, setBankFilter] = useState("all");
   const [kindFilter, setKindFilter] = useState("all");
   const [overrideEntries, setOverrideEntries] = useState([]);
   const [hiddenIds, setHiddenIds] = useState(() => new Set());
   const [pendingId, setPendingId] = useState(null);
+  const [spoilersOk, setSpoilersOk] = useState(false);
 
   const session = loadSession();
   const hiddenBy = session?.username || "";
@@ -227,10 +240,43 @@ export default function DashboardOfShame({ canEdit = false }) {
 
   return (
     <div className="page">
+      {spoilersOk ? null : (
+        <div className="overlay dos-spoiler-overlay" role="presentation">
+          <div
+            className="event-sheet"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="dos-spoiler-title"
+          >
+            <p className="eyebrow">Dashboard of Shame</p>
+            <h2 id="dos-spoiler-title">Spoiler alert</h2>
+            <p>
+              There might be spoilers on the questions. Please try to attempt
+              it first before coming here. :C
+            </p>
+            <p>
+              We made some mistakes in our questions, and we are owning up to
+              it.
+            </p>
+            <button
+              type="button"
+              className="primary"
+              onClick={() => setSpoilersOk(true)}
+            >
+              Okay
+            </button>
+          </div>
+        </div>
+      )}
       <header className="topbar">
         <div>
           <p className="eyebrow">{canEdit ? "Staff" : "Help"}</p>
           <h1>Dashboard of Shame</h1>
+          <p className="login-hint">
+            We made mistakes and we are currently owning up to it. ;( That
+            being said, please attempt the questions on your own first. Spoiler
+            alert, the answers might be here ._.
+          </p>
         </div>
       </header>
       <p className="focus-line">
@@ -285,6 +331,7 @@ export default function DashboardOfShame({ canEdit = false }) {
             const sorted = [...entry.changes].sort(
               (a, b) => FIELD_ORDER[a.field] - FIELD_ORDER[b.field]
             );
+            const questionText = discussedQuestion(entry, questions);
             return (
               <li
                 key={entry.id}
@@ -321,8 +368,8 @@ export default function DashboardOfShame({ canEdit = false }) {
                     </span>
                   ))}
                 </div>
-                {entry.subject ? (
-                  <p className="dos-subject">“{entry.subject}”</p>
+                {questionText ? (
+                  <MathText className="dos-question" text={questionText} />
                 ) : null}
                 {sorted.map((change, i) => (
                   <ChangeRow key={`${entry.id}-${i}`} change={change} />

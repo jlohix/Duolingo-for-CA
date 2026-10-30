@@ -500,7 +500,7 @@ function AppBody({ onGateChange }) {
         ) : adminNav === "updates" ? (
           <Updates canEdit />
         ) : adminNav === "shame" ? (
-          <DashboardOfShame canEdit />
+          <DashboardOfShame canEdit questions={questions} />
         ) : adminNav === "qpack" ? (
           <Suspense fallback={<div className="page"><p>Loading question pack…</p></div>}>
             <QuestionPack questions={questions} loaded={questionsLoaded} />
@@ -554,7 +554,7 @@ function AppBody({ onGateChange }) {
           ) : screen === "guide" ? (
             <Guide />
           ) : screen === "shame" ? (
-            <DashboardOfShame />
+            <DashboardOfShame questions={questions} />
           ) : (
             <Updates />
           )}
@@ -608,7 +608,7 @@ function AppBody({ onGateChange }) {
           ) : screen === "guide" ? (
             <Guide />
           ) : screen === "shame" ? (
-            <DashboardOfShame />
+            <DashboardOfShame questions={questions} />
           ) : (
             <Updates />
           )}
@@ -1072,7 +1072,7 @@ function AppBody({ onGateChange }) {
   } else if (screen === "updates") {
     main = <Updates />;
   } else if (screen === "shame") {
-    main = <DashboardOfShame />;
+    main = <DashboardOfShame questions={questions} />;
   }
 
   const nav = [

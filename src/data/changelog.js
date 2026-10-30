@@ -1,5 +1,17 @@
 export const BUILT_IN_LOGS = [
   {
+    id: "built-2026-10-31-dashboard-of-shame",
+    date: "2026-10-31",
+    title: "Dashboard of Shame",
+    body: "Help now has a Dashboard of Shame. Opening it first shows a spoiler alert: try the questions on your own first, because answers might be on the page, and that we made some mistakes and are owning up to them. The line under the title says the same in shorter form. Each change names the question that was edited, then shows how the wording, options, answer, or diagram changed.",
+  },
+  {
+    id: "built-2026-10-31-poles-csv3",
+    date: "2026-10-31",
+    title: "Poles Average is back",
+    body: "Poles Average now has question 211: zeros and poles, damping, and the bandpass output at the center frequency. Knowledge check uses the same questions.",
+  },
+  {
     id: "built-2026-10-31-opamp-wording",
     date: "2026-10-31",
     title: "Clearer op-amp steps",
