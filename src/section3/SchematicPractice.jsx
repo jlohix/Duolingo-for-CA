@@ -1,5 +1,5 @@
-import { useState } from "react";
 import MathText from "../components/MathText";
+import ConfettiBurst from "../components/ConfettiBurst";
 import { MiniGraph, PracticeBoard as DefaultBoard } from "./PracticeSchematics";
 
 const KEYS = ["a", "b", "c", "d"];
@@ -68,6 +68,12 @@ export default function SchematicPractice({ question, selected, revealed, ok, on
           </button>
         ) : null}
       </div>
+      {revealed ? (
+        <ConfettiBurst
+          burstKey={question.prompt || "try"}
+          variant={ok ? "confetti" : "crosses"}
+        />
+      ) : null}
       {revealed ? (
         <div className={`feedback ${ok ? "ok" : "bad"}`}>
           <div>

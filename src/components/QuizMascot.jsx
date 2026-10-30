@@ -1,18 +1,9 @@
 import { useEffect, useRef, useState } from "react";
+import ConfettiBurst from "./ConfettiBurst";
 
 const PACKS = {
   happy: {
-    frames: [
-      "/mascots/happy-sunwoo/frames/frame_01.png",
-      "/mascots/happy-sunwoo/frames/frame_02.png",
-      "/mascots/happy-sunwoo/frames/frame_03.png",
-      "/mascots/happy-sunwoo/frames/frame_04.png",
-      "/mascots/happy-sunwoo/frames/frame_05.png",
-      "/mascots/happy-sunwoo/frames/frame_06.png",
-      "/mascots/happy-sunwoo/frames/frame_07.png",
-      "/mascots/happy-sunwoo/frames/frame_08.png",
-    ],
-    times: [150, 120, 110, 130, 110, 120, 140, 260],
+    still: "/mascots/happy-sunwoo/celebration.png",
     alt: "Sunwoo celebrating",
   },
   scary: {
@@ -43,15 +34,24 @@ function preload(frames) {
 
 export default function QuizMascot({ mood, playKey }) {
   const pack = PACKS[mood];
-  const [src, setSrc] = useState(pack?.frames[0] || "");
+  const [src, setSrc] = useState(pack?.still || pack?.frames?.[0] || "");
+  const [burst, setBurst] = useState(0);
   const cancelRef = useRef(0);
 
   useEffect(() => {
-    if (pack) preload(pack.frames);
+    if (pack?.frames) preload(pack.frames);
+    if (pack?.still) preload([pack.still]);
   }, [pack]);
 
   useEffect(() => {
-    if (!pack) return undefined;
+    if (mood === "happy" || mood === "scary") setBurst((n) => n + 1);
+  }, [mood, playKey]);
+
+  useEffect(() => {
+    if (!pack?.frames) {
+      if (pack?.still) setSrc(pack.still);
+      return undefined;
+    }
     const token = cancelRef.current + 1;
     cancelRef.current = token;
     setSrc(pack.frames[0]);
@@ -77,8 +77,16 @@ export default function QuizMascot({ mood, playKey }) {
   if (!pack) return null;
 
   return (
-    <div className={`quiz-mascot quiz-mascot-${mood}`}>
-      <img src={src} alt={pack.alt} />
-    </div>
+    <>
+      {burst > 0 && mood === "happy" ? (
+        <ConfettiBurst burstKey={burst} />
+      ) : null}
+      {burst > 0 && mood === "scary" ? (
+        <ConfettiBurst burstKey={burst} variant="crosses" />
+      ) : null}
+      <div className={`quiz-mascot quiz-mascot-${mood}`}>
+        <img src={src} alt={pack.alt} />
+      </div>
+    </>
   );
 }

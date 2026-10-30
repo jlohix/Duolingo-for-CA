@@ -1,5 +1,17 @@
 export const BUILT_IN_LOGS = [
   {
+    id: "built-2026-10-30-miss-crosses",
+    date: "2026-10-30",
+    title: "Red crosses for a miss",
+    body: "A wrong answer now rains red ❌ marks across the whole screen, the same way a right answer rains confetti.",
+  },
+  {
+    id: "built-2026-10-30-correct-confetti",
+    date: "2026-10-30",
+    title: "Confetti for a correct answer",
+    body: "A right answer now rains confetti across the whole screen, and celebrating Sunwoo sits on a clear background instead of a black box.",
+  },
+  {
     id: "built-2026-10-30-halloween-mascot",
     date: "2026-10-30",
     title: "Halloween mascot",

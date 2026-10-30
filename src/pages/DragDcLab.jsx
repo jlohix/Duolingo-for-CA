@@ -1,6 +1,7 @@
 import { useMemo, useRef, useState } from "react";
 import { DC_LAB_QUESTIONS, DC_PARTS } from "../data/dcLab";
 import PartSymbol from "../components/PartSymbol";
+import ConfettiBurst from "../components/ConfettiBurst";
 import ThemeSwitch from "../components/ThemeSwitch";
 import {
   XP_CORRECT,
@@ -207,6 +208,12 @@ export default function DragDcLab({
       onPointerUp={endDrag}
       onPointerCancel={endDrag}
     >
+      {revealed ? (
+        <ConfettiBurst
+          burstKey={`${index}-${ok ? "ok" : "bad"}`}
+          variant={ok ? "confetti" : "crosses"}
+        />
+      ) : null}
       <header className="lesson-bar">
         <button type="button" className="ghost" onClick={onExit}>
           Close

@@ -1,6 +1,7 @@
 import { useMemo, useRef, useState } from "react";
 import { ColourCodeKey, ResistorBody } from "../data/resistorBands";
 import MathText from "../components/MathText";
+import ConfettiBurst from "../components/ConfettiBurst";
 import ThemeSwitch from "../components/ThemeSwitch";
 import LabTeach from "../components/LabTeach";
 import WalkRating from "../components/WalkRating";
@@ -139,6 +140,12 @@ function PracticeView({
       onPointerUp={endDrag}
       onPointerCancel={endDrag}
     >
+      {revealed ? (
+        <ConfettiBurst
+          burstKey={`${index}-${ok ? "ok" : "bad"}`}
+          variant={ok ? "confetti" : "crosses"}
+        />
+      ) : null}
       <header className="lesson-bar">
         <button type="button" className="ghost" onClick={onExit}>
           Close

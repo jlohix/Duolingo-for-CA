@@ -7,6 +7,7 @@ import MaxPowerSchematic from "../components/MaxPowerSchematic";
 import DependentSchematic from "../components/DependentSchematic";
 import LabTeach from "../components/LabTeach";
 import MathText from "../components/MathText";
+import ConfettiBurst from "../components/ConfettiBurst";
 import ThemeSwitch from "../components/ThemeSwitch";
 import {
   XP_CORRECT,
@@ -249,6 +250,12 @@ export default function DragCircuitLab({
       onPointerUp={endDrag}
       onPointerCancel={endDrag}
     >
+      {revealed ? (
+        <ConfettiBurst
+          burstKey={`${index}-${ok ? "ok" : "bad"}`}
+          variant={ok ? "confetti" : "crosses"}
+        />
+      ) : null}
       {showBack ? (
         <div className="lesson-close-row">
           <button type="button" className="ghost" onClick={onExit}>

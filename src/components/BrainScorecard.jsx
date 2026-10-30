@@ -11,7 +11,7 @@ export default function BrainScorecard({ correct = 0, total = 0 }) {
       {verdict.mascot ? (
         <img
           className="brain-mascot"
-          src="/mascots/happy-sunwoo/celebration.gif"
+          src="/mascots/happy-sunwoo/celebration.png"
           alt="Happy Sunwoo celebrating"
         />
       ) : null}
