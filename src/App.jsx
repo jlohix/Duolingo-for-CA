@@ -53,6 +53,7 @@ import Leagues from "./pages/Leagues";
 
 import Guide from "./pages/Guide";
 import Updates from "./pages/Updates";
+import DashboardOfShame from "./pages/DashboardOfShame";
 import Lesson from "./pages/Lesson";
 import SkipQuiz from "./pages/SkipQuiz";
 import KnowledgeCheck from "./pages/KnowledgeCheck";
@@ -461,6 +462,7 @@ function AppBody({ onGateChange }) {
       "profile",
       "guide",
       "updates",
+      "shame",
       "qpack",
     ].includes(screen)
       ? screen
@@ -495,6 +497,8 @@ function AppBody({ onGateChange }) {
           <Guide />
         ) : adminNav === "updates" ? (
           <Updates canEdit />
+        ) : adminNav === "shame" ? (
+          <DashboardOfShame canEdit />
         ) : adminNav === "qpack" ? (
           <Suspense fallback={<div className="page"><p>Loading question pack…</p></div>}>
             <QuestionPack questions={questions} loaded={questionsLoaded} />
@@ -513,7 +517,7 @@ function AppBody({ onGateChange }) {
     );
   }
 
-  const boardScreens = ["classboard", "cohortboard", "individualboard", "leagues", "profile", "guide", "updates"];
+  const boardScreens = ["classboard", "cohortboard", "individualboard", "leagues", "profile", "guide", "updates", "shame"];
 
   if (error) {
     if (boardScreens.includes(screen)) {
@@ -545,6 +549,8 @@ function AppBody({ onGateChange }) {
             />
           ) : screen === "guide" ? (
             <Guide />
+          ) : screen === "shame" ? (
+            <DashboardOfShame />
           ) : (
             <Updates />
           )}
@@ -597,6 +603,8 @@ function AppBody({ onGateChange }) {
             />
           ) : screen === "guide" ? (
             <Guide />
+          ) : screen === "shame" ? (
+            <DashboardOfShame />
           ) : (
             <Updates />
           )}
@@ -1059,6 +1067,8 @@ function AppBody({ onGateChange }) {
     main = <Guide />;
   } else if (screen === "updates") {
     main = <Updates />;
+  } else if (screen === "shame") {
+    main = <DashboardOfShame />;
   }
 
   const nav = [
@@ -1070,6 +1080,7 @@ function AppBody({ onGateChange }) {
     "leagues",
     "guide",
     "updates",
+    "shame",
   ].includes(screen)
     ? screen
     : "home";
