@@ -1,5 +1,11 @@
 export const BUILT_IN_LOGS = [
   {
+    id: "built-2026-10-30-laplace-ca-216",
+    date: "2026-10-30",
+    title: "Laplace circuit diagram for 216",
+    body: "Laplace Circuit Application question 216 now uses the matching circuit diagram. Knowledge check uses the same questions.",
+  },
+  {
     id: "built-2026-10-30-laplace-vo-t",
     date: "2026-10-30",
     title: "Laplace inverse step matches 96",
