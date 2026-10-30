@@ -1,9 +1,21 @@
 export const BUILT_IN_LOGS = [
   {
+    id: "built-2026-10-30-halloween-mascot",
+    date: "2026-10-30",
+    title: "Halloween mascot",
+    body: "The Learn mascot is in a witch hat and cape for Halloween. The usual look comes back after the holiday.",
+  },
+  {
     id: "built-2026-10-30-gentler-hints",
     date: "2026-10-30",
     title: "Hints nudge, they do not solve",
     body: "The Hint button now points at the method, not the worked answer. It will not quote the explanation or name the choice.",
+  },
+  {
+    id: "built-2026-10-28-brain-profile",
+    date: "2026-10-28",
+    title: "No Pen, Just Brains on Profile",
+    body: "Profile now has a No Pen, Just Brains dashboard. Your first marks stay locked, later tries keep the best score, and the remark picture sits under those attempts.",
   },
   {
     id: "built-2026-10-23-no-pen",
