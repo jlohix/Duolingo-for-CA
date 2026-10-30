@@ -1,5 +1,11 @@
 export const BUILT_IN_LOGS = [
   {
+    id: "built-2026-10-30-laplace-opamp-banks",
+    date: "2026-10-30",
+    title: "Laplace diagrams and current division",
+    body: "Laplace Circuit Application now uses the matching diagrams for questions 216 and 217, and the current-division step on question 212 is corrected. Knowledge check uses the same questions.",
+  },
+  {
     id: "built-2026-10-30-opamp-206",
     date: "2026-10-30",
     title: "Op-amp virtual short step",
