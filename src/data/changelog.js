@@ -1,5 +1,11 @@
 export const BUILT_IN_LOGS = [
   {
+    id: "built-2026-10-30-laplace-yc",
+    date: "2026-10-30",
+    title: "Laplace circuit step wording",
+    body: "Laplace Circuit Application question 206 now asks for capacitor admittance in the s-domain step. Knowledge check uses the same questions.",
+  },
+  {
     id: "built-2026-10-30-laplace-ca-csv",
     date: "2026-10-30",
     title: "Laplace circuit questions updated",
