@@ -5997,3 +5997,229 @@ html[data-theme="dark"] .circuit-svg .board-step {
   opacity: 0.65;
   pointer-events: none;
 }
+
+/* Dashboard of Shame — question change history */
+.dos-filters {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.dos-filters label {
+  display: grid;
+  gap: 4px;
+  font-size: 0.8rem;
+  color: var(--muted);
+}
+
+.dos-filters select {
+  border: 2px solid var(--line);
+  border-radius: 12px;
+  padding: 8px 10px;
+  background: var(--card);
+  color: var(--ink);
+  font: inherit;
+}
+
+.dos-count {
+  margin: 0 0 4px;
+  font-weight: 700;
+  color: var(--muted);
+}
+
+.dos-item {
+  display: grid;
+  gap: 10px;
+}
+
+.dos-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.dos-badge {
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 3px 9px;
+  border-radius: 999px;
+  border: 1.5px solid var(--line);
+  color: var(--ink);
+  background: var(--card);
+}
+
+.dos-badge-question {
+  background: var(--ok-bg);
+  border-color: var(--green);
+}
+
+.dos-badge-options {
+  background: var(--letter-bg);
+}
+
+.dos-badge-answer {
+  background: var(--bad-bg);
+  border-color: var(--red);
+}
+
+.dos-badge-image {
+  background: var(--done-bg);
+}
+
+.dos-subject {
+  margin: 0;
+  font-style: italic;
+  color: var(--muted);
+}
+
+.dos-change {
+  border-top: 1.5px dashed var(--line);
+  padding-top: 10px;
+}
+
+.dos-field {
+  margin: 0 0 6px;
+}
+
+.dos-ba {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+@media (max-width: 560px) {
+  .dos-ba {
+    grid-template-columns: 1fr;
+  }
+}
+
+.dos-col {
+  display: grid;
+  gap: 6px;
+  align-content: start;
+  border: 2px solid var(--line);
+  border-radius: 14px;
+  padding: 10px;
+  background: var(--bg);
+}
+
+.dos-before {
+  border-color: var(--red);
+  background: var(--bad-bg);
+}
+
+.dos-after {
+  border-color: var(--green);
+  background: var(--ok-bg);
+}
+
+.dos-tag {
+  font-size: 0.7rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--muted);
+}
+
+.dos-code {
+  display: block;
+  white-space: pre-wrap;
+  word-break: break-word;
+  font-size: 0.85rem;
+  color: var(--ink);
+  background: transparent;
+}
+
+.dos-empty {
+  color: var(--muted);
+  font-style: italic;
+}
+
+.dos-img {
+  max-width: 100%;
+  border-radius: 10px;
+  border: 1px solid var(--line);
+  background: #fff;
+}
+
+/* Question editor (admin) */
+.qed-pickers {
+  display: grid;
+  gap: 12px;
+}
+
+.qed-pickers label,
+.qed-form label {
+  display: grid;
+  gap: 4px;
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+
+.qed-pickers select,
+.qed-form input,
+.qed-form textarea,
+.qed-form select {
+  border: 2px solid var(--line);
+  border-radius: 12px;
+  padding: 8px 10px;
+  background: var(--card);
+  color: var(--ink);
+  font: inherit;
+}
+
+.qed-form {
+  display: grid;
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.qed-flag {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--red);
+}
+
+.qed-preview {
+  max-width: 100%;
+  border-radius: 10px;
+  border: 1px solid var(--line);
+  background: #fff;
+  justify-self: start;
+}
+
+.qed-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.qed-ok {
+  color: var(--green-dark, var(--green));
+  font-weight: 600;
+  margin: 0;
+}
+
+.qed-err {
+  color: var(--red);
+  font-weight: 600;
+  margin: 0;
+}
+
+/* Dashboard of Shame — admin hide/show */
+.dos-hide-btn {
+  font-size: 0.78rem;
+  padding: 4px 10px;
+  white-space: nowrap;
+}
+
+.dos-hidden {
+  opacity: 0.55;
+}
+
+.dos-hidden-tag {
+  color: var(--red);
+  font-weight: 600;
+}

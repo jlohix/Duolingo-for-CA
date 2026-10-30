@@ -53,6 +53,8 @@ import Leagues from "./pages/Leagues";
 
 import Guide from "./pages/Guide";
 import Updates from "./pages/Updates";
+import DashboardOfShame from "./pages/DashboardOfShame";
+import QuestionEditor from "./pages/QuestionEditor";
 import Lesson from "./pages/Lesson";
 import SkipQuiz from "./pages/SkipQuiz";
 import KnowledgeCheck from "./pages/KnowledgeCheck";
@@ -461,7 +463,9 @@ function AppBody({ onGateChange }) {
       "profile",
       "guide",
       "updates",
+      "shame",
       "qpack",
+      "qedit",
     ].includes(screen)
       ? screen
       : "admin";
@@ -495,10 +499,14 @@ function AppBody({ onGateChange }) {
           <Guide />
         ) : adminNav === "updates" ? (
           <Updates canEdit />
+        ) : adminNav === "shame" ? (
+          <DashboardOfShame canEdit />
         ) : adminNav === "qpack" ? (
           <Suspense fallback={<div className="page"><p>Loading question pack…</p></div>}>
             <QuestionPack questions={questions} loaded={questionsLoaded} />
           </Suspense>
+        ) : adminNav === "qedit" ? (
+          <QuestionEditor questions={questions} loaded={questionsLoaded} />
         ) : (
           <Suspense fallback={<div className="page"><p>Loading admin…</p></div>}>
             <Admin
@@ -513,7 +521,7 @@ function AppBody({ onGateChange }) {
     );
   }
 
-  const boardScreens = ["classboard", "cohortboard", "individualboard", "leagues", "profile", "guide", "updates"];
+  const boardScreens = ["classboard", "cohortboard", "individualboard", "leagues", "profile", "guide", "updates", "shame"];
 
   if (error) {
     if (boardScreens.includes(screen)) {
@@ -545,6 +553,8 @@ function AppBody({ onGateChange }) {
             />
           ) : screen === "guide" ? (
             <Guide />
+          ) : screen === "shame" ? (
+            <DashboardOfShame />
           ) : (
             <Updates />
           )}
@@ -597,6 +607,8 @@ function AppBody({ onGateChange }) {
             />
           ) : screen === "guide" ? (
             <Guide />
+          ) : screen === "shame" ? (
+            <DashboardOfShame />
           ) : (
             <Updates />
           )}
@@ -1059,6 +1071,8 @@ function AppBody({ onGateChange }) {
     main = <Guide />;
   } else if (screen === "updates") {
     main = <Updates />;
+  } else if (screen === "shame") {
+    main = <DashboardOfShame />;
   }
 
   const nav = [
@@ -1070,6 +1084,7 @@ function AppBody({ onGateChange }) {
     "leagues",
     "guide",
     "updates",
+    "shame",
   ].includes(screen)
     ? screen
     : "home";
