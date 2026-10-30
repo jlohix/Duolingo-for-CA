@@ -1,5 +1,11 @@
 export const BUILT_IN_LOGS = [
   {
+    id: "built-2026-10-30-laplace-ca-csv",
+    date: "2026-10-30",
+    title: "Laplace circuit questions updated",
+    body: "Laplace Circuit Application practice and Knowledge check now use the updated step-by-step questions, including the corrected output-voltage result.",
+  },
+  {
     id: "built-2026-10-30-mascot-move",
     date: "2026-10-30",
     title: "Mascots move again",
