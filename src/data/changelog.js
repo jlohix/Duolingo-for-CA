@@ -1,5 +1,17 @@
 export const BUILT_IN_LOGS = [
   {
+    id: "built-2026-10-30-poles-bank",
+    date: "2026-10-30",
+    title: "Poles questions updated",
+    body: "The Poles Easy through Challenging questions are updated. Knowledge check uses the same questions.",
+  },
+  {
+    id: "built-2026-10-30-opamp-bank",
+    date: "2026-10-30",
+    title: "Op-amp questions updated",
+    body: "The Op-amps Easy through Challenging questions are updated. Knowledge check uses the same questions.",
+  },
+  {
     id: "built-2026-10-30-laplace-opamp-banks",
     date: "2026-10-30",
     title: "Laplace diagrams and current division",
