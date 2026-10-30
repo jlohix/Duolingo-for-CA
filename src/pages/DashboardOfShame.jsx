@@ -1,6 +1,11 @@
 import { useEffect, useMemo, useState } from "react";
 import { QUESTION_CHANGES } from "../data/questionChanges.generated";
-import { listQuestionOverridesRemote } from "../supabaseClient";
+import {
+  listQuestionOverridesRemote,
+  listHiddenShameRemote,
+  setShameHiddenRemote,
+} from "../supabaseClient";
+import { loadSession } from "../state/auth";
 
 const OPTION_FIELDS = [
   ["optionA", "option_a", "Option A"],
@@ -118,6 +123,11 @@ export default function DashboardOfShame({ canEdit = false }) {
   const [bankFilter, setBankFilter] = useState("all");
   const [kindFilter, setKindFilter] = useState("all");
   const [overrideEntries, setOverrideEntries] = useState([]);
+  const [hiddenIds, setHiddenIds] = useState(() => new Set());
+  const [pendingId, setPendingId] = useState(null);
+
+  const session = loadSession();
+  const hiddenBy = session?.username || "";
 
   // Pull live admin edits from Supabase and show them alongside the
   // git-derived history. Failure is non-fatal — we just show the git list.
@@ -139,6 +149,48 @@ export default function DashboardOfShame({ canEdit = false }) {
     };
   }, []);
 
+  // Pull the shared set of admin-hidden entry ids. Students never see hidden
+  // entries; admins see them greyed out with a Show toggle.
+  useEffect(() => {
+    let active = true;
+    listHiddenShameRemote()
+      .then((rows) => {
+        if (!active) return;
+        setHiddenIds(new Set((rows || []).map((r) => r.entry_id)));
+      })
+      .catch(() => {
+        if (active) setHiddenIds(new Set());
+      });
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  async function toggleHidden(entryId) {
+    const willHide = !hiddenIds.has(entryId);
+    setPendingId(entryId);
+    // Optimistic update.
+    setHiddenIds((prev) => {
+      const next = new Set(prev);
+      if (willHide) next.add(entryId);
+      else next.delete(entryId);
+      return next;
+    });
+    try {
+      await setShameHiddenRemote(entryId, willHide, hiddenBy);
+    } catch {
+      // Roll back on failure.
+      setHiddenIds((prev) => {
+        const next = new Set(prev);
+        if (willHide) next.delete(entryId);
+        else next.add(entryId);
+        return next;
+      });
+    } finally {
+      setPendingId(null);
+    }
+  }
+
   // Manual edits first (newest activity), then the git-derived history.
   const allChanges = useMemo(
     () => [...overrideEntries, ...QUESTION_CHANGES],
@@ -154,13 +206,20 @@ export default function DashboardOfShame({ canEdit = false }) {
   }, [allChanges]);
 
   const filtered = useMemo(() => {
-    return allChanges.filter((e) => {
-      if (bankFilter !== "all" && e.bankId !== bankFilter) return false;
-      if (kindFilter !== "all" && !changeSummary(e.changes).includes(kindFilter))
-        return false;
-      return true;
-    });
-  }, [allChanges, bankFilter, kindFilter]);
+    return allChanges
+      .filter((e) => {
+        // Students never see hidden entries; admins see all (greyed).
+        if (!canEdit && hiddenIds.has(e.id)) return false;
+        if (bankFilter !== "all" && e.bankId !== bankFilter) return false;
+        if (
+          kindFilter !== "all" &&
+          !changeSummary(e.changes).includes(kindFilter)
+        )
+          return false;
+        return true;
+      })
+      .map((e) => ({ ...e, hidden: hiddenIds.has(e.id) }));
+  }, [allChanges, bankFilter, kindFilter, hiddenIds, canEdit]);
 
   const visible = expanded ? filtered : filtered.slice(0, PREVIEW);
   const hiddenCount = Math.max(0, filtered.length - PREVIEW);
@@ -226,11 +285,33 @@ export default function DashboardOfShame({ canEdit = false }) {
               (a, b) => FIELD_ORDER[a.field] - FIELD_ORDER[b.field]
             );
             return (
-              <li key={entry.id} className="profile-block change-item dos-item">
+              <li
+                key={entry.id}
+                className={`profile-block change-item dos-item${
+                  entry.hidden ? " dos-hidden" : ""
+                }`}
+              >
                 <div className="change-head">
                   <p className="eyebrow">
                     {entry.date} · {entry.bankTitle} · Q{entry.questionId}
+                    {canEdit && entry.hidden ? (
+                      <span className="dos-hidden-tag"> · hidden from students</span>
+                    ) : null}
                   </p>
+                  {canEdit ? (
+                    <button
+                      type="button"
+                      className="ghost dos-hide-btn"
+                      onClick={() => toggleHidden(entry.id)}
+                      disabled={pendingId === entry.id}
+                    >
+                      {pendingId === entry.id
+                        ? "…"
+                        : entry.hidden
+                        ? "Show to students"
+                        : "Hide from students"}
+                    </button>
+                  ) : null}
                 </div>
                 <div className="dos-badges">
                   {changeSummary(entry.changes).map((k) => (

@@ -850,3 +850,23 @@ export async function deleteQuestionOverrideRemote(questionId) {
   });
   return data === true;
 }
+
+
+// ---------- Dashboard of Shame: hidden entries (admin-managed, shared) ----------
+// See supabase/shame_hidden.sql.
+
+export async function listHiddenShameRemote() {
+  const data = await rpc("list_shame_hidden", {});
+  return Array.isArray(data) ? data : [];
+}
+
+// Hide (hidden=true) or show (hidden=false) one Shame entry for all students.
+// Returns the resulting hidden state.
+export async function setShameHiddenRemote(entryId, hidden, hiddenBy) {
+  const data = await rpc("set_shame_hidden", {
+    p_entry_id: String(entryId || ""),
+    p_hidden: hidden === true,
+    p_hidden_by: hiddenBy || null,
+  });
+  return data === true;
+}
