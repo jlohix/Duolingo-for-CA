@@ -1,5 +1,11 @@
 export const BUILT_IN_LOGS = [
   {
+    id: "built-2026-10-30-mascot-move",
+    date: "2026-10-30",
+    title: "Mascots move again",
+    body: "Happy Sunwoo’s party loop and scary Sunwoo’s bat swing play again on check, instead of sitting still.",
+  },
+  {
     id: "built-2026-10-30-correct-confetti",
     date: "2026-10-30",
     title: "Confetti for a correct answer",

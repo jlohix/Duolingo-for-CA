@@ -3,7 +3,17 @@ import ConfettiBurst from "./ConfettiBurst";
 
 const PACKS = {
   happy: {
-    still: "/mascots/happy-sunwoo/celebration.png",
+    frames: [
+      "/mascots/happy-sunwoo/frames/frame_01.png",
+      "/mascots/happy-sunwoo/frames/frame_02.png",
+      "/mascots/happy-sunwoo/frames/frame_03.png",
+      "/mascots/happy-sunwoo/frames/frame_04.png",
+      "/mascots/happy-sunwoo/frames/frame_05.png",
+      "/mascots/happy-sunwoo/frames/frame_06.png",
+      "/mascots/happy-sunwoo/frames/frame_07.png",
+      "/mascots/happy-sunwoo/frames/frame_08.png",
+    ],
+    times: [150, 120, 110, 130, 110, 120, 140, 260],
     alt: "Sunwoo celebrating",
   },
   scary: {
@@ -34,13 +44,12 @@ function preload(frames) {
 
 export default function QuizMascot({ mood, playKey }) {
   const pack = PACKS[mood];
-  const [src, setSrc] = useState(pack?.still || pack?.frames?.[0] || "");
+  const [src, setSrc] = useState(pack?.frames?.[0] || "");
   const [burst, setBurst] = useState(0);
   const cancelRef = useRef(0);
 
   useEffect(() => {
     if (pack?.frames) preload(pack.frames);
-    if (pack?.still) preload([pack.still]);
   }, [pack]);
 
   useEffect(() => {
@@ -48,10 +57,7 @@ export default function QuizMascot({ mood, playKey }) {
   }, [mood, playKey]);
 
   useEffect(() => {
-    if (!pack?.frames) {
-      if (pack?.still) setSrc(pack.still);
-      return undefined;
-    }
+    if (!pack?.frames) return undefined;
     const token = cancelRef.current + 1;
     cancelRef.current = token;
     setSrc(pack.frames[0]);
