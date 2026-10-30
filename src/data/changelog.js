@@ -1,5 +1,11 @@
 export const BUILT_IN_LOGS = [
   {
+    id: "built-2026-10-31-opamp-csv",
+    date: "2026-10-31",
+    title: "Op-amp questions updated",
+    body: "Op-amps Easy now walks through KCL at the inverting input before the gain formula, and the two KCL choices are easier to tell apart. Knowledge check uses the same questions.",
+  },
+  {
     id: "built-2026-10-30-poles-csv2",
     date: "2026-10-30",
     title: "Poles questions updated",
