@@ -208,12 +208,7 @@ export default function DragDcLab({
       onPointerUp={endDrag}
       onPointerCancel={endDrag}
     >
-      {revealed ? (
-        <ConfettiBurst
-          burstKey={`${index}-${ok ? "ok" : "bad"}`}
-          variant={ok ? "confetti" : "crosses"}
-        />
-      ) : null}
+      {revealed && ok ? <ConfettiBurst burstKey={index} /> : null}
       <header className="lesson-bar">
         <button type="button" className="ghost" onClick={onExit}>
           Close

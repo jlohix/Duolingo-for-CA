@@ -44,7 +44,7 @@ export default function QuizMascot({ mood, playKey }) {
   }, [pack]);
 
   useEffect(() => {
-    if (mood === "happy" || mood === "scary") setBurst((n) => n + 1);
+    if (mood === "happy") setBurst((n) => n + 1);
   }, [mood, playKey]);
 
   useEffect(() => {
@@ -78,11 +78,8 @@ export default function QuizMascot({ mood, playKey }) {
 
   return (
     <>
-      {burst > 0 && mood === "happy" ? (
+      {mood === "happy" && burst > 0 ? (
         <ConfettiBurst burstKey={burst} />
-      ) : null}
-      {burst > 0 && mood === "scary" ? (
-        <ConfettiBurst burstKey={burst} variant="crosses" />
       ) : null}
       <div className={`quiz-mascot quiz-mascot-${mood}`}>
         <img src={src} alt={pack.alt} />

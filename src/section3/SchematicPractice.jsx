@@ -68,11 +68,8 @@ export default function SchematicPractice({ question, selected, revealed, ok, on
           </button>
         ) : null}
       </div>
-      {revealed ? (
-        <ConfettiBurst
-          burstKey={question.prompt || "try"}
-          variant={ok ? "confetti" : "crosses"}
-        />
+      {revealed && ok ? (
+        <ConfettiBurst burstKey={question.prompt || "ok"} />
       ) : null}
       {revealed ? (
         <div className={`feedback ${ok ? "ok" : "bad"}`}>

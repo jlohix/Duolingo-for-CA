@@ -250,12 +250,7 @@ export default function DragCircuitLab({
       onPointerUp={endDrag}
       onPointerCancel={endDrag}
     >
-      {revealed ? (
-        <ConfettiBurst
-          burstKey={`${index}-${ok ? "ok" : "bad"}`}
-          variant={ok ? "confetti" : "crosses"}
-        />
-      ) : null}
+      {revealed && ok ? <ConfettiBurst burstKey={index} /> : null}
       {showBack ? (
         <div className="lesson-close-row">
           <button type="button" className="ghost" onClick={onExit}>
