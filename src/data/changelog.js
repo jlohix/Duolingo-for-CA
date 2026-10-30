@@ -1,5 +1,11 @@
 export const BUILT_IN_LOGS = [
   {
+    id: "built-2026-10-31-laplace-205",
+    date: "2026-10-31",
+    title: "Laplace initial-condition step",
+    body: "Laplace Circuit Application question 205 now explains why the inductor current and capacitor voltage start at zero. Knowledge check uses the same questions.",
+  },
+  {
     id: "built-2026-10-31-dashboard-of-shame",
     date: "2026-10-31",
     title: "Dashboard of Shame",
