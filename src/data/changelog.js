@@ -1,5 +1,11 @@
 export const BUILT_IN_LOGS = [
   {
+    id: "built-2026-10-30-laplace-vo-t",
+    date: "2026-10-30",
+    title: "Laplace inverse step matches 96",
+    body: "Laplace Circuit Application question 218 now inverts 96/(s+4) to 96e^(-4t)u(t). Knowledge check uses the same questions.",
+  },
+  {
     id: "built-2026-10-30-laplace-yc",
     date: "2026-10-30",
     title: "Laplace circuit step wording",
