@@ -1,5 +1,11 @@
 export const BUILT_IN_LOGS = [
   {
+    id: "built-2026-10-30-four-banks",
+    date: "2026-10-30",
+    title: "Four question banks updated",
+    body: "Superposition, Op-amps, Laplace Circuit Application, and Poles practice questions are updated. Knowledge check in those sections uses the same questions.",
+  },
+  {
     id: "built-2026-10-30-laplace-ca-216",
     date: "2026-10-30",
     title: "Laplace circuit diagram for 216",
