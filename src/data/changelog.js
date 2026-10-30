@@ -1,5 +1,11 @@
 export const BUILT_IN_LOGS = [
   {
+    id: "built-2026-10-31-opamp-wording",
+    date: "2026-10-31",
+    title: "Clearer op-amp steps",
+    body: "Op-amp practice questions now use clearer step wording, and the inverting-amp KCL equation is marked correctly. Knowledge check uses the same questions.",
+  },
+  {
     id: "built-2026-10-31-superposition-csv",
     date: "2026-10-31",
     title: "Superposition questions updated",
