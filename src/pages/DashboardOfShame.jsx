@@ -6,6 +6,7 @@ import {
   setShameHiddenRemote,
 } from "../supabaseClient";
 import { loadSession } from "../state/auth";
+import MathText from "../components/MathText";
 
 const OPTION_FIELDS = [
   ["optionA", "option_a", "Option A"],
@@ -96,7 +97,7 @@ function ValueBlock({ value, isImage }) {
       />
     );
   }
-  return <code className="dos-code">{value}</code>;
+  return <MathText className="dos-code" text={value} />;
 }
 
 function ChangeRow({ change }) {
