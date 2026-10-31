@@ -1,5 +1,29 @@
 export const BUILT_IN_LOGS = [
   {
+    id: "built-2026-10-31-kcl-206-challenging",
+    date: "2026-10-31",
+    title: "KCL/KVL 206 is Challenging",
+    body: "KCL/KVL question 206 now sits in Challenging instead of Average. Knowledge check uses the same questions.",
+  },
+  {
+    id: "built-2026-10-31-ohms-law-average",
+    date: "2026-10-31",
+    title: "Ohm's law Average",
+    body: "Ohm's law now has an Average set: question 208, four steps on series-parallel equivalent resistance and the source current. Knowledge check uses the same questions.",
+  },
+  {
+    id: "built-2026-10-31-nodal-mesh-1101-easy",
+    date: "2026-10-31",
+    title: "Nodal and mesh Easy",
+    body: "Nodal and mesh question 1101 now sits in Easy instead of Average. Knowledge check uses the same questions.",
+  },
+  {
+    id: "built-2026-10-31-norton-205-challenging",
+    date: "2026-10-31",
+    title: "Norton 205 is Challenging",
+    body: "Norton question 205 now sits in Challenging instead of Average. Knowledge check uses the same questions.",
+  },
+  {
     id: "built-2026-10-31-laplaceinca-dfrac",
     date: "2026-10-31",
     title: "Laplace Circuit Application fractions",
