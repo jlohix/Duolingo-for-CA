@@ -1,5 +1,11 @@
 export const BUILT_IN_LOGS = [
   {
+    id: "built-2026-11-01-laptransf-209-expl",
+    date: "2026-11-01",
+    title: "Clearer transfer-function 209 step",
+    body: "Transfer Functions question 209 now walks through the KCL and KVL steps more clearly. Knowledge check uses the same questions.",
+  },
+  {
     id: "built-2026-11-01-laptransf",
     date: "2026-11-01",
     title: "Transfer function diagrams and 209",
