@@ -1,5 +1,11 @@
 export const BUILT_IN_LOGS = [
   {
+    id: "built-2026-10-31-foc-202-diagram",
+    date: "2026-10-31",
+    title: "First-order Average 202 diagram",
+    body: "First-order Average question 202 now shows the source-free RL circuit with 40 ohm and 0.8 henry, matching the inductor steps.",
+  },
+  {
     id: "built-2026-10-31-foc-201-option-b",
     date: "2026-10-31",
     title: "First-order Easy 201 option B",

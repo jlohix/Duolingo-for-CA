@@ -77,7 +77,7 @@ export const FOC_AVERAGE = {
       id: "202-1",
       mainQuestion: "An inductor has an initial current of 0.25 A. At \\(t=0\\), the switch is closed and the inductor discharges through a \\(40\\,\\Omega\\) resistor.\n\nFind:\n\n(a) The time constant.\n\n(b) The inductor current \\(i_L(t)\\).\n\n(c) The inductor current at \\(t=3\\tau\\).\n\n(d) The initial voltage across the inductor, using the passive sign convention.",
       question: "what is The time constant for the source-free RL circuit given an inductance $L = 0.8\\text{ H}$ and resistance $R = 40\\;\\Omega$?",
-      image: "/question-bank/foc/foc3.jpg",
+      image: "/question-bank/foc/foc2.png",
       options: {
         a: "$32\\text{ ms}$",
         b: "$20\\text{ ms}$",
@@ -91,7 +91,7 @@ export const FOC_AVERAGE = {
       id: "202-2",
       mainQuestion: "An inductor has an initial current of 0.25 A. At \\(t=0\\), the switch is closed and the inductor discharges through a \\(40\\,\\Omega\\) resistor.\n\nFind:\n\n(a) The time constant.\n\n(b) The inductor current \\(i_L(t)\\).\n\n(c) The inductor current at \\(t=3\\tau\\).\n\n(d) The initial voltage across the inductor, using the passive sign convention.",
       question: "what is The inductor current $i_L(t)$ given an initial current $i_L(0) = 0.25\\text{ A}$ and time constant $\\tau = 0.020\\text{ s}$?",
-      image: "/question-bank/foc/foc3.jpg",
+      image: "/question-bank/foc/foc2.png",
       options: {
         a: "$0.25e^{-20t}\\text{ A}$",
         b: "$2.0e^{-50t}\\text{ A}$",
@@ -105,7 +105,7 @@ export const FOC_AVERAGE = {
       id: "202-3",
       mainQuestion: "An inductor has an initial current of 0.25 A. At \\(t=0\\), the switch is closed and the inductor discharges through a \\(40\\,\\Omega\\) resistor.\n\nFind:\n\n(a) The time constant.\n\n(b) The inductor current \\(i_L(t)\\).\n\n(c) The inductor current at \\(t=3\\tau\\).\n\n(d) The initial voltage across the inductor, using the passive sign convention.",
       question: "what is The inductor current at $t = 3\\tau$, given $i_L(t) = 0.25e^{-50t}\\text{ A}$?",
-      image: "/question-bank/foc/foc3.jpg",
+      image: "/question-bank/foc/foc2.png",
       options: {
         a: "$12.45\\text{ mA}$",
         b: "$124.5\\text{ mA}$",
@@ -119,7 +119,7 @@ export const FOC_AVERAGE = {
       id: "202-4",
       mainQuestion: "An inductor has an initial current of 0.25 A. At \\(t=0\\), the switch is closed and the inductor discharges through a \\(40\\,\\Omega\\) resistor.\n\nFind:\n\n(a) The time constant.\n\n(b) The inductor current \\(i_L(t)\\).\n\n(c) The inductor current at \\(t=3\\tau\\).\n\n(d) The initial voltage across the inductor, using the passive sign convention.",
       question: "what is The initial voltage across the inductor, using the passive sign convention, given $L = 0.8\\text{ H}$ and $i_L(t) = 0.25e^{-50t}\\text{ A}$?",
-      image: "/question-bank/foc/foc3.jpg",
+      image: "/question-bank/foc/foc2.png",
       options: {
         a: "-10 V",
         b: "$0\\text{ V}$",
