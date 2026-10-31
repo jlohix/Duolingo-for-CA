@@ -1,5 +1,11 @@
 export const BUILT_IN_LOGS = [
   {
+    id: "built-2026-11-01-laptransf-209-stem",
+    date: "2026-11-01",
+    title: "Transfer function 209 wording",
+    body: "Transfer Functions question 209 now asks for the characteristic equation from the current transfer function. Knowledge check uses the same questions.",
+  },
+  {
     id: "built-2026-11-01-laptransf-209-expl",
     date: "2026-11-01",
     title: "Clearer transfer-function 209 step",
