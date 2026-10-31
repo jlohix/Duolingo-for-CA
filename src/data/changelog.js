@@ -1,5 +1,11 @@
 export const BUILT_IN_LOGS = [
   {
+    id: "built-2026-10-31-laplaceinca-dfrac",
+    date: "2026-10-31",
+    title: "Laplace Circuit Application fractions",
+    body: "Laplace Circuit Application now writes fractions in a larger stacked form so they are easier to read. Knowledge check uses the same questions.",
+  },
+  {
     id: "built-2026-10-31-foc-202-diagram",
     date: "2026-10-31",
     title: "First-order Average 202 diagram",
