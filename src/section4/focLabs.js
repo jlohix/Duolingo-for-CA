@@ -15,7 +15,7 @@ export const FOC_EASY = {
       image: "/question-bank/foc/foc1.png",
       options: {
         a: "$v_C(t) = 15e^{-t/0.3}\\text{ V}$",
-        b: "$v_C(t) = 18e^{-3.33t}\\text{ V}$",
+        b: "$v_C(t) = 18e^{-3.36t}\\text{ V}$",
         c: "$v_C(t) = 18e^{-t/0.3}\\text{ V}$",
         d: "$v_C(t) = 20e^{-t/0.3}\\text{ V}$",
       },

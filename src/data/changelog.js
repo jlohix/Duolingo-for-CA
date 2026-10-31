@@ -1,5 +1,11 @@
 export const BUILT_IN_LOGS = [
   {
+    id: "built-2026-10-31-foc-201-option-b",
+    date: "2026-10-31",
+    title: "First-order Easy 201 option B",
+    body: "First-order Easy question 201 now writes option B as 18 e to the minus 3.36 t volts.",
+  },
+  {
     id: "built-2026-10-31-laplace-212-diagram",
     date: "2026-10-31",
     title: "Laplace 212 current source",
