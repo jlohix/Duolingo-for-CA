@@ -1,5 +1,11 @@
 export const BUILT_IN_LOGS = [
   {
+    id: "built-2026-11-01-laptransf",
+    date: "2026-11-01",
+    title: "Transfer function diagrams and 209",
+    body: "Transfer Functions practice now shows the circuit photos, adds question 209 on the active RLC poles and stability, and matches the impulse-response residues on question 206. Knowledge check uses the same questions.",
+  },
+  {
     id: "built-2026-11-01-complexlap-distractors",
     date: "2026-11-01",
     title: "Complex impedance choices",
