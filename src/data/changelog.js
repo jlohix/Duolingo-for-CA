@@ -1,5 +1,11 @@
 export const BUILT_IN_LOGS = [
   {
+    id: "built-2026-11-01-complexlap-distractors",
+    date: "2026-11-01",
+    title: "Complex impedance choices",
+    body: "Complex Impedance practice now has clearer wrong-answer choices on questions 201, 206, and 209. Knowledge check uses the same questions.",
+  },
+  {
     id: "built-2026-10-31-laplace-206-distractor",
     date: "2026-10-31",
     title: "Laplace 206 voltage choices",
