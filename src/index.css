@@ -1154,7 +1154,10 @@ html[data-theme="dark"] [data-tier="obsidian"] { color: #9aa3af; --tier: #9aa3af
 }
 
 .admin-fold {
-  margin: 24px 0 8px;
+  margin: 16px 0;
+  background: var(--card);
+  border: 2px solid var(--line);
+  border-radius: 16px;
 }
 
 .admin-fold > summary {
@@ -1162,6 +1165,7 @@ html[data-theme="dark"] [data-tier="obsidian"] { color: #9aa3af; --tier: #9aa3af
   align-items: center;
   justify-content: space-between;
   gap: 12px;
+  padding: 16px;
   cursor: pointer;
   list-style: none;
 }
@@ -1188,10 +1192,22 @@ html[data-theme="dark"] [data-tier="obsidian"] { color: #9aa3af; --tier: #9aa3af
   content: "Hide";
 }
 
+.admin-fold[open] > summary {
+  border-bottom: 1px solid var(--line);
+}
+
 .admin-fold > summary:focus-visible {
   outline: 2px solid var(--green);
-  outline-offset: 4px;
-  border-radius: 8px;
+  outline-offset: -4px;
+  border-radius: 14px;
+}
+
+.admin-fold-body {
+  padding: 4px 16px 16px;
+}
+
+.admin-fold-body .admin-table-wrap {
+  margin: 8px 0 0;
 }
 
 .hex-stats {
