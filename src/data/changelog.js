@@ -1,5 +1,11 @@
 export const BUILT_IN_LOGS = [
   {
+    id: "built-2026-11-05-questions-first-attempt",
+    date: "2026-11-05",
+    title: "Questions on first attempt",
+    body: "The topic score now says how many questions you got correct on first attempt, like 243/280 questions correct on first attempt.",
+  },
+  {
     id: "built-2026-11-05-strong-first-attempt",
     date: "2026-11-05",
     title: "Strong on first attempt",

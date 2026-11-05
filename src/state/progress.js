@@ -610,7 +610,7 @@ export function topicInsight(progress, topicId) {
   }
   const pct = Math.round((correct / attempts) * 100);
   const score = { pct, correct, attempts };
-  const firstAttempt = `${correct}/${attempts} correct on first attempt`;
+  const firstAttempt = `${correct}/${attempts} questions correct on first attempt`;
   if (attempts < LABEL_AFTER) {
     return {
       kind: "starting",
