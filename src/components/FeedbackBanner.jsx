@@ -10,6 +10,8 @@ export default function FeedbackBanner({
   onContinue,
   onBack,
   backLabel,
+  onNext,
+  nextLabel = "Next →",
 }) {
   return (
     <div className={`feedback ${correct ? "ok" : "bad"}`}>
@@ -32,9 +34,15 @@ export default function FeedbackBanner({
       </div>
       <div className="feedback-nav">
         {onBack ? <QuizPartBack onBack={onBack} label={backLabel} /> : null}
-        <button type="button" className="primary" onClick={onContinue}>
-          {failOut ? "Next" : "Continue"}
-        </button>
+        {onNext ? (
+          <button type="button" className="primary" onClick={onNext}>
+            {nextLabel}
+          </button>
+        ) : (
+          <button type="button" className="primary" onClick={onContinue}>
+            {failOut ? "Next" : "Continue"}
+          </button>
+        )}
       </div>
     </div>
   );

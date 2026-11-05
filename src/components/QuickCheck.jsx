@@ -121,6 +121,8 @@ export function QuickCheckCard({
   onRetry,
   onBack,
   backLabel = "← Previous",
+  onNext,
+  nextLabel = "Next →",
   afterReveal,
   skipControl = null,
   badge = "Quick check",
@@ -174,6 +176,11 @@ export function QuickCheckCard({
               {backLabel}
             </button>
           ) : null}
+          {onNext ? (
+            <button type="button" className="primary qc-next" onClick={onNext}>
+              {nextLabel}
+            </button>
+          ) : null}
           <button
             type="button"
             className="qc-check"
@@ -200,6 +207,11 @@ export function QuickCheckCard({
                 {backLabel}
               </button>
             ) : null}
+            {onNext && !afterReveal ? (
+              <button type="button" className="primary qc-next" onClick={onNext}>
+                {nextLabel}
+              </button>
+            ) : null}
             {!ok && onRetry ? (
               <button type="button" className="ghost" onClick={onRetry}>
                 Try again
@@ -223,6 +235,8 @@ export function InlineKnowledgeCheck({
   onRetry,
   onBack,
   backLabel,
+  onNext,
+  nextLabel,
   afterReveal,
   skipControl,
   badge,
@@ -247,6 +261,8 @@ export function InlineKnowledgeCheck({
       onRetry={onRetry}
       onBack={onBack}
       backLabel={backLabel}
+      onNext={onNext}
+      nextLabel={nextLabel}
       afterReveal={afterReveal}
       skipControl={skipControl}
       badge={badge}

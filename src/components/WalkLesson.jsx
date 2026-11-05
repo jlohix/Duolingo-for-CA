@@ -32,7 +32,10 @@ function PracticeView({ title, progressLabel, practice, Schematic, boardHint, pr
   const [revealed, setRevealed] = useState(false);
   const [ok, setOk] = useState(false);
   const [answers, setAnswers] = useState({});
+  const answersRef = useRef({});
   const [advanced, setAdvanced] = useState(() => new Set());
+  const advancedRef = useRef(new Set());
+  const [furthest, setFurthest] = useState(0);
   const [firstPass, setFirstPass] = useState(0);
   const [reviewOpen, setReviewOpen] = useState(false);
   const [reviewCount, setReviewCount] = useState(0);
@@ -45,17 +48,22 @@ function PracticeView({ title, progressLabel, practice, Schematic, boardHint, pr
   const hint =
     question?.boardHint !== undefined ? question.boardHint : boardHint;
 
-  function remember(fromIndex, sel, rev, wasOk, base = answers) {
-    return {
-      ...base,
+  function remember(fromIndex, sel, rev, wasOk) {
+    const nextAnswers = {
+      ...answersRef.current,
       [fromIndex]: { selected: sel, revealed: Boolean(rev), ok: Boolean(wasOk) },
     };
+    answersRef.current = nextAnswers;
+    setAnswers(nextAnswers);
+    return nextAnswers;
   }
 
-  function showIndex(nextIndex, nextAnswers) {
+  function showIndex(nextIndex, nextAnswers = answersRef.current) {
     const saved = nextAnswers[nextIndex];
+    answersRef.current = nextAnswers;
     setAnswers(nextAnswers);
     setIndex(nextIndex);
+    if (nextIndex > furthest) setFurthest(nextIndex);
     setSelected(saved?.selected ?? "");
     setRevealed(Boolean(saved?.revealed));
     setOk(Boolean(saved?.ok));
@@ -80,19 +88,31 @@ function PracticeView({ title, progressLabel, practice, Schematic, boardHint, pr
     showIndex(index - 1, remember(index, selected, revealed, ok));
   }
 
+  function goForward() {
+    if (index >= furthest) return;
+    if (reviewOpen) setReviewOpen(false);
+    showIndex(index + 1, remember(index, selected, revealed, ok));
+  }
+
   function skipAhead() {
     if (!preview) return;
     if (index + 1 >= queue.length) {
       onDone(firstPass, originalTotal);
       return;
     }
-    setAdvanced((ids) => new Set(ids).add(index));
+    const nextAdvanced = new Set(advancedRef.current).add(index);
+    advancedRef.current = nextAdvanced;
+    setAdvanced(nextAdvanced);
     showIndex(index + 1, remember(index, selected, revealed, ok));
   }
 
   function next() {
     if (!revealed) return;
-    const alreadyLeft = advanced.has(index);
+    if (index < furthest) {
+      goForward();
+      return;
+    }
+    const alreadyLeft = advancedRef.current.has(index);
     const nextQueue = alreadyLeft || ok ? queue : [...queue, question];
     if (!alreadyLeft && !ok) setQueue(nextQueue);
     if (index + 1 >= nextQueue.length) {
@@ -104,7 +124,9 @@ function PracticeView({ title, progressLabel, practice, Schematic, boardHint, pr
       index + 1 === originalTotal &&
       nextQueue.length > originalTotal;
     const nextAnswers = remember(index, selected, revealed, ok);
-    setAdvanced((ids) => new Set(ids).add(index));
+    const nextAdvanced = new Set(advancedRef.current).add(index);
+    advancedRef.current = nextAdvanced;
+    setAdvanced(nextAdvanced);
     if (enteringReview) {
       setAnswers(nextAnswers);
       setReviewCount(nextQueue.length - originalTotal);
@@ -148,7 +170,7 @@ function PracticeView({ title, progressLabel, practice, Schematic, boardHint, pr
           count={reviewCount}
           onContinue={() => {
             setReviewOpen(false);
-            showIndex(index + 1, answers);
+            showIndex(index + 1, answersRef.current);
           }}
         />
       ) : (
@@ -167,16 +189,21 @@ function PracticeView({ title, progressLabel, practice, Schematic, boardHint, pr
               selected={selected}
               revealed={revealed}
               ok={ok}
-              onSelect={setSelected}
+              onSelect={(value) => {
+                setSelected(value);
+                remember(index, value, revealed, ok);
+              }}
               onCheck={check}
               onBack={index > 0 ? goBack : undefined}
               backLabel="← Previous question"
+              onNext={index < furthest ? goForward : undefined}
+              nextLabel="Next question →"
               willRepeat={willRepeat}
               progressLabel={`${index + 1} of ${queue.length}`}
               skipControl={preview ? <StaffSkipNext className="qc-next" onClick={skipAhead} /> : null}
               afterReveal={
                 <button type="button" className="primary qc-next" onClick={next}>
-                  {last ? lastLabel : "Next"}
+                  {index < furthest ? "Next question →" : last ? lastLabel : "Next"}
                 </button>
               }
             />

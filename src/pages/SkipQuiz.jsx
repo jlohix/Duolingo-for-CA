@@ -192,6 +192,15 @@ function SkipRound({
             {quiz.canGoBack ? (
               <QuizPartBack onBack={quiz.goBack} label={quiz.backLabel} />
             ) : null}
+            {quiz.canGoForward ? (
+              <button
+                type="button"
+                className="primary"
+                onClick={quiz.goForward}
+              >
+                {quiz.nextLabel}
+              </button>
+            ) : null}
             <button
               type="button"
               className="primary check"
@@ -222,6 +231,8 @@ function SkipRound({
           onContinue={continueQuiz}
           onBack={quiz.canGoBack ? quiz.goBack : undefined}
           backLabel={quiz.backLabel}
+          onNext={quiz.canGoForward ? quiz.goForward : undefined}
+          nextLabel={quiz.nextLabel}
         />
       )}
       <CloseWarning

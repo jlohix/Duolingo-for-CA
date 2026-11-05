@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { isAnswerCorrect } from "../data/loadQuestions";
 import { primerForLesson } from "../data/lessonPrimers";
 import MathText from "./MathText";
@@ -25,6 +25,8 @@ export default function LessonWarmup({
   const [selected, setSelected] = useState("");
   const [revealed, setRevealed] = useState(false);
   const [answers, setAnswers] = useState({});
+  const answersRef = useRef({});
+  const [furthest, setFurthest] = useState(0);
   const [leaveOpen, setLeaveOpen] = useState(false);
 
   if (!primer) {
@@ -41,25 +43,33 @@ export default function LessonWarmup({
   const warmup = primer.warmups[index];
   const lastWarmup = index >= primer.warmups.length - 1;
 
-  function remember(fromIndex, sel, rev, base = answers) {
-    return {
-      ...base,
+  function remember(fromIndex, sel, rev) {
+    const nextAnswers = {
+      ...answersRef.current,
       [fromIndex]: { selected: sel, revealed: Boolean(rev) },
     };
+    answersRef.current = nextAnswers;
+    setAnswers(nextAnswers);
+    return nextAnswers;
   }
 
-  function showWarmup(nextIndex, nextAnswers) {
+  function showWarmup(nextIndex, nextAnswers = answersRef.current) {
     const saved = nextAnswers[nextIndex];
+    answersRef.current = nextAnswers;
     setAnswers(nextAnswers);
     setIndex(nextIndex);
+    if (nextIndex > furthest) setFurthest(nextIndex);
     setSelected(saved?.selected ?? "");
     setRevealed(Boolean(saved?.revealed));
   }
 
   function nextWarmup() {
     const nextAnswers = remember(index, selected, revealed);
+    if (index < furthest) {
+      showWarmup(index + 1, nextAnswers);
+      return;
+    }
     if (lastWarmup) {
-      setAnswers(nextAnswers);
       setStep("go");
       return;
     }
@@ -121,7 +131,10 @@ export default function LessonWarmup({
             question={warmup}
             selected={selected}
             revealed={revealed}
-            onSelect={setSelected}
+            onSelect={(value) => {
+              setSelected(value);
+              remember(index, value, revealed);
+            }}
           />
           {!revealed ? (
             <div className="quiz-actions">
@@ -132,13 +145,22 @@ export default function LessonWarmup({
                     label="← Previous question"
                   />
                 ) : null}
+                {index < furthest ? (
+                  <button
+                    type="button"
+                    className="primary"
+                    onClick={() => showWarmup(index + 1, remember(index, selected, revealed))}
+                  >
+                    Next question →
+                  </button>
+                ) : null}
                 <button
                   type="button"
                   className="primary check"
                   disabled={!selected}
                   onClick={() => {
                     setRevealed(true);
-                    setAnswers(remember(index, selected, true));
+                    remember(index, selected, true);
                   }}
                 >
                   Check
@@ -155,6 +177,12 @@ export default function LessonWarmup({
               onContinue={nextWarmup}
               onBack={index > 0 ? previousWarmup : undefined}
               backLabel="← Previous question"
+              onNext={
+                index < furthest
+                  ? () => showWarmup(index + 1, remember(index, selected, revealed))
+                  : undefined
+              }
+              nextLabel="Next question →"
             />
           )}
         </>
