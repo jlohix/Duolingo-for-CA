@@ -1,5 +1,11 @@
 export const BUILT_IN_LOGS = [
   {
+    id: "built-2026-11-05-resume-quiz",
+    date: "2026-11-05",
+    title: "Pick up where you left off",
+    body: "If you leave a practice set, Knowledge check, or No Pen, Just Brains halfway, Circuito saves your place. Open it again to continue from the same question.",
+  },
+  {
     id: "built-2026-11-05-fold-profile-dashboards",
     date: "2026-11-05",
     title: "Fold-up Profile dashboards",

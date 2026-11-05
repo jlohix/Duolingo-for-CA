@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { questionsForSkip, isAnswerCorrect } from "../data/loadQuestions";
 import { TOPICS } from "../data/topics";
 import {
@@ -18,6 +18,11 @@ import CloseWarning from "../components/CloseWarning";
 import ThemeSwitch from "../components/ThemeSwitch";
 import HintControl from "../components/HintControl";
 import StreakChip from "../components/StreakChip";
+import {
+  loadQuizResume,
+  clearQuizResume,
+  usePersistQuiz,
+} from "../state/quizResume";
 
 function SkipFail({ topicName, misses, needed, total, onRetry, onHome }) {
   return (
@@ -52,13 +57,33 @@ function SkipRound({
   onFinished,
   onFail,
 }) {
+  const runKey = `skip-${targetTopicId}`;
+  const [saved] = useState(() => loadQuizResume(runKey));
   const initial = useMemo(
-    () => questionsForSkip(allQuestions, targetTopicId, SKIP_QUIZ_SIZE),
-    [allQuestions, targetTopicId]
+    () =>
+      saved?.queue?.length
+        ? saved.queue
+        : questionsForSkip(allQuestions, targetTopicId, SKIP_QUIZ_SIZE),
+    [allQuestions, targetTopicId, saved]
   );
-  const quiz = useQuizQueue(initial, XP_CORRECT, { recycleMissed: false });
+  const quiz = useQuizQueue(initial, XP_CORRECT, {
+    recycleMissed: false,
+    resume: saved,
+  });
+  const stoppedRef = useRef(false);
   const [leaveOpen, setLeaveOpen] = useState(false);
-  const [firstMisses, setFirstMisses] = useState(0);
+  const [firstMisses, setFirstMisses] = useState(
+    () => Math.max(0, Math.round(Number(saved?.firstMisses) || 0))
+  );
+
+  usePersistQuiz(
+    runKey,
+    () => ({
+      ...quiz.getResumeState(),
+      firstMisses,
+    }),
+    stoppedRef
+  );
 
   const target = TOPICS.find((t) => t.id === targetTopicId);
   const sourceNames = TOPICS.filter((t) => t.id < targetTopicId)
@@ -69,6 +94,8 @@ function SkipRound({
   const skipFailed = firstMisses > allowedMisses;
 
   function finishPass() {
+    stoppedRef.current = true;
+    clearQuizResume(runKey);
     const grew = wouldExtendStreak(progress);
     const streakFrom = visibleStreak(progress);
     let next = progress;
@@ -93,6 +120,8 @@ function SkipRound({
 
   function continueQuiz() {
     if (skipFailed) {
+      stoppedRef.current = true;
+      clearQuizResume(runKey);
       onFail({
         misses: firstMisses,
         needed,
@@ -104,13 +133,16 @@ function SkipRound({
     const { done } = quiz.goNext();
     if (done) {
       if (quiz.firstPassCorrect >= needed) finishPass();
-      else
+      else {
+        stoppedRef.current = true;
+        clearQuizResume(runKey);
         onFail({
           misses: firstMisses,
           needed,
           total: quiz.originalTotal,
           topicName: target?.name,
         });
+      }
     }
   }
 

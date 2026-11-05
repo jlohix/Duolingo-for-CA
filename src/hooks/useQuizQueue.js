@@ -2,35 +2,59 @@ import { useState } from "react";
 import { isAnswerCorrect } from "../data/loadQuestions";
 import { XP_CORRECT } from "../state/progress";
 import { isAdmin, loadSession } from "../state/auth";
+import { resumeSets } from "../state/quizResume";
 
 export function useQuizQueue(
   initialQuestions,
   xpPerCorrect = XP_CORRECT,
   options = {}
 ) {
+  const resume = options.resume;
   const recycleMissed = options.recycleMissed !== false;
   /** Within a multi-step family, require a correct answer before the next step. */
   const requireCorrectWithinFamily = Boolean(options.requireCorrectWithinFamily);
-  const [queue, setQueue] = useState(initialQuestions);
-  const originalTotal = initialQuestions.length;
+  const startQueue =
+    Array.isArray(resume?.queue) && resume.queue.length
+      ? resume.queue
+      : initialQuestions;
+  const [queue, setQueue] = useState(startQueue);
+  const originalTotal =
+    Number(resume?.originalTotal) > 0
+      ? Number(resume.originalTotal)
+      : initialQuestions.length;
   const familyTotal =
+    Number(resume?.familyTotal) ||
     Number(options.familyTotal) ||
     new Set(
-      initialQuestions.map((q) => q.questionFamilyId || q.id).filter(Boolean)
+      startQueue.map((q) => q.questionFamilyId || q.id).filter(Boolean)
     ).size ||
     originalTotal;
-  const [index, setIndex] = useState(0);
-  const [selected, setSelected] = useState("");
-  const [revealed, setRevealed] = useState(false);
-  const [solvedIds, setSolvedIds] = useState(() => new Set());
-  const [attemptedIds, setAttemptedIds] = useState(() => new Set());
-  const [completedFamilies, setCompletedFamilies] = useState(() => new Set());
-  const [firstPassCorrect, setFirstPassCorrect] = useState(0);
-  const [firstPassIds, setFirstPassIds] = useState(() => new Set());
-  const [xpGained, setXpGained] = useState(0);
+  const [index, setIndex] = useState(() => {
+    const i = Math.max(0, Math.round(Number(resume?.index) || 0));
+    return startQueue.length ? Math.min(i, startQueue.length - 1) : 0;
+  });
+  const [selected, setSelected] = useState(
+    () => resume?.selected ?? ""
+  );
+  const [revealed, setRevealed] = useState(() => Boolean(resume?.revealed));
+  const sets = resumeSets(resume);
+  const [solvedIds, setSolvedIds] = useState(() => sets.solvedIds);
+  const [attemptedIds, setAttemptedIds] = useState(() => sets.attemptedIds);
+  const [completedFamilies, setCompletedFamilies] = useState(
+    () => sets.completedFamilies
+  );
+  const [firstPassCorrect, setFirstPassCorrect] = useState(
+    () => Math.max(0, Math.round(Number(resume?.firstPassCorrect) || 0))
+  );
+  const [firstPassIds, setFirstPassIds] = useState(() => sets.firstPassIds);
+  const [xpGained, setXpGained] = useState(
+    () => Math.max(0, Math.round(Number(resume?.xpGained) || 0))
+  );
 
-  const [reviewOpen, setReviewOpen] = useState(false);
-  const [reviewCount, setReviewCount] = useState(0);
+  const [reviewOpen, setReviewOpen] = useState(() => Boolean(resume?.reviewOpen));
+  const [reviewCount, setReviewCount] = useState(
+    () => Math.max(0, Math.round(Number(resume?.reviewCount) || 0))
+  );
 
   const question = queue[index];
 
@@ -118,6 +142,25 @@ export function useQuizQueue(
     setRevealed(false);
   }
 
+  function getResumeState() {
+    return {
+      queue,
+      originalTotal,
+      familyTotal,
+      index,
+      selected,
+      revealed,
+      solvedIds: [...solvedIds],
+      attemptedIds: [...attemptedIds],
+      completedFamilies: [...completedFamilies],
+      firstPassCorrect,
+      firstPassIds: [...firstPassIds],
+      xpGained,
+      reviewOpen,
+      reviewCount,
+    };
+  }
+
   return {
     question,
     index,
@@ -139,5 +182,6 @@ export function useQuizQueue(
     goNext,
     skipAhead,
     startReview,
+    getResumeState,
   };
 }

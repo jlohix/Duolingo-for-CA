@@ -9,7 +9,7 @@ const STEPS = [
   },
   {
     title: "Lessons",
-    text: "Each lesson starts with a short warm-up. You can skip it and go straight to the question bank. Hints are optional and only name a method, not the answer. Closing mid-quiz warns you that this run is lost, but XP already earned stays. Missed questions come back in a Review round.",
+    text: "Each lesson starts with a short warm-up. You can skip it and go straight to the question bank. Hints are optional and only name a method, not the answer. If you close mid-quiz, Circuito saves your place so you can pick up the same question. XP already earned stays. Missed questions come back in a Review round.",
   },
   {
     title: "XP",

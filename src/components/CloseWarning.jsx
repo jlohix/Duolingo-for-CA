@@ -12,7 +12,7 @@ export default function CloseWarning({ open, onStay, onLeave, preview = false })
         <p>
           {preview
             ? "This is a staff preview. Leaving does not change student progress."
-            : "Progress in this run will be lost. XP already earned stays."}
+            : "You can come back to the same question. XP already earned stays."}
         </p>
         <button type="button" className="quit-btn" onClick={onLeave}>
           Leave

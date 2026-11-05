@@ -4,7 +4,13 @@ import { TOPICS } from "../data/topics";
 import {
   questionsForKnowledgeCheck,
   KNOWLEDGE_CHECK_SIZE,
+  knowledgeCheckKey,
 } from "../data/knowledgeCheck";
+import {
+  loadQuizResume,
+  clearQuizResume,
+  usePersistQuiz,
+} from "../state/quizResume";
 import {
   recordKnowledgeCheck,
   knowledgeCheckSummary,
@@ -21,7 +27,7 @@ import HintControl from "../components/HintControl";
 import StreakChip from "../components/StreakChip";
 import StaffSkipNext from "../components/StaffSkipNext";
 
-function familyStatsFromQueue(questions) {
+function familyStatsFromQueue(questions, savedRows) {
   const map = new Map();
   for (const question of questions) {
     const id = String(question.questionFamilyId || question.id);
@@ -31,6 +37,20 @@ function familyStatsFromQueue(questions) {
       total: Math.max(1, Number(question.stepCount) || 1),
       correct: 0,
     });
+  }
+  if (Array.isArray(savedRows)) {
+    for (const row of savedRows) {
+      const id = String(row?.id || "");
+      const cur = map.get(id);
+      if (!cur) continue;
+      map.set(id, {
+        ...cur,
+        correct: Math.max(
+          0,
+          Math.min(cur.total, Math.round(Number(row.correct) || 0))
+        ),
+      });
+    }
   }
   return map;
 }
@@ -44,23 +64,44 @@ export default function KnowledgeCheck({
   onExit,
   onFinished,
 }) {
+  const runKey = knowledgeCheckKey(topicId);
+  const [saved] = useState(() => loadQuizResume(runKey));
+  const resumed = Boolean(saved?.queue?.length);
   const [initial] = useState(() =>
-    questionsForKnowledgeCheck(allQuestions, topicId, KNOWLEDGE_CHECK_SIZE)
+    saved?.queue?.length
+      ? saved.queue
+      : questionsForKnowledgeCheck(allQuestions, topicId, KNOWLEDGE_CHECK_SIZE)
   );
   const familyTotal = useMemo(
     () =>
-      new Set(
-        initial.map((question) => question.questionFamilyId || question.id)
-      ).size,
-    [initial]
+      Number(saved?.familyTotal) > 0
+        ? Number(saved.familyTotal)
+        : new Set(
+            initial.map((question) => question.questionFamilyId || question.id)
+          ).size,
+    [initial, saved]
   );
   const quiz = useQuizQueue(initial, 0, {
     recycleMissed: false,
     requireCorrectWithinFamily: true,
     familyTotal,
+    resume: saved,
   });
-  const familyStats = useRef(familyStatsFromQueue(initial));
+  const familyStats = useRef(familyStatsFromQueue(initial, saved?.familyStats));
+  const stoppedRef = useRef(false);
   const [leaveOpen, setLeaveOpen] = useState(false);
+
+  usePersistQuiz(
+    runKey,
+    () => ({
+      ...quiz.getResumeState(),
+      familyStats: [...familyStats.current.entries()].map(([id, row]) => ({
+        id,
+        ...row,
+      })),
+    }),
+    stoppedRef
+  );
   const topic = TOPICS.find((row) => row.id === topicId);
   const prior = knowledgeCheckSummary(progress, topicId);
 
@@ -73,6 +114,8 @@ export default function KnowledgeCheck({
       questionStats.reduce((sum, row) => sum + row.total, 0) ||
       familyTotal ||
       quiz.originalTotal;
+    stoppedRef.current = true;
+    clearQuizResume(runKey);
     const grew = !preview && wouldExtendStreak(progress);
     const streakFrom = visibleStreak(progress);
     let next = progress;
@@ -148,6 +191,9 @@ export default function KnowledgeCheck({
         {metaBits.join(" · ")}
         {preview ? " · staff preview · not saved" : " · no XP"}
       </p>
+      {resumed ? (
+        <p className="login-hint">Picking up where you left off.</p>
+      ) : null}
       <QuestionCard
         question={q}
         selected={quiz.selected}
