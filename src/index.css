@@ -2658,8 +2658,9 @@ h2 {
   gap: 8px;
   align-items: center;
   justify-content: flex-end;
-  flex: 1 1 100%;
-  margin-top: 4px;
+  width: 100%;
+  flex: 0 0 auto;
+  margin-top: 0;
 }
 
 .feedback-nav .quiz-part-back {
@@ -2728,15 +2729,23 @@ button.staff-next {
   border-radius: 16px;
   padding: 16px;
   display: flex;
-  flex-wrap: wrap;
+  flex-direction: column;
+  align-items: stretch;
   gap: 12px;
-  align-items: flex-start;
-  justify-content: space-between;
 }
 
-.feedback > div {
+.feedback-body {
   min-width: 0;
-  flex: 1 1 12rem;
+  width: 100%;
+}
+
+.feedback-why,
+.feedback .fit-katex,
+.feedback .math-text {
+  display: block;
+  max-width: 100%;
+  min-width: 0;
+  overflow-wrap: anywhere;
 }
 
 .feedback .katex,
@@ -2745,7 +2754,7 @@ button.staff-next {
 }
 
 .feedback .katex-display {
-  overflow-x: auto;
+  overflow: hidden;
 }
 
 .quiz-mascot {
@@ -2831,7 +2840,7 @@ button.staff-next {
 
 .feedback .primary {
   width: auto;
-  margin: 0 0 0 auto;
+  margin: 0;
   white-space: nowrap;
   flex: 0 0 auto;
 }
@@ -4608,6 +4617,20 @@ html[data-theme="dark"] .circuit-svg .board-step {
   margin: 0;
   display: grid;
   gap: 4px;
+  min-width: 0;
+}
+
+.qc-feedback .fit-katex,
+.qc-feedback .math-text {
+  display: block;
+  max-width: 100%;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.qc-feedback .katex-display {
+  max-width: 100%;
+  overflow: hidden;
 }
 
 .qc-result {

@@ -1,5 +1,11 @@
 export const BUILT_IN_LOGS = [
   {
+    id: "built-2026-11-06-feedback-fit",
+    date: "2026-11-06",
+    title: "Solutions fit the card",
+    body: "After Check, the explanation uses the full width of the card and long formulas shrink to fit, so you do not have to scroll sideways.",
+  },
+  {
     id: "built-2026-11-05-question-back",
     date: "2026-11-05",
     title: "Go back a part",

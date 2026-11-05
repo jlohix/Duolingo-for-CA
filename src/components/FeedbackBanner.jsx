@@ -1,6 +1,7 @@
 import MathText from "./MathText";
 import QuizMascot from "./QuizMascot";
 import QuizPartBack from "./QuizPartBack";
+import FitKatex from "./FitKatex";
 
 export default function FeedbackBanner({
   correct,
@@ -15,7 +16,7 @@ export default function FeedbackBanner({
 }) {
   return (
     <div className={`feedback ${correct ? "ok" : "bad"}`}>
-      <div>
+      <div className="feedback-body">
         <QuizMascot mood={correct ? "happy" : "scary"} playKey={correct ? "ok" : "bad"} />
         <strong>{correct ? "Correct" : "Not quite"}</strong>
         {failOut ? (
@@ -27,9 +28,11 @@ export default function FeedbackBanner({
           <p>This question will come back at the end.</p>
         ) : null}
         {explanation ? (
-          <p>
-            <MathText text={explanation} sentenceLines />
-          </p>
+          <FitKatex className="feedback-why">
+            <p>
+              <MathText text={explanation} sentenceLines />
+            </p>
+          </FitKatex>
         ) : null}
       </div>
       <div className="feedback-nav">
