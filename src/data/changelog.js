@@ -3,7 +3,7 @@ export const BUILT_IN_LOGS = [
     id: "built-2026-11-05-sunwoo-back",
     date: "2026-11-05",
     title: "Sunwoo is back",
-    body: "Checking an answer shows Sunwoo again: a party loop when you are right, and the bat swing when you miss.",
+    body: "Checking an answer shows Sunwoo again, in full colour: a party loop when you are right, and the bat swing when you miss.",
   },
   {
     id: "built-2026-11-05-resume-quiz",
