@@ -1,5 +1,11 @@
 export const BUILT_IN_LOGS = [
   {
+    id: "built-2026-11-05-strong-first-attempt",
+    date: "2026-11-05",
+    title: "Strong on first attempt",
+    body: "Profile and Progress now say Strong instead of Strength, and show how many you got correct on first attempt, like 243/280 correct on first attempt.",
+  },
+  {
     id: "built-2026-11-01-laptransf-209-stem",
     date: "2026-11-01",
     title: "Transfer function 209 wording",

@@ -610,19 +610,20 @@ export function topicInsight(progress, topicId) {
   }
   const pct = Math.round((correct / attempts) * 100);
   const score = { pct, correct, attempts };
+  const firstAttempt = `${correct}/${attempts} correct on first attempt`;
   if (attempts < LABEL_AFTER) {
     return {
       kind: "starting",
       label: "Getting started",
-      detail: `${correct}/${attempts} first try (${pct}%)`,
+      detail: firstAttempt,
       ...score,
     };
   }
   if (pct >= STRENGTH_PCT) {
     return {
       kind: "strength",
-      label: "Strength",
-      detail: `${correct}/${attempts} first try (${pct}%)`,
+      label: "Strong",
+      detail: firstAttempt,
       ...score,
     };
   }
@@ -630,7 +631,7 @@ export function topicInsight(progress, topicId) {
     return {
       kind: "solid",
       label: "Solid",
-      detail: `${correct}/${attempts} first try (${pct}%)`,
+      detail: firstAttempt,
       ...score,
     };
   }
@@ -638,14 +639,14 @@ export function topicInsight(progress, topicId) {
     return {
       kind: "developing",
       label: "Needs work",
-      detail: `${correct}/${attempts} first try (${pct}%)`,
+      detail: firstAttempt,
       ...score,
     };
   }
   return {
     kind: "weakness",
     label: "Weakness",
-    detail: `${correct}/${attempts} first try (${pct}%)`,
+    detail: firstAttempt,
     ...score,
   };
 }

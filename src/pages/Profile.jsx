@@ -290,7 +290,7 @@ export default function Profile({
         onPractice={onPractice}
       />
       <p className="focus-line">
-        Strengths and weaknesses use first-try accuracy on lessons and
+        Strong and weakness labels use first-attempt accuracy on lessons and
         walkthroughs. A topic needs at least 3 answers before it is labeled.
         Only sections that have questions appear here.
       </p>
@@ -307,8 +307,8 @@ export default function Profile({
             <TopicList rows={strengths} />
           ) : (
             <p className="login-hint">
-              No strengths yet. Hit 80% first try on a topic (60%+ counts as
-              solid).
+              No strong topics yet. Hit 80% correct on first attempt (60%+
+              counts as solid).
             </p>
           )}
         </section>
@@ -318,8 +318,8 @@ export default function Profile({
             <TopicList rows={weaknesses} />
           ) : (
             <p className="login-hint">
-              No weaknesses tagged yet. Topics under 60% first try will show
-              here.
+              No weaknesses tagged yet. Topics under 60% correct on first
+              attempt will show here.
             </p>
           )}
         </section>
