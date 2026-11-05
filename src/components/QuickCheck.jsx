@@ -119,6 +119,8 @@ export function QuickCheckCard({
   onSelect,
   onCheck,
   onRetry,
+  onBack,
+  backLabel = "← Previous",
   afterReveal,
   skipControl = null,
   badge = "Quick check",
@@ -167,6 +169,11 @@ export function QuickCheckCard({
       </div>
       {!revealed ? (
         <div className="qc-actions">
+          {onBack ? (
+            <button type="button" className="ghost quiz-part-back" onClick={onBack}>
+              {backLabel}
+            </button>
+          ) : null}
           <button
             type="button"
             className="qc-check"
@@ -188,6 +195,11 @@ export function QuickCheckCard({
             <p className="login-hint">This question will come back at the end.</p>
           ) : null}
           <div className="qc-feedback-actions">
+            {onBack ? (
+              <button type="button" className="ghost quiz-part-back" onClick={onBack}>
+                {backLabel}
+              </button>
+            ) : null}
             {!ok && onRetry ? (
               <button type="button" className="ghost" onClick={onRetry}>
                 Try again
@@ -209,6 +221,8 @@ export function InlineKnowledgeCheck({
   onSelect,
   onCheck,
   onRetry,
+  onBack,
+  backLabel,
   afterReveal,
   skipControl,
   badge,
@@ -231,6 +245,8 @@ export function InlineKnowledgeCheck({
       onSelect={(displayKey) => onSelect(layout.toOriginal[displayKey])}
       onCheck={onCheck}
       onRetry={onRetry}
+      onBack={onBack}
+      backLabel={backLabel}
       afterReveal={afterReveal}
       skipControl={skipControl}
       badge={badge}

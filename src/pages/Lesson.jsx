@@ -15,6 +15,7 @@ import ReviewGate from "../components/ReviewGate";
 import { setCurrentQuestion } from "../data/currentQuestion";
 import StreakChip from "../components/StreakChip";
 import FeedbackBanner from "../components/FeedbackBanner";
+import QuizPartBack from "../components/QuizPartBack";
 import CloseWarning from "../components/CloseWarning";
 import ThemeSwitch from "../components/ThemeSwitch";
 import HintControl from "../components/HintControl";
@@ -340,6 +341,9 @@ export default function Lesson({
             <div className="quiz-actions">
               <HintControl question={quiz.question} />
               <div className="quiz-actions-row">
+                {quiz.canGoBack ? (
+                  <QuizPartBack onBack={quiz.goBack} label={quiz.backLabel} />
+                ) : null}
                 <button
                   type="button"
                   className="primary check"
@@ -372,6 +376,8 @@ export default function Lesson({
                 quiz.index < quiz.originalTotal
               }
               onContinue={continueLesson}
+              onBack={quiz.canGoBack ? quiz.goBack : undefined}
+              backLabel={quiz.backLabel}
             />
           )}
         </>

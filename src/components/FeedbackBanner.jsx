@@ -1,5 +1,6 @@
 import MathText from "./MathText";
 import QuizMascot from "./QuizMascot";
+import QuizPartBack from "./QuizPartBack";
 
 export default function FeedbackBanner({
   correct,
@@ -7,6 +8,8 @@ export default function FeedbackBanner({
   willRepeat,
   failOut,
   onContinue,
+  onBack,
+  backLabel,
 }) {
   return (
     <div className={`feedback ${correct ? "ok" : "bad"}`}>
@@ -27,9 +30,12 @@ export default function FeedbackBanner({
           </p>
         ) : null}
       </div>
-      <button type="button" className="primary" onClick={onContinue}>
-        {failOut ? "Next" : "Continue"}
-      </button>
+      <div className="feedback-nav">
+        {onBack ? <QuizPartBack onBack={onBack} label={backLabel} /> : null}
+        <button type="button" className="primary" onClick={onContinue}>
+          {failOut ? "Next" : "Continue"}
+        </button>
+      </div>
     </div>
   );
 }

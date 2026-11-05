@@ -4,6 +4,37 @@ import { XP_CORRECT } from "../state/progress";
 import { isAdmin, loadSession } from "../state/auth";
 import { resumeSets } from "../state/quizResume";
 
+function loadAnswers(resume) {
+  const raw = resume?.answers;
+  if (!raw || typeof raw !== "object") return {};
+  const src = Array.isArray(raw)
+    ? Object.fromEntries(
+        raw.map((row, i) => [String(row?.i ?? i), row])
+      )
+    : raw;
+  const out = {};
+  for (const [key, row] of Object.entries(src)) {
+    out[String(key)] = {
+      selected: row?.selected ?? "",
+      revealed: Boolean(row?.revealed),
+    };
+  }
+  return out;
+}
+
+function loadAdvanced(resume) {
+  const raw = resume?.advanced;
+  if (!Array.isArray(raw)) return new Set();
+  return new Set(raw.map((n) => String(n)));
+}
+
+function sameFamily(a, b) {
+  if (!a || !b) return false;
+  return (
+    String(a.questionFamilyId || a.id) === String(b.questionFamilyId || b.id)
+  );
+}
+
 export function useQuizQueue(
   initialQuestions,
   xpPerCorrect = XP_CORRECT,
@@ -37,6 +68,8 @@ export function useQuizQueue(
     () => resume?.selected ?? ""
   );
   const [revealed, setRevealed] = useState(() => Boolean(resume?.revealed));
+  const [answers, setAnswers] = useState(() => loadAnswers(resume));
+  const [advanced, setAdvanced] = useState(() => loadAdvanced(resume));
   const sets = resumeSets(resume);
   const [solvedIds, setSolvedIds] = useState(() => sets.solvedIds);
   const [attemptedIds, setAttemptedIds] = useState(() => sets.attemptedIds);
@@ -58,6 +91,21 @@ export function useQuizQueue(
 
   const question = queue[index];
 
+  function storeAnswers(fromIndex, sel, rev, base = answers) {
+    return {
+      ...base,
+      [String(fromIndex)]: { selected: sel, revealed: Boolean(rev) },
+    };
+  }
+
+  function showIndex(nextIndex, nextAnswers) {
+    const saved = nextAnswers[String(nextIndex)];
+    setAnswers(nextAnswers);
+    setIndex(nextIndex);
+    setSelected(saved?.selected ?? "");
+    setRevealed(Boolean(saved?.revealed));
+  }
+
   function check(onOutcome) {
     if (!selected || revealed || !question) return;
     const ok = isAnswerCorrect(question, selected);
@@ -65,6 +113,7 @@ export function useQuizQueue(
     const awardXp = ok && !solvedIds.has(question.id);
     setAttemptedIds((ids) => new Set(ids).add(question.id));
     setRevealed(true);
+    setAnswers(storeAnswers(index, selected, true));
     if (firstTry && ok) {
       setFirstPassCorrect((n) => n + 1);
       setFirstPassIds((ids) => new Set(ids).add(question.id));
@@ -85,6 +134,10 @@ export function useQuizQueue(
     onOutcome?.({ ok, firstTry, awardXp, question });
   }
 
+  function markAdvanced(fromIndex) {
+    setAdvanced((ids) => new Set(ids).add(String(fromIndex)));
+  }
+
   /** Staff preview: move to the next part without answering or recycling. */
   function skipAhead() {
     if (!isAdmin(loadSession())) return { done: false };
@@ -92,10 +145,16 @@ export function useQuizQueue(
     if (index + 1 >= queue.length) {
       return { done: true };
     }
-    setSelected("");
-    setRevealed(false);
-    setIndex((i) => i + 1);
+    markAdvanced(index);
+    showIndex(index + 1, storeAnswers(index, selected, revealed));
     return { done: false };
+  }
+
+  function goBack() {
+    if (index <= 0) return false;
+    showIndex(index - 1, storeAnswers(index, selected, revealed));
+    if (reviewOpen) setReviewOpen(false);
+    return true;
   }
 
   function goNext() {
@@ -106,40 +165,39 @@ export function useQuizQueue(
     if (requireCorrectWithinFamily && multiStep && !ok) {
       setSelected("");
       setRevealed(false);
+      setAnswers(storeAnswers(index, "", false));
       return { done: false, retriedStep: true };
     }
 
-    const nextQueue =
-      recycleMissed && !ok && !requireCorrectWithinFamily
-        ? [...queue, question]
-        : queue;
-    if (recycleMissed && !ok && !requireCorrectWithinFamily) {
-      setQueue(nextQueue);
-    }
+    const alreadyLeft = advanced.has(String(index));
+    const shouldRecycle =
+      !alreadyLeft && recycleMissed && !ok && !requireCorrectWithinFamily;
+    const nextQueue = shouldRecycle ? [...queue, question] : queue;
+    if (shouldRecycle) setQueue(nextQueue);
     if (index + 1 >= nextQueue.length) {
       return { done: true };
     }
     const enteringReview =
+      !alreadyLeft &&
       recycleMissed &&
       !requireCorrectWithinFamily &&
       index + 1 === originalTotal &&
       nextQueue.length > originalTotal;
-    setSelected("");
-    setRevealed(false);
+    const nextAnswers = storeAnswers(index, selected, revealed);
+    markAdvanced(index);
     if (enteringReview) {
+      setAnswers(nextAnswers);
       setReviewCount(nextQueue.length - originalTotal);
       setReviewOpen(true);
       return { done: false };
     }
-    setIndex((i) => i + 1);
+    showIndex(index + 1, nextAnswers);
     return { done: false };
   }
 
   function startReview() {
     setReviewOpen(false);
-    setIndex((i) => i + 1);
-    setSelected("");
-    setRevealed(false);
+    showIndex(index + 1, storeAnswers(index, selected, revealed));
   }
 
   function getResumeState() {
@@ -150,6 +208,8 @@ export function useQuizQueue(
       index,
       selected,
       revealed,
+      answers,
+      advanced: [...advanced],
       solvedIds: [...solvedIds],
       attemptedIds: [...attemptedIds],
       completedFamilies: [...completedFamilies],
@@ -160,6 +220,11 @@ export function useQuizQueue(
       reviewCount,
     };
   }
+
+  const canGoBack = index > 0;
+  const backLabel = sameFamily(queue[index - 1], question)
+    ? "← Previous part"
+    : "← Previous question";
 
   return {
     question,
@@ -178,8 +243,11 @@ export function useQuizQueue(
     xpGained,
     reviewOpen,
     reviewCount,
+    canGoBack,
+    backLabel,
     check,
     goNext,
+    goBack,
     skipAhead,
     startReview,
     getResumeState,

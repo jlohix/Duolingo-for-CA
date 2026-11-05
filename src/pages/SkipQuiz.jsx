@@ -14,6 +14,7 @@ import {
 import { useQuizQueue } from "../hooks/useQuizQueue";
 import QuestionCard from "../components/QuestionCard";
 import FeedbackBanner from "../components/FeedbackBanner";
+import QuizPartBack from "../components/QuizPartBack";
 import CloseWarning from "../components/CloseWarning";
 import ThemeSwitch from "../components/ThemeSwitch";
 import HintControl from "../components/HintControl";
@@ -187,25 +188,30 @@ function SkipRound({
       {!quiz.revealed ? (
         <div className="quiz-actions">
           <HintControl question={quiz.question} />
-          <button
-            type="button"
-            className="primary check"
-            disabled={!quiz.selected}
-            onClick={() =>
-              quiz.check(({ ok, firstTry, awardXp, question }) => {
-                if (firstTry && !ok) setFirstMisses((n) => n + 1);
-                setProgress((p) => {
-                  let next = p;
-                  if (awardXp) next = addXp(next, XP_CORRECT);
-                  if (firstTry)
-                    next = recordFirstTry(next, question.topicId, ok);
-                  return next;
-                });
-              })
-            }
-          >
-            Check
-          </button>
+          <div className="quiz-actions-row">
+            {quiz.canGoBack ? (
+              <QuizPartBack onBack={quiz.goBack} label={quiz.backLabel} />
+            ) : null}
+            <button
+              type="button"
+              className="primary check"
+              disabled={!quiz.selected}
+              onClick={() =>
+                quiz.check(({ ok, firstTry, awardXp, question }) => {
+                  if (firstTry && !ok) setFirstMisses((n) => n + 1);
+                  setProgress((p) => {
+                    let next = p;
+                    if (awardXp) next = addXp(next, XP_CORRECT);
+                    if (firstTry)
+                      next = recordFirstTry(next, question.topicId, ok);
+                    return next;
+                  });
+                })
+              }
+            >
+              Check
+            </button>
+          </div>
         </div>
       ) : (
         <FeedbackBanner
@@ -214,6 +220,8 @@ function SkipRound({
           willRepeat={false}
           failOut={skipFailed}
           onContinue={continueQuiz}
+          onBack={quiz.canGoBack ? quiz.goBack : undefined}
+          backLabel={quiz.backLabel}
         />
       )}
       <CloseWarning

@@ -31,6 +31,8 @@ function PracticeView({ title, progressLabel, practice, Schematic, boardHint, pr
   const [selected, setSelected] = useState("");
   const [revealed, setRevealed] = useState(false);
   const [ok, setOk] = useState(false);
+  const [answers, setAnswers] = useState({});
+  const [advanced, setAdvanced] = useState(() => new Set());
   const [firstPass, setFirstPass] = useState(0);
   const [reviewOpen, setReviewOpen] = useState(false);
   const [reviewCount, setReviewCount] = useState(0);
@@ -43,10 +45,20 @@ function PracticeView({ title, progressLabel, practice, Schematic, boardHint, pr
   const hint =
     question?.boardHint !== undefined ? question.boardHint : boardHint;
 
-  function reset() {
-    setSelected("");
-    setRevealed(false);
-    setOk(false);
+  function remember(fromIndex, sel, rev, wasOk, base = answers) {
+    return {
+      ...base,
+      [fromIndex]: { selected: sel, revealed: Boolean(rev), ok: Boolean(wasOk) },
+    };
+  }
+
+  function showIndex(nextIndex, nextAnswers) {
+    const saved = nextAnswers[nextIndex];
+    setAnswers(nextAnswers);
+    setIndex(nextIndex);
+    setSelected(saved?.selected ?? "");
+    setRevealed(Boolean(saved?.revealed));
+    setOk(Boolean(saved?.ok));
   }
 
   function check() {
@@ -57,8 +69,15 @@ function PracticeView({ title, progressLabel, practice, Schematic, boardHint, pr
     attemptedRef.current.add(checkId);
     setOk(pass);
     setRevealed(true);
+    setAnswers(remember(index, selected, true, pass));
     if (firstTry && pass) setFirstPass((n) => n + 1);
     onCheck?.({ ok: pass, firstTry, id: checkId });
+  }
+
+  function goBack() {
+    if (index <= 0) return;
+    if (reviewOpen) setReviewOpen(false);
+    showIndex(index - 1, remember(index, selected, revealed, ok));
   }
 
   function skipAhead() {
@@ -67,27 +86,32 @@ function PracticeView({ title, progressLabel, practice, Schematic, boardHint, pr
       onDone(firstPass, originalTotal);
       return;
     }
-    reset();
-    setIndex((n) => n + 1);
+    setAdvanced((ids) => new Set(ids).add(index));
+    showIndex(index + 1, remember(index, selected, revealed, ok));
   }
 
   function next() {
     if (!revealed) return;
-    const nextQueue = ok ? queue : [...queue, question];
-    if (!ok) setQueue(nextQueue);
+    const alreadyLeft = advanced.has(index);
+    const nextQueue = alreadyLeft || ok ? queue : [...queue, question];
+    if (!alreadyLeft && !ok) setQueue(nextQueue);
     if (index + 1 >= nextQueue.length) {
       onDone(firstPass, originalTotal);
       return;
     }
     const enteringReview =
-      index + 1 === originalTotal && nextQueue.length > originalTotal;
-    reset();
+      !alreadyLeft &&
+      index + 1 === originalTotal &&
+      nextQueue.length > originalTotal;
+    const nextAnswers = remember(index, selected, revealed, ok);
+    setAdvanced((ids) => new Set(ids).add(index));
     if (enteringReview) {
+      setAnswers(nextAnswers);
       setReviewCount(nextQueue.length - originalTotal);
       setReviewOpen(true);
       return;
     }
-    setIndex((n) => n + 1);
+    showIndex(index + 1, nextAnswers);
   }
 
   return (
@@ -124,7 +148,7 @@ function PracticeView({ title, progressLabel, practice, Schematic, boardHint, pr
           count={reviewCount}
           onContinue={() => {
             setReviewOpen(false);
-            setIndex((n) => n + 1);
+            showIndex(index + 1, answers);
           }}
         />
       ) : (
@@ -145,6 +169,8 @@ function PracticeView({ title, progressLabel, practice, Schematic, boardHint, pr
               ok={ok}
               onSelect={setSelected}
               onCheck={check}
+              onBack={index > 0 ? goBack : undefined}
+              backLabel="← Previous question"
               willRepeat={willRepeat}
               progressLabel={`${index + 1} of ${queue.length}`}
               skipControl={preview ? <StaffSkipNext className="qc-next" onClick={skipAhead} /> : null}

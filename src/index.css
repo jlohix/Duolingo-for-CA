@@ -2645,6 +2645,34 @@ h2 {
   min-width: 7.5rem;
 }
 
+.quiz-part-back {
+  font-weight: 800;
+  padding: 12px 16px;
+  border-radius: 14px;
+  flex: 0 0 auto;
+}
+
+.feedback-nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+  justify-content: flex-end;
+  flex: 1 1 100%;
+  margin-top: 4px;
+}
+
+.feedback-nav .quiz-part-back {
+  margin-right: auto;
+}
+
+.feedback-nav .primary {
+  width: auto;
+  margin: 0;
+  white-space: nowrap;
+  flex: 0 0 auto;
+}
+
 button.staff-next {
   font-weight: 800;
   text-transform: uppercase;

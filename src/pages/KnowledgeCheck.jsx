@@ -21,6 +21,7 @@ import { logKnowledgeCheckAttempt } from "../state/knowledgeCheckAttempts";
 import { useQuizQueue } from "../hooks/useQuizQueue";
 import QuestionCard from "../components/QuestionCard";
 import FeedbackBanner from "../components/FeedbackBanner";
+import QuizPartBack from "../components/QuizPartBack";
 import CloseWarning from "../components/CloseWarning";
 import ThemeSwitch from "../components/ThemeSwitch";
 import HintControl from "../components/HintControl";
@@ -204,6 +205,9 @@ export default function KnowledgeCheck({
         <div className="quiz-actions">
           <HintControl question={q} />
           <div className="quiz-actions-row">
+            {quiz.canGoBack ? (
+              <QuizPartBack onBack={quiz.goBack} label={quiz.backLabel} />
+            ) : null}
             <button
               type="button"
               className="primary check"
@@ -242,6 +246,8 @@ export default function KnowledgeCheck({
             const { done } = preview ? quiz.skipAhead() : quiz.goNext();
             if (done) finish();
           }}
+          onBack={quiz.canGoBack ? quiz.goBack : undefined}
+          backLabel={quiz.backLabel}
         />
       )}
       <CloseWarning

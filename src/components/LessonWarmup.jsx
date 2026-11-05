@@ -4,6 +4,7 @@ import { primerForLesson } from "../data/lessonPrimers";
 import MathText from "./MathText";
 import QuestionCard from "./QuestionCard";
 import FeedbackBanner from "./FeedbackBanner";
+import QuizPartBack from "./QuizPartBack";
 import ThemeSwitch from "./ThemeSwitch";
 import CloseWarning from "./CloseWarning";
 
@@ -23,6 +24,7 @@ export default function LessonWarmup({
   const [index, setIndex] = useState(0);
   const [selected, setSelected] = useState("");
   const [revealed, setRevealed] = useState(false);
+  const [answers, setAnswers] = useState({});
   const [leaveOpen, setLeaveOpen] = useState(false);
 
   if (!primer) {
@@ -39,14 +41,34 @@ export default function LessonWarmup({
   const warmup = primer.warmups[index];
   const lastWarmup = index >= primer.warmups.length - 1;
 
+  function remember(fromIndex, sel, rev, base = answers) {
+    return {
+      ...base,
+      [fromIndex]: { selected: sel, revealed: Boolean(rev) },
+    };
+  }
+
+  function showWarmup(nextIndex, nextAnswers) {
+    const saved = nextAnswers[nextIndex];
+    setAnswers(nextAnswers);
+    setIndex(nextIndex);
+    setSelected(saved?.selected ?? "");
+    setRevealed(Boolean(saved?.revealed));
+  }
+
   function nextWarmup() {
+    const nextAnswers = remember(index, selected, revealed);
     if (lastWarmup) {
+      setAnswers(nextAnswers);
       setStep("go");
       return;
     }
-    setIndex((i) => i + 1);
-    setSelected("");
-    setRevealed(false);
+    showWarmup(index + 1, nextAnswers);
+  }
+
+  function previousWarmup() {
+    if (index <= 0) return;
+    showWarmup(index - 1, remember(index, selected, revealed));
   }
 
   return (
@@ -103,23 +125,36 @@ export default function LessonWarmup({
           />
           {!revealed ? (
             <div className="quiz-actions">
-              <button
-                type="button"
-                className="primary check"
-                disabled={!selected}
-                onClick={() => setRevealed(true)}
-              >
-                Check
-              </button>
-              <button type="button" className="ghost" onClick={onReady}>
-                Skip warm-up
-              </button>
+              <div className="quiz-actions-row">
+                {index > 0 ? (
+                  <QuizPartBack
+                    onBack={previousWarmup}
+                    label="← Previous question"
+                  />
+                ) : null}
+                <button
+                  type="button"
+                  className="primary check"
+                  disabled={!selected}
+                  onClick={() => {
+                    setRevealed(true);
+                    setAnswers(remember(index, selected, true));
+                  }}
+                >
+                  Check
+                </button>
+                <button type="button" className="ghost" onClick={onReady}>
+                  Skip warm-up
+                </button>
+              </div>
             </div>
           ) : (
             <FeedbackBanner
               correct={isAnswerCorrect(warmup, selected)}
               explanation={warmup.explanation}
               onContinue={nextWarmup}
+              onBack={index > 0 ? previousWarmup : undefined}
+              backLabel="← Previous question"
             />
           )}
         </>

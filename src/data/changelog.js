@@ -1,5 +1,11 @@
 export const BUILT_IN_LOGS = [
   {
+    id: "built-2026-11-05-question-back",
+    date: "2026-11-05",
+    title: "Go back a part",
+    body: "On a step-by-step question you can tap Previous part to reopen the last step, or Previous question to reopen the one before. XP and first-try scores stay as they were.",
+  },
+  {
     id: "built-2026-11-05-sunwoo-back",
     date: "2026-11-05",
     title: "Sunwoo is back",
