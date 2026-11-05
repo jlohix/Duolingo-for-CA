@@ -1,5 +1,11 @@
 export const BUILT_IN_LOGS = [
   {
+    id: "built-2026-11-05-fold-profile-dashboards",
+    date: "2026-11-05",
+    title: "Fold-up Profile dashboards",
+    body: "Knowledge checks and No Pen, Just Brains on Profile now start folded. Tap Show to open a section, then tap a Knowledge check topic to see its scores.",
+  },
+  {
     id: "built-2026-11-05-questions-first-attempt",
     date: "2026-11-05",
     title: "Questions on first attempt",

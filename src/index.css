@@ -1094,6 +1094,65 @@ html[data-theme="dark"] [data-tier="obsidian"] { color: #9aa3af; --tier: #9aa3af
   font-size: 1.1rem;
 }
 
+.profile-fold {
+  padding: 0;
+}
+
+.profile-fold > summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 16px;
+  cursor: pointer;
+  list-style: none;
+}
+
+.profile-fold > summary::-webkit-details-marker,
+.profile-fold > summary::marker {
+  display: none;
+  content: "";
+}
+
+.profile-fold-copy {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+
+.profile-fold-title {
+  font-size: 1.1rem;
+  font-weight: 800;
+  color: var(--ink);
+}
+
+.profile-fold > summary::after {
+  content: "Show";
+  flex: 0 0 auto;
+  font-size: 0.85rem;
+  font-weight: 800;
+  color: var(--green-dark);
+}
+
+.profile-fold[open] > summary::after {
+  content: "Hide";
+}
+
+.profile-fold[open] > summary {
+  border-bottom: 1px solid var(--line);
+  margin-bottom: 4px;
+}
+
+.profile-fold > summary:focus-visible {
+  outline: 2px solid var(--green);
+  outline-offset: -4px;
+  border-radius: 18px;
+}
+
+.profile-fold-body {
+  padding: 0 16px 16px;
+}
+
 .hex-stats {
   margin: 0;
 }
@@ -3003,6 +3062,55 @@ button.staff-next {
 
 .kcheck-card.has-try {
   border-color: color-mix(in srgb, var(--green) 35%, var(--line));
+}
+
+.kcheck-card.kcheck-fold {
+  padding: 0;
+  gap: 0;
+}
+
+.kcheck-card.kcheck-fold > summary {
+  list-style: none;
+  cursor: pointer;
+  padding: 12px;
+  align-items: center;
+}
+
+.kcheck-card.kcheck-fold > summary::-webkit-details-marker,
+.kcheck-card.kcheck-fold > summary::marker {
+  display: none;
+  content: "";
+}
+
+.kcheck-card.kcheck-fold > summary::after {
+  content: "";
+  width: 0.45em;
+  height: 0.45em;
+  border-right: 2px solid var(--muted);
+  border-bottom: 2px solid var(--muted);
+  transform: rotate(45deg);
+  margin-left: 8px;
+  flex: 0 0 auto;
+  transition: transform 0.15s ease;
+}
+
+.kcheck-card.kcheck-fold[open] > summary::after {
+  transform: rotate(225deg);
+}
+
+.kcheck-card.kcheck-fold[open] > summary {
+  border-bottom: 1px solid var(--line);
+}
+
+.kcheck-card.kcheck-fold > .kcheck-score-pair,
+.kcheck-card.kcheck-fold > .login-hint {
+  padding: 12px;
+}
+
+.kcheck-card.kcheck-fold > summary:focus-visible {
+  outline: 2px solid var(--green);
+  outline-offset: -4px;
+  border-radius: 14px;
 }
 
 .kcheck-card.empty {

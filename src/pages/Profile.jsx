@@ -332,17 +332,21 @@ export default function Profile({
         </section>
       ) : null}
 
-      <section className="profile-block">
-        <h2>No Pen, Just Brains</h2>
+      <FoldBlock
+        title="No Pen, Just Brains"
+        summary={brainFoldSummary(progress)}
+      >
         <p className="login-hint">
           50 conceptual questions from each Learn section. Your first attempt
           and your best attempt is recorded.
         </p>
         <BrainDashboard progress={progress} />
-      </section>
+      </FoldBlock>
 
-      <section className="profile-block">
-        <h2>Knowledge checks</h2>
+      <FoldBlock
+        title="Knowledge checks"
+        summary={knowledgeCheckFoldSummary(checkTopics, progress)}
+      >
         <p className="login-hint">
           Five random step-by-step questions per section. Your score is
           first-try steps over every part — for example 19/24 is 79%. Each card
@@ -353,7 +357,7 @@ export default function Profile({
           progress={progress}
           rows={checkRows}
         />
-      </section>
+      </FoldBlock>
 
       <section className="profile-block">
         <h2>What’s inside</h2>
@@ -366,6 +370,40 @@ export default function Profile({
       </section>
     </div>
   );
+}
+
+function FoldBlock({ title, summary, children }) {
+  return (
+    <details className="profile-block profile-fold">
+      <summary>
+        <span className="profile-fold-copy">
+          <span className="profile-fold-title">{title}</span>
+          {summary ? <span className="login-hint">{summary}</span> : null}
+        </span>
+      </summary>
+      <div className="profile-fold-body">{children}</div>
+    </details>
+  );
+}
+
+function knowledgeCheckFoldSummary(topics, progress) {
+  const total = topics.length;
+  const attempted = topics.filter((topic) =>
+    knowledgeCheckSummary(progress, topic.id)
+  ).length;
+  if (!total) return "No sections yet";
+  if (!attempted) return "Not attempted · tap to open";
+  return `${attempted} of ${total} attempted · tap to open`;
+}
+
+function brainFoldSummary(progress) {
+  const summary = brainAttemptSummary(progress);
+  if (!summary) return "Not attempted · tap to open";
+  const later = summary.laterBest;
+  if (later) {
+    return `${later.correct}/${later.total} best · tap to open`;
+  }
+  return `${summary.firstCorrect}/${summary.firstTotal} first · tap to open`;
 }
 
 function BrainDashboard({ progress }) {
@@ -488,21 +526,20 @@ function KnowledgeCheckVisual({ topics, progress, rows }) {
         const firstPct = knowledgeCheckPercent(firstCorrect, firstTotal);
         const hasTry = Boolean(firstTotal || attempts.length);
         return (
-          <li
-            key={topic.id}
-            className={`kcheck-card ${hasTry ? "has-try" : "empty"}`}
-          >
-            <div className="kcheck-card-head">
+          <li key={topic.id}>
+            <details
+              className={`kcheck-card kcheck-fold ${hasTry ? "has-try" : "empty"}`}
+            >
+            <summary className="kcheck-card-head">
               <strong>{topic.name}</strong>
               {hasTry ? (
                 <span className="login-hint">
-                  {attempts.length}{" "}
-                  {attempts.length === 1 ? "attempt" : "attempts"}
+                  {formatKnowledgeCheckScore(firstCorrect, firstTotal)} first
                 </span>
               ) : (
                 <span className="login-hint">Not attempted</span>
               )}
-            </div>
+            </summary>
             {hasTry ? (
               <>
                 <div className="kcheck-score-pair">
@@ -566,6 +603,7 @@ function KnowledgeCheckVisual({ topics, progress, rows }) {
                 Open this section on Learn and finish a Knowledge check.
               </p>
             )}
+            </details>
           </li>
         );
       })}
