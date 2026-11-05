@@ -1153,6 +1153,47 @@ html[data-theme="dark"] [data-tier="obsidian"] { color: #9aa3af; --tier: #9aa3af
   padding: 0 16px 16px;
 }
 
+.admin-fold {
+  margin: 24px 0 8px;
+}
+
+.admin-fold > summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  cursor: pointer;
+  list-style: none;
+}
+
+.admin-fold > summary::-webkit-details-marker,
+.admin-fold > summary::marker {
+  display: none;
+  content: "";
+}
+
+.admin-fold h2 {
+  margin: 0;
+}
+
+.admin-fold > summary::after {
+  content: "Show";
+  flex: 0 0 auto;
+  font-size: 0.85rem;
+  font-weight: 800;
+  color: var(--green-dark);
+}
+
+.admin-fold[open] > summary::after {
+  content: "Hide";
+}
+
+.admin-fold > summary:focus-visible {
+  outline: 2px solid var(--green);
+  outline-offset: 4px;
+  border-radius: 8px;
+}
+
 .hex-stats {
   margin: 0;
 }

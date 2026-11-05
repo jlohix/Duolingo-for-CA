@@ -714,6 +714,25 @@ function WalkFeedbackTable({ students }) {
   );
 }
 
+function AdminFold({ title, summary, children }) {
+  return (
+    <details className="admin-fold">
+      <summary>
+        <span className="profile-fold-copy">
+          <h2>{title}</h2>
+          {summary ? <span className="login-hint">{summary}</span> : null}
+        </span>
+      </summary>
+      <div className="admin-fold-body">{children}</div>
+    </details>
+  );
+}
+
+function foldStudentCount(n) {
+  if (!n) return "No scores yet · tap to open";
+  return `${n} ${n === 1 ? "student" : "students"} · tap to open`;
+}
+
 function KnowledgeChecksTable({ students }) {
   const topics = TOPICS.filter((topic) =>
     KNOWLEDGE_CHECK_TOPIC_IDS.includes(topic.id)
@@ -722,8 +741,7 @@ function KnowledgeChecksTable({ students }) {
     topics.some((topic) => knowledgeCheckSummary(row, topic.id))
   );
   return (
-    <section className="admin-walk-feedback">
-      <h2>Knowledge checks</h2>
+    <AdminFold title="Knowledge checks" summary={foldStudentCount(attempted.length)}>
       <p className="login-hint">
         Five random questions per section. Score is first-try steps as a
         percent of every part (for example 19/24 = 79%). First score is locked
@@ -768,15 +786,17 @@ function KnowledgeChecksTable({ students }) {
           </tbody>
         </table>
       </div>
-    </section>
+    </AdminFold>
   );
 }
 
 function BrainAttemptsTable({ students }) {
   const attempted = students.filter((row) => brainAttemptSummary(row));
   return (
-    <section className="admin-walk-feedback">
-      <h2>No Pen, Just Brains</h2>
+    <AdminFold
+      title="No Pen, Just Brains"
+      summary={foldStudentCount(attempted.length)}
+    >
       <p className="login-hint">
         First marks are locked on the first finish. Later is the best retake.
       </p>
@@ -823,7 +843,7 @@ function BrainAttemptsTable({ students }) {
           </tbody>
         </table>
       </div>
-    </section>
+    </AdminFold>
   );
 }
 
