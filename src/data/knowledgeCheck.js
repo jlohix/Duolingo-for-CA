@@ -3,6 +3,7 @@ import { FREEC_QUIZ } from "./freeCQuizLab";
 import { FREEL_QUIZ } from "./freeLQuizLab";
 import { STEPC_QUIZ } from "./stepCQuizLab";
 import { STEPL_QUIZ } from "./stepLQuizLab";
+import { NETFUNC_EASY, NETFUNC_AVERAGE, NETFUNC_CHALLENGING } from "../section7/networkFuncLabs";
 
 export const KNOWLEDGE_CHECK_SIZE = 5;
 export const KNOWLEDGE_CHECK_TOPIC_IDS = [1, 2, 3, 4, 5, 6, 7, 8];
@@ -99,14 +100,60 @@ function section4Families() {
   ].filter(Boolean);
 }
 
+// Network-function pack questions (static JS, not in CSV banks) for section 7
+function section7Families() {
+  const allPackQuestions = [
+    ...NETFUNC_EASY.questions,
+    ...NETFUNC_AVERAGE.questions,
+    ...NETFUNC_CHALLENGING.questions,
+  ];
+  // Group by questionFamilyId to form families
+  const byFamily = new Map();
+  for (const q of allPackQuestions) {
+    const key = `netfunc::${q.questionFamilyId || q.id}`;
+    if (!byFamily.has(key)) byFamily.set(key, []);
+    byFamily.get(key).push(q);
+  }
+  const families = [];
+  for (const [key, steps] of byFamily) {
+    const sorted = [...steps].sort(
+      (a, b) => (a.stepIndex || 0) - (b.stepIndex || 0)
+    );
+    if (!sorted.every(isMcq)) continue;
+    families.push({
+      key,
+      steps: sorted.map((step, i) => ({
+        ...step,
+        topicId: 7,
+        question: step.question,
+        explanation: step.explanation || "",
+        questionFamilyId: key,
+        stepIndex: i + 1,
+        stepCount: sorted.length,
+        isFamilyFinal: i === sorted.length - 1,
+      })),
+    });
+  }
+  return families;
+}
+
 export function knowledgeCheckFamilies(allQuestions, topicId) {
   const families = familiesFromBanks(allQuestions, topicId);
-  if (Number(topicId) !== 4) return families;
-  const seen = new Set(families.map((family) => family.key));
-  for (const family of section4Families()) {
-    if (seen.has(family.key)) continue;
-    seen.add(family.key);
-    families.push(family);
+  if (Number(topicId) === 4) {
+    const seen = new Set(families.map((family) => family.key));
+    for (const family of section4Families()) {
+      if (seen.has(family.key)) continue;
+      seen.add(family.key);
+      families.push(family);
+    }
+  }
+  if (Number(topicId) === 7) {
+    const seen = new Set(families.map((family) => family.key));
+    for (const family of section7Families()) {
+      if (seen.has(family.key)) continue;
+      seen.add(family.key);
+      families.push(family);
+    }
   }
   return families;
 }

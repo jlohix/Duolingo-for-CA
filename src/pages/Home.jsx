@@ -434,7 +434,8 @@ function SectionWalks({
               <span className="node-name">{renderTitleWithTest(lab.title)}</span>
               <span className="node-count">{lab.count}</span>
             </button>
-            {banks.map((bank) => (
+            {/* Sections 5 & 6 combine all bank nodes into Easy/Average/Challenging at the bottom */}
+            {topicId !== 5 && topicId !== 6 && banks.map((bank) => (
               <BankDifficultyNodes
                 key={bank.id}
                 bankId={bank.id}
@@ -539,7 +540,8 @@ function TopicLadder({
                       )
                     )
                   )
-                ).map((bank) => (
+                // Sections 5 & 6 combine their banks into Easy/Average/Challenging nodes — skip here
+                ).filter(() => topic.id !== 5 && topic.id !== 6).map((bank) => (
                   <BankDifficultyNodes
                     key={bank.id}
                     bankId={bank.id}
@@ -636,64 +638,6 @@ export default function Home({
         onClose={() => setEventOpen(false)}
       />
     ) : null;
-
-  if (section === "papers") {
-    return (
-      <DoodlePage>
-      <div className="page">
-        <header className="topbar">
-          <div>
-            <button
-              type="button"
-              className="ghost back-link"
-              onClick={() => setSection(null)}
-            >
-              ← Back
-            </button>
-            <p className="eyebrow">Exam practice</p>
-            <h1>Past Year Papers</h1>
-          </div>
-        </header>
-        {pastPapers.length === 0 ? (
-          <p className="login-hint">
-            This section is ready. The question bank is not in yet — sit tight
-            and it will show up here as papers you can attempt.
-          </p>
-        ) : (
-          <>
-            <p className="login-hint">
-              Sit a past paper like a lesson. First finish awards XP like
-              Average. Replay is practice only.
-            </p>
-            <ul className="paper-list">
-              {pastPapers.map((pack) => {
-                const done = progress.completed?.includes(pack.id);
-                const n = pack.questions.length;
-                return (
-                  <li key={pack.id}>
-                    <button
-                      type="button"
-                      className={`paper-row ${done ? "done" : ""}`}
-                      onClick={() => onStartPaper(pack)}
-                    >
-                      <span className="node-icon">{done ? "✓" : "PY"}</span>
-                      <span className="paper-row-copy">
-                        <span className="paper-row-title">{pack.title}</span>
-                        <span className="paper-row-count">
-                          {n} {n === 1 ? "question" : "questions"}
-                        </span>
-                      </span>
-                    </button>
-                  </li>
-                );
-              })}
-            </ul>
-          </>
-        )}
-      </div>
-      </DoodlePage>
-    );
-  }
 
   if (section != null) {
     const index = topics.findIndex((t) => t.id === section);
@@ -806,37 +750,6 @@ export default function Home({
             />
           );
         })}
-        <SectionCard
-          kicker="Exam practice"
-          title="Past Year Papers"
-          blurb={
-            pastPapers.length
-              ? `${pastPapers.length} ${pastPapers.length === 1 ? "paper" : "papers"} ready to sit.`
-              : "Question bank coming soon. Open this section when it is in."
-          }
-          index={topics.length + 1}
-          badge="PY"
-          unlocked
-          showMeter={!allOpen}
-          meter={{
-            done: pastPapers.filter((p) => progress.completed?.includes(p.id))
-              .length,
-            total: Math.max(pastPapers.length, 1),
-            pct: pastPapers.length
-              ? Math.round(
-                  (100 *
-                    pastPapers.filter((p) =>
-                      progress.completed?.includes(p.id)
-                    ).length) /
-                    pastPapers.length
-                )
-              : 0,
-          }}
-          current={false}
-          skipReady={false}
-          onOpen={() => setSection("papers")}
-          onJump={() => setSection("papers")}
-        />
       </div>
       {skipSheet}
     </div>
