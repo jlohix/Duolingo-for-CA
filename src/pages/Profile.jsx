@@ -7,6 +7,7 @@ import {
   knowledgeCheckSummary,
   knowledgeCheckPercent,
   formatKnowledgeCheckScore,
+  brainAttemptSummary,
 } from "../state/progress";
 import { KNOWLEDGE_CHECK_TOPIC_IDS } from "../data/knowledgeCheck";
 import { DEFAULT_CLASS, normalizeClassId } from "../data/classes";
@@ -25,6 +26,7 @@ import {
   mergeKnowledgeCheckRows,
   loadMyKnowledgeCheckAttempts,
 } from "../state/knowledgeCheckAttempts";
+import BrainScorecard from "../components/BrainScorecard";
 import { useEffect, useMemo, useState } from "react";
 
 // Resize/compress an image file to a small square PNG blob for the avatar.
@@ -288,7 +290,7 @@ export default function Profile({
         onPractice={onPractice}
       />
       <p className="focus-line">
-        Strengths and weaknesses use first-try accuracy on lessons and
+        Strong and weakness labels use first-attempt accuracy on lessons and
         walkthroughs. A topic needs at least 3 answers before it is labeled.
         Only sections that have questions appear here.
       </p>
@@ -305,8 +307,8 @@ export default function Profile({
             <TopicList rows={strengths} />
           ) : (
             <p className="login-hint">
-              No strengths yet. Hit 80% first try on a topic (60%+ counts as
-              solid).
+              No strong topics yet. Hit 80% correct on first attempt (60%+
+              counts as solid).
             </p>
           )}
         </section>
@@ -316,8 +318,8 @@ export default function Profile({
             <TopicList rows={weaknesses} />
           ) : (
             <p className="login-hint">
-              No weaknesses tagged yet. Topics under 60% first try will show
-              here.
+              No weaknesses tagged yet. Topics under 60% correct on first
+              attempt will show here.
             </p>
           )}
         </section>
@@ -330,8 +332,21 @@ export default function Profile({
         </section>
       ) : null}
 
-      <section className="profile-block">
-        <h2>Knowledge checks</h2>
+      <FoldBlock
+        title="No Pen, Just Brains"
+        summary={brainFoldSummary(progress)}
+      >
+        <p className="login-hint">
+          50 conceptual questions from each Learn section. Your first attempt
+          and your best attempt is recorded.
+        </p>
+        <BrainDashboard progress={progress} />
+      </FoldBlock>
+
+      <FoldBlock
+        title="Knowledge checks"
+        summary={knowledgeCheckFoldSummary(checkTopics, progress)}
+      >
         <p className="login-hint">
           Five random step-by-step questions per section. Your score is
           first-try steps over every part — for example 19/24 is 79%. Each card
@@ -342,7 +357,7 @@ export default function Profile({
           progress={progress}
           rows={checkRows}
         />
-      </section>
+      </FoldBlock>
 
       <section className="profile-block">
         <h2>What’s inside</h2>
@@ -353,6 +368,116 @@ export default function Profile({
         </p>
         <TopicList rows={insideRows} completed={completed} showUnits />
       </section>
+    </div>
+  );
+}
+
+function FoldBlock({ title, summary, children }) {
+  return (
+    <details className="profile-block profile-fold">
+      <summary>
+        <span className="profile-fold-copy">
+          <span className="profile-fold-title">{title}</span>
+          {summary ? <span className="login-hint">{summary}</span> : null}
+        </span>
+      </summary>
+      <div className="profile-fold-body">{children}</div>
+    </details>
+  );
+}
+
+function knowledgeCheckFoldSummary(topics, progress) {
+  const total = topics.length;
+  const attempted = topics.filter((topic) =>
+    knowledgeCheckSummary(progress, topic.id)
+  ).length;
+  if (!total) return "No sections yet";
+  if (!attempted) return "Not attempted · tap to open";
+  return `${attempted} of ${total} attempted · tap to open`;
+}
+
+function brainFoldSummary(progress) {
+  const summary = brainAttemptSummary(progress);
+  if (!summary) return "Not attempted · tap to open";
+  const later = summary.laterBest;
+  if (later) {
+    return `${later.correct}/${later.total} best · tap to open`;
+  }
+  return `${summary.firstCorrect}/${summary.firstTotal} first · tap to open`;
+}
+
+function BrainDashboard({ progress }) {
+  const summary = brainAttemptSummary(progress);
+  const laterBest = summary?.laterBest || null;
+  if (!summary) {
+    return (
+      <p className="login-hint">
+        Open No Pen, Just Brains on Learn to sit the set. Your marks will show
+        here.
+      </p>
+    );
+  }
+  const firstPct = knowledgeCheckPercent(
+    summary.firstCorrect,
+    summary.firstTotal
+  );
+  const laterPct = laterBest
+    ? knowledgeCheckPercent(laterBest.correct, laterBest.total)
+    : 0;
+  const attemptCount = 1 + (summary.laterCount || 0);
+  const shown = laterBest || {
+    correct: summary.firstCorrect,
+    total: summary.firstTotal,
+  };
+  return (
+    <div className="brain-dash">
+      <div className="kcheck-score-pair">
+        <div>
+          <span>First attempt</span>
+          <strong>
+            {summary.firstCorrect}/{summary.firstTotal}
+          </strong>
+          <span className="kcheck-score-frac">{firstPct}% marks</span>
+          <div className="insight-meter" aria-hidden="true">
+            <div
+              className={`insight-fill ${scoreKind(
+                summary.firstCorrect,
+                summary.firstTotal
+              )}`}
+              style={{ width: `${firstPct}%` }}
+            />
+          </div>
+        </div>
+        <div>
+          <span>Best attempt</span>
+          <strong>
+            {laterBest ? `${laterBest.correct}/${laterBest.total}` : "—"}
+          </strong>
+          <span className="kcheck-score-frac">
+            {laterBest ? `${laterPct}% marks` : "No retake yet"}
+          </span>
+          <div className="insight-meter kcheck-improve-meter" aria-hidden="true">
+            {laterBest ? (
+              <>
+                <div
+                  className="insight-fill kcheck-improve-base"
+                  style={{ width: `${Math.min(firstPct, laterPct)}%` }}
+                />
+                {laterPct > firstPct ? (
+                  <div
+                    className="insight-fill kcheck-improve-gain"
+                    style={{ width: `${laterPct - firstPct}%` }}
+                  />
+                ) : null}
+              </>
+            ) : null}
+          </div>
+        </div>
+      </div>
+      <p className="login-hint">
+        {attemptCount} {attemptCount === 1 ? "attempt" : "attempts"} saved.
+      </p>
+      <BrainScorecard correct={shown.correct} total={shown.total} />
     </div>
   );
 }
@@ -401,21 +526,20 @@ function KnowledgeCheckVisual({ topics, progress, rows }) {
         const firstPct = knowledgeCheckPercent(firstCorrect, firstTotal);
         const hasTry = Boolean(firstTotal || attempts.length);
         return (
-          <li
-            key={topic.id}
-            className={`kcheck-card ${hasTry ? "has-try" : "empty"}`}
-          >
-            <div className="kcheck-card-head">
+          <li key={topic.id}>
+            <details
+              className={`kcheck-card kcheck-fold ${hasTry ? "has-try" : "empty"}`}
+            >
+            <summary className="kcheck-card-head">
               <strong>{topic.name}</strong>
               {hasTry ? (
                 <span className="login-hint">
-                  {attempts.length}{" "}
-                  {attempts.length === 1 ? "attempt" : "attempts"}
+                  {formatKnowledgeCheckScore(firstCorrect, firstTotal)} first
                 </span>
               ) : (
                 <span className="login-hint">Not attempted</span>
               )}
-            </div>
+            </summary>
             {hasTry ? (
               <>
                 <div className="kcheck-score-pair">
@@ -479,6 +603,7 @@ function KnowledgeCheckVisual({ topics, progress, rows }) {
                 Open this section on Learn and finish a Knowledge check.
               </p>
             )}
+            </details>
           </li>
         );
       })}

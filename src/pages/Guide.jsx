@@ -9,7 +9,7 @@ const STEPS = [
   },
   {
     title: "Lessons",
-    text: "Each lesson starts with a short warm-up. You can skip it and go straight to the question bank. Hints are optional. Closing mid-quiz warns you that this run is lost, but XP already earned stays. Missed questions come back in a Review round.",
+    text: "Each lesson starts with a short warm-up. You can skip it and go straight to the question bank. Hints are optional and only name a method, not the answer. If you close mid-quiz, Circuito saves your place so you can pick up the same question. XP already earned stays. Missed questions come back in a Review round.",
   },
   {
     title: "XP",
@@ -25,7 +25,7 @@ const STEPS = [
   },
   {
     title: "Profile and Progress",
-    text: "On Profile you can pick a board name for Class board and Individual. Offensive names are not anonymous — we know who you are, because your NTU email is still on the account. Profile also lists strengths (about 80%+ first try) and weaknesses (under 60%) after at least 3 answers from lessons and walkthroughs, plus a hex chart, Knowledge check cards (first try plus your five best later attempts), and a list of the tests and question banks in each section. Walkthroughs stay on Learn; staff Profile still lists them. Topics with no questions are left off. Progress shows the same hex, the same lesson list, and your strongest / focus area.",
+    text: "On Profile you can pick a board name for Class board and Individual. Offensive names are not anonymous — we know who you are, because your NTU email is still on the account. Profile also lists strong topics (80%+ correct on first attempt) and weaknesses (under 60%) after at least 3 answers from lessons and walkthroughs, plus a hex chart. Knowledge checks and No Pen, Just Brains start folded — tap Show to open them, then tap a Knowledge check section to see first and best scores. There is also a list of the tests and question banks in each section. Walkthroughs stay on Learn; staff Profile still lists them. Topics with no questions are left off. Progress shows the same hex, the same lesson list, and your strongest / focus area.",
   },
   {
     title: "Trophy leagues",

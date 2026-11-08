@@ -1,5 +1,6 @@
 import { useMemo, useRef, useState } from "react";
 import MathText from "./MathText";
+import ConfettiBurst from "./ConfettiBurst";
 import ThemeSwitch from "./ThemeSwitch";
 import ReviewGate from "./ReviewGate";
 
@@ -139,6 +140,7 @@ export default function ValueDragLab({
       onPointerUp={endDrag}
       onPointerCancel={endDrag}
     >
+      {revealed && ok ? <ConfettiBurst burstKey={index} /> : null}
       {showBack ? (
         <div className="lesson-close-row">
           <button type="button" className="ghost" onClick={onExit}>

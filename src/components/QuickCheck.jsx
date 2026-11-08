@@ -1,6 +1,7 @@
 import { useRef } from "react";
 import MathText from "./MathText";
 import QuizMascot from "./QuizMascot";
+import FitKatex from "./FitKatex";
 
 const LABELS = ["A", "B", "C", "D"];
 const KEYS = ["a", "b", "c", "d"];
@@ -119,7 +120,12 @@ export function QuickCheckCard({
   onSelect,
   onCheck,
   onRetry,
+  onBack,
+  backLabel = "← Previous",
+  onNext,
+  nextLabel = "Next →",
   afterReveal,
+  skipControl = null,
   badge = "Quick check",
   progressLabel,
   willRepeat = false,
@@ -165,25 +171,50 @@ export function QuickCheckCard({
         })}
       </div>
       {!revealed ? (
-        <button
-          type="button"
-          className="qc-check"
-          disabled={!selected}
-          onClick={onCheck}
-        >
-          Check
-        </button>
+        <div className="qc-actions">
+          {onBack ? (
+            <button type="button" className="ghost quiz-part-back" onClick={onBack}>
+              {backLabel}
+            </button>
+          ) : null}
+          {onNext ? (
+            <button type="button" className="primary qc-next" onClick={onNext}>
+              {nextLabel}
+            </button>
+          ) : null}
+          <button
+            type="button"
+            className="qc-check"
+            disabled={!selected}
+            onClick={onCheck}
+          >
+            Check
+          </button>
+          {skipControl}
+        </div>
       ) : (
         <div className={`qc-feedback ${ok ? "ok" : "bad"}`}>
           <QuizMascot mood={ok ? "happy" : "scary"} playKey={ok ? "ok" : "bad"} />
           <p className={ok ? "ok-text" : "bad-text"}>
             <span className="qc-result">{ok ? "Nice!" : "Not quite"}</span>
-            <MathText text={why} sentenceLines />
+            <FitKatex>
+              <MathText text={why} sentenceLines />
+            </FitKatex>
           </p>
           {!ok && willRepeat ? (
             <p className="login-hint">This question will come back at the end.</p>
           ) : null}
           <div className="qc-feedback-actions">
+            {onBack ? (
+              <button type="button" className="ghost quiz-part-back" onClick={onBack}>
+                {backLabel}
+              </button>
+            ) : null}
+            {onNext && !afterReveal ? (
+              <button type="button" className="primary qc-next" onClick={onNext}>
+                {nextLabel}
+              </button>
+            ) : null}
             {!ok && onRetry ? (
               <button type="button" className="ghost" onClick={onRetry}>
                 Try again
@@ -205,7 +236,12 @@ export function InlineKnowledgeCheck({
   onSelect,
   onCheck,
   onRetry,
+  onBack,
+  backLabel,
+  onNext,
+  nextLabel,
   afterReveal,
+  skipControl,
   badge,
   progressLabel,
   lockKey,
@@ -226,7 +262,12 @@ export function InlineKnowledgeCheck({
       onSelect={(displayKey) => onSelect(layout.toOriginal[displayKey])}
       onCheck={onCheck}
       onRetry={onRetry}
+      onBack={onBack}
+      backLabel={backLabel}
+      onNext={onNext}
+      nextLabel={nextLabel}
       afterReveal={afterReveal}
+      skipControl={skipControl}
       badge={badge}
       progressLabel={progressLabel}
       willRepeat={willRepeat}

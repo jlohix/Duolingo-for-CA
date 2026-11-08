@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { questionsForSkip, isAnswerCorrect } from "../data/loadQuestions";
 import { TOPICS } from "../data/topics";
 import {
@@ -14,10 +14,16 @@ import {
 import { useQuizQueue } from "../hooks/useQuizQueue";
 import QuestionCard from "../components/QuestionCard";
 import FeedbackBanner from "../components/FeedbackBanner";
+import QuizPartBack from "../components/QuizPartBack";
 import CloseWarning from "../components/CloseWarning";
 import ThemeSwitch from "../components/ThemeSwitch";
 import HintControl from "../components/HintControl";
 import StreakChip from "../components/StreakChip";
+import {
+  loadQuizResume,
+  clearQuizResume,
+  usePersistQuiz,
+} from "../state/quizResume";
 
 function SkipFail({ topicName, misses, needed, total, onRetry, onHome }) {
   return (
@@ -52,13 +58,33 @@ function SkipRound({
   onFinished,
   onFail,
 }) {
+  const runKey = `skip-${targetTopicId}`;
+  const [saved] = useState(() => loadQuizResume(runKey));
   const initial = useMemo(
-    () => questionsForSkip(allQuestions, targetTopicId, SKIP_QUIZ_SIZE),
-    [allQuestions, targetTopicId]
+    () =>
+      saved?.queue?.length
+        ? saved.queue
+        : questionsForSkip(allQuestions, targetTopicId, SKIP_QUIZ_SIZE),
+    [allQuestions, targetTopicId, saved]
   );
-  const quiz = useQuizQueue(initial, XP_CORRECT, { recycleMissed: false });
+  const quiz = useQuizQueue(initial, XP_CORRECT, {
+    recycleMissed: false,
+    resume: saved,
+  });
+  const stoppedRef = useRef(false);
   const [leaveOpen, setLeaveOpen] = useState(false);
-  const [firstMisses, setFirstMisses] = useState(0);
+  const [firstMisses, setFirstMisses] = useState(
+    () => Math.max(0, Math.round(Number(saved?.firstMisses) || 0))
+  );
+
+  usePersistQuiz(
+    runKey,
+    () => ({
+      ...quiz.getResumeState(),
+      firstMisses,
+    }),
+    stoppedRef
+  );
 
   const target = TOPICS.find((t) => t.id === targetTopicId);
   const sourceNames = TOPICS.filter((t) => t.id < targetTopicId)
@@ -69,6 +95,8 @@ function SkipRound({
   const skipFailed = firstMisses > allowedMisses;
 
   function finishPass() {
+    stoppedRef.current = true;
+    clearQuizResume(runKey);
     const grew = wouldExtendStreak(progress);
     const streakFrom = visibleStreak(progress);
     let next = progress;
@@ -93,6 +121,8 @@ function SkipRound({
 
   function continueQuiz() {
     if (skipFailed) {
+      stoppedRef.current = true;
+      clearQuizResume(runKey);
       onFail({
         misses: firstMisses,
         needed,
@@ -104,13 +134,16 @@ function SkipRound({
     const { done } = quiz.goNext();
     if (done) {
       if (quiz.firstPassCorrect >= needed) finishPass();
-      else
+      else {
+        stoppedRef.current = true;
+        clearQuizResume(runKey);
         onFail({
           misses: firstMisses,
           needed,
           total: quiz.originalTotal,
           topicName: target?.name,
         });
+      }
     }
   }
 
@@ -155,25 +188,39 @@ function SkipRound({
       {!quiz.revealed ? (
         <div className="quiz-actions">
           <HintControl question={quiz.question} />
-          <button
-            type="button"
-            className="primary check"
-            disabled={!quiz.selected}
-            onClick={() =>
-              quiz.check(({ ok, firstTry, awardXp, question }) => {
-                if (firstTry && !ok) setFirstMisses((n) => n + 1);
-                setProgress((p) => {
-                  let next = p;
-                  if (awardXp) next = addXp(next, XP_CORRECT);
-                  if (firstTry)
-                    next = recordFirstTry(next, question.topicId, ok);
-                  return next;
-                });
-              })
-            }
-          >
-            Check
-          </button>
+          <div className="quiz-actions-row">
+            {quiz.canGoBack ? (
+              <QuizPartBack onBack={quiz.goBack} label={quiz.backLabel} />
+            ) : null}
+            {quiz.canGoForward ? (
+              <button
+                type="button"
+                className="primary"
+                onClick={quiz.goForward}
+              >
+                {quiz.nextLabel}
+              </button>
+            ) : null}
+            <button
+              type="button"
+              className="primary check"
+              disabled={!quiz.selected}
+              onClick={() =>
+                quiz.check(({ ok, firstTry, awardXp, question }) => {
+                  if (firstTry && !ok) setFirstMisses((n) => n + 1);
+                  setProgress((p) => {
+                    let next = p;
+                    if (awardXp) next = addXp(next, XP_CORRECT);
+                    if (firstTry)
+                      next = recordFirstTry(next, question.topicId, ok);
+                    return next;
+                  });
+                })
+              }
+            >
+              Check
+            </button>
+          </div>
         </div>
       ) : (
         <FeedbackBanner
@@ -182,6 +229,10 @@ function SkipRound({
           willRepeat={false}
           failOut={skipFailed}
           onContinue={continueQuiz}
+          onBack={quiz.canGoBack ? quiz.goBack : undefined}
+          backLabel={quiz.backLabel}
+          onNext={quiz.canGoForward ? quiz.goForward : undefined}
+          nextLabel={quiz.nextLabel}
         />
       )}
       <CloseWarning

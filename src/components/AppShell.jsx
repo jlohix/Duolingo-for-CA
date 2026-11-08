@@ -17,14 +17,17 @@ const STUDENT_LINKS = [
   { id: "individualboard", label: "Individual", group: "Compete", icon: "fa-user" },
   { id: "guide", label: "How to use", group: "Help", icon: "fa-question-circle" },
   { id: "updates", label: "Updates", group: "Help", icon: "fa-bullhorn" },
+  { id: "shame", label: "Dashboard of Shame", group: "Help", icon: "fa-history" },
 ];
 
 const ADMIN_LINKS = [
   { id: "home", label: "Learn", group: "Study", icon: "fa-book" },
   { id: "admin", label: "Students", group: "Staff", icon: "fa-users" },
   { id: "qpack", label: "Question pack", group: "Staff", icon: "fa-file-pdf-o" },
+  { id: "qedit", label: "Edit questions", group: "Staff", icon: "fa-pencil-square-o" },
   { id: "profile", label: "Profile", group: "You", icon: "fa-user" },
   { id: "updates", label: "Updates", group: "Staff", icon: "fa-bullhorn" },
+  { id: "shame", label: "Dashboard of Shame", group: "Staff", icon: "fa-history" },
   { id: "guide", label: "How to use", group: "Staff", icon: "fa-question-circle" },
   { id: "leagues", label: "Trophy leagues", group: "Leagues", icon: "fa-trophy" },
   { id: "classboard", label: "Class board", group: "Compete", icon: "fa-list-ol" },

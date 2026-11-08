@@ -26,6 +26,7 @@ import {
   formatKnowledgeCheckCell,
 } from "../state/progress";
 import { knowledgeCheckReady } from "../data/knowledgeCheck";
+import { mascotSrc } from "../data/mascot";
 import StreakChip from "../components/StreakChip";
 import TopicInsight from "../components/TopicInsight";
 import TrophyBadge from "../components/TrophyBadge";
@@ -211,7 +212,7 @@ function SectionCard({
           <p className="section-bubble">{blurb}</p>
           <img
             className="section-mascot"
-            src="/mascot.png"
+            src={mascotSrc()}
             alt=""
             aria-hidden="true"
           />

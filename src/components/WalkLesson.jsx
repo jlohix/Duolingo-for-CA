@@ -12,6 +12,7 @@ import {
   XP_CORRECT,
 } from "../state/progress";
 import PracticeStage from "../section3/PracticeStage";
+import StaffSkipNext from "./StaffSkipNext";
 
 function resolvePracticeView(question, lab, practiceView) {
   if (!question || question.hideBoard) return null;
@@ -23,13 +24,18 @@ function resolvePracticeView(question, lab, practiceView) {
   return step?.view || null;
 }
 
-function PracticeView({ title, progressLabel, practice, Schematic, boardHint, practiceView, lab, lastLabel = "See score", onExit, onBack, showBack = false, onDone, onCheck }) {
+function PracticeView({ title, progressLabel, practice, Schematic, boardHint, practiceView, lab, lastLabel = "See score", onExit, onBack, showBack = false, onDone, onCheck, preview = false }) {
   const originalTotal = practice.length;
   const [queue, setQueue] = useState(practice);
   const [index, setIndex] = useState(0);
   const [selected, setSelected] = useState("");
   const [revealed, setRevealed] = useState(false);
   const [ok, setOk] = useState(false);
+  const [answers, setAnswers] = useState({});
+  const answersRef = useRef({});
+  const [advanced, setAdvanced] = useState(() => new Set());
+  const advancedRef = useRef(new Set());
+  const [furthest, setFurthest] = useState(0);
   const [firstPass, setFirstPass] = useState(0);
   const [reviewOpen, setReviewOpen] = useState(false);
   const [reviewCount, setReviewCount] = useState(0);
@@ -42,10 +48,25 @@ function PracticeView({ title, progressLabel, practice, Schematic, boardHint, pr
   const hint =
     question?.boardHint !== undefined ? question.boardHint : boardHint;
 
-  function reset() {
-    setSelected("");
-    setRevealed(false);
-    setOk(false);
+  function remember(fromIndex, sel, rev, wasOk) {
+    const nextAnswers = {
+      ...answersRef.current,
+      [fromIndex]: { selected: sel, revealed: Boolean(rev), ok: Boolean(wasOk) },
+    };
+    answersRef.current = nextAnswers;
+    setAnswers(nextAnswers);
+    return nextAnswers;
+  }
+
+  function showIndex(nextIndex, nextAnswers = answersRef.current) {
+    const saved = nextAnswers[nextIndex];
+    answersRef.current = nextAnswers;
+    setAnswers(nextAnswers);
+    setIndex(nextIndex);
+    if (nextIndex > furthest) setFurthest(nextIndex);
+    setSelected(saved?.selected ?? "");
+    setRevealed(Boolean(saved?.revealed));
+    setOk(Boolean(saved?.ok));
   }
 
   function check() {
@@ -56,27 +77,63 @@ function PracticeView({ title, progressLabel, practice, Schematic, boardHint, pr
     attemptedRef.current.add(checkId);
     setOk(pass);
     setRevealed(true);
+    setAnswers(remember(index, selected, true, pass));
     if (firstTry && pass) setFirstPass((n) => n + 1);
     onCheck?.({ ok: pass, firstTry, id: checkId });
   }
 
+  function goBack() {
+    if (index <= 0) return;
+    if (reviewOpen) setReviewOpen(false);
+    showIndex(index - 1, remember(index, selected, revealed, ok));
+  }
+
+  function goForward() {
+    if (index >= furthest) return;
+    if (reviewOpen) setReviewOpen(false);
+    showIndex(index + 1, remember(index, selected, revealed, ok));
+  }
+
+  function skipAhead() {
+    if (!preview) return;
+    if (index + 1 >= queue.length) {
+      onDone(firstPass, originalTotal);
+      return;
+    }
+    const nextAdvanced = new Set(advancedRef.current).add(index);
+    advancedRef.current = nextAdvanced;
+    setAdvanced(nextAdvanced);
+    showIndex(index + 1, remember(index, selected, revealed, ok));
+  }
+
   function next() {
     if (!revealed) return;
-    const nextQueue = ok ? queue : [...queue, question];
-    if (!ok) setQueue(nextQueue);
+    if (index < furthest) {
+      goForward();
+      return;
+    }
+    const alreadyLeft = advancedRef.current.has(index);
+    const nextQueue = alreadyLeft || ok ? queue : [...queue, question];
+    if (!alreadyLeft && !ok) setQueue(nextQueue);
     if (index + 1 >= nextQueue.length) {
       onDone(firstPass, originalTotal);
       return;
     }
     const enteringReview =
-      index + 1 === originalTotal && nextQueue.length > originalTotal;
-    reset();
+      !alreadyLeft &&
+      index + 1 === originalTotal &&
+      nextQueue.length > originalTotal;
+    const nextAnswers = remember(index, selected, revealed, ok);
+    const nextAdvanced = new Set(advancedRef.current).add(index);
+    advancedRef.current = nextAdvanced;
+    setAdvanced(nextAdvanced);
     if (enteringReview) {
+      setAnswers(nextAnswers);
       setReviewCount(nextQueue.length - originalTotal);
       setReviewOpen(true);
       return;
     }
-    setIndex((n) => n + 1);
+    showIndex(index + 1, nextAnswers);
   }
 
   return (
@@ -113,7 +170,7 @@ function PracticeView({ title, progressLabel, practice, Schematic, boardHint, pr
           count={reviewCount}
           onContinue={() => {
             setReviewOpen(false);
-            setIndex((n) => n + 1);
+            showIndex(index + 1, answersRef.current);
           }}
         />
       ) : (
@@ -132,13 +189,21 @@ function PracticeView({ title, progressLabel, practice, Schematic, boardHint, pr
               selected={selected}
               revealed={revealed}
               ok={ok}
-              onSelect={setSelected}
+              onSelect={(value) => {
+                setSelected(value);
+                remember(index, value, revealed, ok);
+              }}
               onCheck={check}
+              onBack={index > 0 ? goBack : undefined}
+              backLabel="← Previous question"
+              onNext={index < furthest ? goForward : undefined}
+              nextLabel="Next question →"
               willRepeat={willRepeat}
               progressLabel={`${index + 1} of ${queue.length}`}
+              skipControl={preview ? <StaffSkipNext className="qc-next" onClick={skipAhead} /> : null}
               afterReveal={
                 <button type="button" className="primary qc-next" onClick={next}>
-                  {last ? lastLabel : "Next"}
+                  {index < furthest ? "Next question →" : last ? lastLabel : "Next"}
                 </button>
               }
             />
@@ -386,6 +451,7 @@ export default function WalkLesson({
         showBack={Boolean(lab.showBack) || Boolean(onBack)}
         onCheck={payCheck}
         onDone={afterPractice}
+        preview={preview}
       />
     );
   }
@@ -401,6 +467,7 @@ export default function WalkLesson({
       boardHint={lab.boardHint}
       onBack={onBack}
       showBack={Boolean(lab.showBack) || Boolean(onBack)}
+      preview={preview}
       practiceLabel={hasPractice ? "Try a few" : hasDrag ? "Drag values" : "Finish"}
       skipLabel={
         hasPractice

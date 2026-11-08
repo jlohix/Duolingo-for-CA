@@ -539,9 +539,12 @@ export async function uploadAnnouncementImage(file) {
   return `${SUPABASE_URL}/storage/v1/object/public/${ANNOUNCEMENT_BUCKET}/${path}`;
 }
 
-// Active announcements for the current moment (students). Newest first.
-export async function listActiveAnnouncementsRemote() {
-  const data = await rpc("list_active_announcements", {});
+// Active announcements for the current moment, targeted at the student's class.
+// Newest first.
+export async function listActiveAnnouncementsRemote(classId = null) {
+  const data = await rpc("list_active_announcements", {
+    p_class_id: classId || null,
+  });
   return Array.isArray(data) ? data : [];
 }
 
@@ -562,6 +565,8 @@ export async function createAnnouncementRemote({
   frequency,
   createdBy,
   color,
+  audience,
+  classIds,
 }) {
   return rpc("create_announcement", {
     p_title: String(title || ""),
@@ -572,6 +577,8 @@ export async function createAnnouncementRemote({
     p_frequency: frequency === "recurring" ? "recurring" : "once",
     p_created_by: createdBy || null,
     p_color: color || null,
+    p_audience: audience === "classes" ? "classes" : "all",
+    p_class_ids: Array.isArray(classIds) ? classIds : [],
   });
 }
 
@@ -585,6 +592,8 @@ export async function updateAnnouncementRemote({
   frequency,
   active,
   color,
+  audience,
+  classIds,
 }) {
   const data = await rpc("update_announcement", {
     p_id: id,
@@ -596,6 +605,8 @@ export async function updateAnnouncementRemote({
     p_frequency: frequency === "recurring" ? "recurring" : "once",
     p_active: active !== false,
     p_color: color || null,
+    p_audience: audience === "classes" ? "classes" : "all",
+    p_class_ids: Array.isArray(classIds) ? classIds : [],
   });
   return data === true;
 }
@@ -789,4 +800,73 @@ export async function listMyKnowledgeCheckAttempts(email) {
 export async function listKnowledgeCheckAttempts() {
   const data = await rpc("list_knowledge_check_attempts", {});
   return Array.isArray(data) ? data : [];
+}
+
+
+// ---------- Question overrides (admin-edited question content, shared) ----------
+// Overrides are applied on top of the static CSV question bank for every user
+// on every device. See supabase/question_overrides.sql.
+
+export async function listQuestionOverridesRemote() {
+  const data = await rpc("list_question_overrides", {});
+  return Array.isArray(data) ? data : [];
+}
+
+// Save (insert or replace) one question override. `before` is the snapshot of
+// the question as it looked before this edit, used by the Dashboard of Shame.
+export async function upsertQuestionOverrideRemote({
+  questionId,
+  bankId,
+  question,
+  optionA,
+  optionB,
+  optionC,
+  optionD,
+  answer,
+  image,
+  explanation,
+  before,
+  editedBy,
+}) {
+  return rpc("upsert_question_override", {
+    p_question_id: String(questionId || ""),
+    p_bank_id: bankId || null,
+    p_question: question ?? null,
+    p_option_a: optionA ?? null,
+    p_option_b: optionB ?? null,
+    p_option_c: optionC ?? null,
+    p_option_d: optionD ?? null,
+    p_answer: answer || null,
+    p_image: image ?? null,
+    p_explanation: explanation ?? null,
+    p_before_json: before ? before : null,
+    p_edited_by: editedBy || null,
+  });
+}
+
+export async function deleteQuestionOverrideRemote(questionId) {
+  const data = await rpc("delete_question_override", {
+    p_question_id: String(questionId || ""),
+  });
+  return data === true;
+}
+
+
+// ---------- Dashboard of Shame: hidden entries (admin-managed, shared) ----------
+// See supabase/shame_hidden.sql.
+
+export async function listHiddenShameRemote() {
+  const data = await rpc("list_shame_hidden", {});
+  return Array.isArray(data) ? data : [];
+}
+
+// Hide (hidden=true) or show (hidden=false) one Shame entry for all students.
+// Returns the resulting hidden state.
+export async function setShameHiddenRemote(entryId, hidden, hiddenBy) {
+  const data = await rpc("set_shame_hidden", {
+    p_entry_id: String(entryId || ""),
+    p_hidden: hidden === true,
+    p_hidden_by: hiddenBy || null,
+  });
+  return data === true;
 }

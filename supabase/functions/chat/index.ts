@@ -316,11 +316,11 @@ async function generateAnswer(
       "or 'explain this', they mean the question above.\n" +
       "- Read the question, then use the lecture context below to explain the " +
       "concepts and method needed to solve it.\n" +
-      "- This is a LEARNING app: GUIDE the student. Explain the relevant idea " +
-      "and the next step so they can work it out. Do NOT reveal which option " +
-      "is correct or the final numeric answer unless they have clearly already " +
-      "answered it, or they insist after you have given a hint. Prefer a nudge " +
-      "and a checking question over a full solution.\n" +
+      "- This is a LEARNING app: GUIDE the student. Name the law or the next " +
+      "step, then stop. Do NOT quote the worked explanation, do not restate " +
+      "the correct option in other words, and do not give the final number " +
+      "unless they have already answered or they insist after a nudge. Prefer " +
+      "one short hint and a checking question over a full solution.\n" +
       "- If the exact numbers aren't covered by the lecture context, still help " +
       "using the question itself and the general method from the slides. Do NOT " +
       "refuse or say it's 'not in the course material' when a question is on " +

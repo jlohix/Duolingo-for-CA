@@ -14,6 +14,7 @@ import {
   STANDARD_COLORS,
   DEFAULT_ACCENT,
 } from "../data/announcementColors";
+import { CLASS_IDS, classLabel } from "../data/classes";
 
 const EMPTY_FORM = {
   id: null,
@@ -26,6 +27,8 @@ const EMPTY_FORM = {
   endsAt: "",
   frequency: "once",
   color: DEFAULT_ACCENT,
+  audience: "all", // "all" | "classes"
+  classIds: [],
 };
 
 // Format a UTC timestamp as an SGT date-time string for display.
@@ -115,9 +118,24 @@ export default function AnnouncementsAdmin() {
       endsAt: toLocalInput(row.ends_at),
       frequency: row.frequency === "recurring" ? "recurring" : "once",
       color: row.color || DEFAULT_ACCENT,
+      audience: row.audience === "classes" ? "classes" : "all",
+      classIds: Array.isArray(row.class_ids) ? row.class_ids : [],
     });
     setStatus("");
     if (fileRef.current) fileRef.current.value = "";
+  }
+
+  // Toggle a class in the per-class checkbox list.
+  function toggleClass(id) {
+    setForm((f) => {
+      const has = f.classIds.includes(id);
+      return {
+        ...f,
+        classIds: has
+          ? f.classIds.filter((c) => c !== id)
+          : [...f.classIds, id],
+      };
+    });
   }
 
   async function handleImage(e) {
@@ -151,7 +169,14 @@ export default function AnnouncementsAdmin() {
       endsAt: form.openEnded ? "" : form.endsAt,
       frequency: form.frequency,
       color: form.color || DEFAULT_ACCENT,
+      audience: form.audience === "classes" ? "classes" : "all",
+      classIds: form.audience === "classes" ? form.classIds : [],
     };
+    if (payload.audience === "classes" && payload.classIds.length === 0) {
+      setStatus("Pick at least one class, or choose All classes.");
+      setBusy(false);
+      return;
+    }
     try {
       if (form.id) {
         await updateAnnouncementRemote({ ...payload, id: form.id, active: true });
@@ -330,6 +355,52 @@ export default function AnnouncementsAdmin() {
           </div>
         </div>
 
+        <div className="announcement-audience-field">
+          <span className="announcement-color-label">Who sees it</span>
+          <div className="announcement-audience-radios">
+            <label className="announcement-check">
+              <input
+                type="radio"
+                name="audience"
+                checked={form.audience === "all"}
+                onChange={() => set("audience", "all")}
+              />
+              All classes
+            </label>
+            <label className="announcement-check">
+              <input
+                type="radio"
+                name="audience"
+                checked={form.audience === "classes"}
+                onChange={() => set("audience", "classes")}
+              />
+              Specific classes
+            </label>
+          </div>
+          {form.audience === "classes" ? (
+            <div className="announcement-class-grid">
+              {CLASS_IDS.map((id) => {
+                const checked = form.classIds.includes(id);
+                return (
+                  <label
+                    key={id}
+                    className={`announcement-class-check ${checked ? "on" : ""}`}
+                  >
+                    <span className="announcement-class-name">
+                      {classLabel(id)}
+                    </span>
+                    <input
+                      type="checkbox"
+                      checked={checked}
+                      onChange={() => toggleClass(id)}
+                    />
+                  </label>
+                );
+              })}
+            </div>
+          ) : null}
+        </div>
+
         <div className="announcement-form-actions">
           <button type="submit" className="primary" disabled={busy || uploading}>
             {form.id ? "Save changes" : "Create announcement"}
@@ -356,6 +427,7 @@ export default function AnnouncementsAdmin() {
               <th>Status</th>
               <th>Title</th>
               <th>Description</th>
+              <th>Audience</th>
               <th>Shows (SGT)</th>
               <th>Frequency</th>
               <th>Actions</th>
@@ -364,11 +436,11 @@ export default function AnnouncementsAdmin() {
           <tbody>
             {loading ? (
               <tr>
-                <td colSpan={6} className="admin-empty">Loading…</td>
+                <td colSpan={7} className="admin-empty">Loading…</td>
               </tr>
             ) : rows.length === 0 ? (
               <tr>
-                <td colSpan={6} className="admin-empty">No announcements yet.</td>
+                <td colSpan={7} className="admin-empty">No announcements yet.</td>
               </tr>
             ) : (
               rows.map((row) => {
@@ -392,9 +464,19 @@ export default function AnnouncementsAdmin() {
                     </td>
                     <td className="announcement-desc-cell">{row.description || "—"}</td>
                     <td>
-                      {fmtSgt(row.starts_at)}
-                      {" → "}
-                      {row.ends_at ? fmtSgt(row.ends_at) : "open-ended"}
+                      {row.audience === "classes" &&
+                      Array.isArray(row.class_ids) &&
+                      row.class_ids.length
+                        ? row.class_ids.map((c) => classLabel(c)).join(", ")
+                        : "All classes"}
+                    </td>
+                    <td className="announcement-shows-cell">
+                      <span className="announcement-shows-start">
+                        {fmtSgt(row.starts_at)}
+                      </span>
+                      <span className="announcement-shows-end">
+                        → {row.ends_at ? fmtSgt(row.ends_at) : "open-ended"}
+                      </span>
                     </td>
                     <td>{row.frequency === "recurring" ? "Recurring" : "Once"}</td>
                     <td className="announcement-actions">

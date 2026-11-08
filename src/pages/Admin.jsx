@@ -7,6 +7,7 @@ import {
   knowledgeCheckSummary,
   formatKnowledgeCheckCell,
   formatKnowledgeCheckDetail,
+  brainAttemptSummary,
 } from "../state/progress";
 import { KNOWLEDGE_CHECK_TOPIC_IDS } from "../data/knowledgeCheck";
 import {
@@ -252,6 +253,7 @@ export default function Admin({ progress, setProgress, counts, bankCounts = {} }
         </div>
       </div>
       <KnowledgeChecksTable students={students} />
+      <BrainAttemptsTable students={students} />
       <WalkFeedbackTable students={students} />
       <InboxAdmin />
       <AnnouncementsAdmin />
@@ -712,6 +714,25 @@ function WalkFeedbackTable({ students }) {
   );
 }
 
+function AdminFold({ title, summary, children }) {
+  return (
+    <details className="admin-fold">
+      <summary>
+        <span className="profile-fold-copy">
+          <h2>{title}</h2>
+          {summary ? <span className="login-hint">{summary}</span> : null}
+        </span>
+      </summary>
+      <div className="admin-fold-body">{children}</div>
+    </details>
+  );
+}
+
+function foldStudentCount(n) {
+  if (!n) return "No scores yet · tap to open";
+  return `${n} ${n === 1 ? "student" : "students"} · tap to open`;
+}
+
 function KnowledgeChecksTable({ students }) {
   const topics = TOPICS.filter((topic) =>
     KNOWLEDGE_CHECK_TOPIC_IDS.includes(topic.id)
@@ -720,8 +741,7 @@ function KnowledgeChecksTable({ students }) {
     topics.some((topic) => knowledgeCheckSummary(row, topic.id))
   );
   return (
-    <section className="admin-walk-feedback">
-      <h2>Knowledge checks</h2>
+    <AdminFold title="Knowledge checks" summary={foldStudentCount(attempted.length)}>
       <p className="login-hint">
         Five random questions per section. Score is first-try steps as a
         percent of every part (for example 19/24 = 79%). First score is locked
@@ -766,7 +786,64 @@ function KnowledgeChecksTable({ students }) {
           </tbody>
         </table>
       </div>
-    </section>
+    </AdminFold>
+  );
+}
+
+function BrainAttemptsTable({ students }) {
+  const attempted = students.filter((row) => brainAttemptSummary(row));
+  return (
+    <AdminFold
+      title="No Pen, Just Brains"
+      summary={foldStudentCount(attempted.length)}
+    >
+      <p className="login-hint">
+        First marks are locked on the first finish. Later is the best retake.
+      </p>
+      <div className="admin-table-wrap">
+        <table className="admin-table">
+          <thead>
+            <tr>
+              <th>Student</th>
+              <th>First</th>
+              <th>Best later</th>
+              <th>Attempts</th>
+            </tr>
+          </thead>
+          <tbody>
+            {attempted.length ? (
+              attempted.map((row) => {
+                const summary = brainAttemptSummary(row);
+                return (
+                  <tr key={row.username}>
+                    <td>
+                      {row.display}
+                      {row.live ? " · live" : ""}
+                    </td>
+                    <td>
+                      {summary.firstCorrect}/{summary.firstTotal}
+                    </td>
+                    <td>
+                      {summary.laterBest
+                        ? `${summary.laterBest.correct}/${summary.laterBest.total}`
+                        : "—"}
+                    </td>
+                    <td>{1 + (summary.laterCount || 0)}</td>
+                  </tr>
+                );
+              })
+            ) : (
+              <tr>
+                <td colSpan={4}>
+                  No scores yet. Marks show here after a student finishes No
+                  Pen, Just Brains.
+                </td>
+              </tr>
+            )}
+          </tbody>
+        </table>
+      </div>
+    </AdminFold>
   );
 }
 
@@ -796,6 +873,7 @@ function StudentEditor({ student, counts, bankCounts = {}, onSave }) {
     return next;
   });
   const [saved, setSaved] = useState(false);
+  const brain = brainAttemptSummary(student);
 
   const preview = useMemo(
     () =>
@@ -918,6 +996,20 @@ function StudentEditor({ student, counts, bankCounts = {}, onSave }) {
                 </tbody>
               </table>
             </div>
+          </section>
+          <section className="admin-walk-feedback">
+            <h3>No Pen, Just Brains</h3>
+            <p className="login-hint">
+              {brain
+                ? `First ${brain.firstCorrect}/${brain.firstTotal}${
+                    brain.laterBest
+                      ? ` · best later ${brain.laterBest.correct}/${brain.laterBest.total}`
+                      : " · no retake yet"
+                  } · ${1 + (brain.laterCount || 0)} ${
+                    1 + (brain.laterCount || 0) === 1 ? "attempt" : "attempts"
+                  }`
+                : "Not attempted yet."}
+            </p>
           </section>
         </div>
       ) : (

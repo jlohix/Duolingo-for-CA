@@ -4,7 +4,13 @@ import { TOPICS } from "../data/topics";
 import {
   questionsForKnowledgeCheck,
   KNOWLEDGE_CHECK_SIZE,
+  knowledgeCheckKey,
 } from "../data/knowledgeCheck";
+import {
+  loadQuizResume,
+  clearQuizResume,
+  usePersistQuiz,
+} from "../state/quizResume";
 import {
   recordKnowledgeCheck,
   knowledgeCheckSummary,
@@ -15,12 +21,14 @@ import { logKnowledgeCheckAttempt } from "../state/knowledgeCheckAttempts";
 import { useQuizQueue } from "../hooks/useQuizQueue";
 import QuestionCard from "../components/QuestionCard";
 import FeedbackBanner from "../components/FeedbackBanner";
+import QuizPartBack from "../components/QuizPartBack";
 import CloseWarning from "../components/CloseWarning";
 import ThemeSwitch from "../components/ThemeSwitch";
 import HintControl from "../components/HintControl";
 import StreakChip from "../components/StreakChip";
+import StaffSkipNext from "../components/StaffSkipNext";
 
-function familyStatsFromQueue(questions) {
+function familyStatsFromQueue(questions, savedRows) {
   const map = new Map();
   for (const question of questions) {
     const id = String(question.questionFamilyId || question.id);
@@ -30,6 +38,20 @@ function familyStatsFromQueue(questions) {
       total: Math.max(1, Number(question.stepCount) || 1),
       correct: 0,
     });
+  }
+  if (Array.isArray(savedRows)) {
+    for (const row of savedRows) {
+      const id = String(row?.id || "");
+      const cur = map.get(id);
+      if (!cur) continue;
+      map.set(id, {
+        ...cur,
+        correct: Math.max(
+          0,
+          Math.min(cur.total, Math.round(Number(row.correct) || 0))
+        ),
+      });
+    }
   }
   return map;
 }
@@ -43,23 +65,44 @@ export default function KnowledgeCheck({
   onExit,
   onFinished,
 }) {
+  const runKey = knowledgeCheckKey(topicId);
+  const [saved] = useState(() => loadQuizResume(runKey));
+  const resumed = Boolean(saved?.queue?.length);
   const [initial] = useState(() =>
-    questionsForKnowledgeCheck(allQuestions, topicId, KNOWLEDGE_CHECK_SIZE)
+    saved?.queue?.length
+      ? saved.queue
+      : questionsForKnowledgeCheck(allQuestions, topicId, KNOWLEDGE_CHECK_SIZE)
   );
   const familyTotal = useMemo(
     () =>
-      new Set(
-        initial.map((question) => question.questionFamilyId || question.id)
-      ).size,
-    [initial]
+      Number(saved?.familyTotal) > 0
+        ? Number(saved.familyTotal)
+        : new Set(
+            initial.map((question) => question.questionFamilyId || question.id)
+          ).size,
+    [initial, saved]
   );
   const quiz = useQuizQueue(initial, 0, {
     recycleMissed: false,
     requireCorrectWithinFamily: true,
     familyTotal,
+    resume: saved,
   });
-  const familyStats = useRef(familyStatsFromQueue(initial));
+  const familyStats = useRef(familyStatsFromQueue(initial, saved?.familyStats));
+  const stoppedRef = useRef(false);
   const [leaveOpen, setLeaveOpen] = useState(false);
+
+  usePersistQuiz(
+    runKey,
+    () => ({
+      ...quiz.getResumeState(),
+      familyStats: [...familyStats.current.entries()].map(([id, row]) => ({
+        id,
+        ...row,
+      })),
+    }),
+    stoppedRef
+  );
   const topic = TOPICS.find((row) => row.id === topicId);
   const prior = knowledgeCheckSummary(progress, topicId);
 
@@ -72,6 +115,8 @@ export default function KnowledgeCheck({
       questionStats.reduce((sum, row) => sum + row.total, 0) ||
       familyTotal ||
       quiz.originalTotal;
+    stoppedRef.current = true;
+    clearQuizResume(runKey);
     const grew = !preview && wouldExtendStreak(progress);
     const streakFrom = visibleStreak(progress);
     let next = progress;
@@ -147,6 +192,9 @@ export default function KnowledgeCheck({
         {metaBits.join(" · ")}
         {preview ? " · staff preview · not saved" : " · no XP"}
       </p>
+      {resumed ? (
+        <p className="login-hint">Picking up where you left off.</p>
+      ) : null}
       <QuestionCard
         question={q}
         selected={quiz.selected}
@@ -156,24 +204,47 @@ export default function KnowledgeCheck({
       {!quiz.revealed ? (
         <div className="quiz-actions">
           <HintControl question={q} />
-          <button
-            type="button"
-            className="primary check"
-            disabled={!quiz.selected}
-            onClick={() =>
-              quiz.check(({ ok, firstTry, question }) => {
-                if (!ok || !firstTry) return;
-                const familyId = String(
-                  question.questionFamilyId || question.id
-                );
-                const row = familyStats.current.get(familyId);
-                if (!row || row.correct >= row.total) return;
-                row.correct += 1;
-              })
-            }
-          >
-            Check
-          </button>
+          <div className="quiz-actions-row">
+            {quiz.canGoBack ? (
+              <QuizPartBack onBack={quiz.goBack} label={quiz.backLabel} />
+            ) : null}
+            {quiz.canGoForward ? (
+              <button
+                type="button"
+                className="primary"
+                onClick={quiz.goForward}
+              >
+                {quiz.nextLabel}
+              </button>
+            ) : null}
+            <button
+              type="button"
+              className="primary check"
+              disabled={!quiz.selected}
+              onClick={() =>
+                quiz.check(({ ok, firstTry, question }) => {
+                  if (!ok || !firstTry) return;
+                  const familyId = String(
+                    question.questionFamilyId || question.id
+                  );
+                  const row = familyStats.current.get(familyId);
+                  if (!row || row.correct >= row.total) return;
+                  row.correct += 1;
+                })
+              }
+            >
+              Check
+            </button>
+            {preview ? (
+              <StaffSkipNext
+                onClick={() => {
+                  if (!preview) return;
+                  const { done } = quiz.skipAhead();
+                  if (done) finish();
+                }}
+              />
+            ) : null}
+          </div>
         </div>
       ) : (
         <FeedbackBanner
@@ -181,9 +252,13 @@ export default function KnowledgeCheck({
           explanation={q.explanation || q.why || ""}
           willRepeat={false}
           onContinue={() => {
-            const { done } = quiz.goNext();
+            const { done } = preview ? quiz.skipAhead() : quiz.goNext();
             if (done) finish();
           }}
+          onBack={quiz.canGoBack ? quiz.goBack : undefined}
+          backLabel={quiz.backLabel}
+          onNext={quiz.canGoForward ? quiz.goForward : undefined}
+          nextLabel={quiz.nextLabel}
         />
       )}
       <CloseWarning

@@ -1,3 +1,5 @@
+import { mascotSrc } from "./mascot";
+
 // Default avatar shown for any user who has not uploaded their own.
 //
 // To MASS-CHANGE the default for everyone (e.g. right before deployment):
@@ -12,7 +14,7 @@ export const DEFAULT_AVATAR = "/mascot.png";
 // Resolve which avatar to show: the user's uploaded one, or the default.
 export function avatarSrc(url) {
   const clean = String(url || "").trim();
-  return clean || DEFAULT_AVATAR;
+  return clean || mascotSrc();
 }
 
 // True when the user has no uploaded avatar (i.e. we're showing the default).

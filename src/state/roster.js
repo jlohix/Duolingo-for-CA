@@ -1,4 +1,9 @@
-import { todayKey, visibleStreak, parseKnowledgeChecks } from "./progress";
+import {
+  todayKey,
+  visibleStreak,
+  parseKnowledgeChecks,
+  parseBrainAttempts,
+} from "./progress";
 import { DEFAULT_CLASS, normalizeClassId } from "../data/classes";
 import { loadRemoteStudents, normalizeRemoteStudent } from "./remoteRoster";
 
@@ -99,6 +104,7 @@ export function addStudent(display, classId = DEFAULT_CLASS) {
     streak: 0,
     topicStats: {},
     knowledgeChecks: {},
+    brainAttempts: null,
     completed: [],
   };
   store.extras.push(student);
@@ -122,6 +128,10 @@ function cloneKnowledgeChecks(raw) {
   return parseKnowledgeChecks(raw);
 }
 
+function cloneBrainAttempts(raw) {
+  return parseBrainAttempts(raw);
+}
+
 function applyOverlay(base, overlay) {
   if (!overlay) {
     return {
@@ -129,6 +139,7 @@ function applyOverlay(base, overlay) {
       classId: normalizeClassId(base.classId),
       topicStats: cloneStats(base.topicStats),
       knowledgeChecks: cloneKnowledgeChecks(base.knowledgeChecks),
+      brainAttempts: cloneBrainAttempts(base.brainAttempts),
       completed: Array.isArray(base.completed) ? [...base.completed] : [],
     };
   }
@@ -146,6 +157,9 @@ function applyOverlay(base, overlay) {
     knowledgeChecks: overlay.knowledgeChecks
       ? cloneKnowledgeChecks(overlay.knowledgeChecks)
       : cloneKnowledgeChecks(base.knowledgeChecks),
+    brainAttempts: overlay.brainAttempts
+      ? cloneBrainAttempts(overlay.brainAttempts)
+      : cloneBrainAttempts(base.brainAttempts),
     completed: Array.isArray(overlay.completed)
       ? overlay.completed
       : Array.isArray(base.completed)
@@ -169,6 +183,7 @@ export function listStudents(liveProgress, options = {}) {
     streak: visibleStreak(liveProgress),
     topicStats: cloneStats(liveProgress.topicStats),
     knowledgeChecks: cloneKnowledgeChecks(liveProgress.knowledgeChecks),
+    brainAttempts: cloneBrainAttempts(liveProgress.brainAttempts),
     completed: liveProgress.completed || [],
     walkFeedback: liveProgress.walkFeedback || {},
     avatarUrl: String(liveProgress.avatarUrl || "").trim(),
@@ -189,6 +204,7 @@ export function listStudents(liveProgress, options = {}) {
             streak: Number(row.streak) || 0,
             topicStats: row.topicStats || {},
             knowledgeChecks: row.knowledgeChecks || {},
+            brainAttempts: row.brainAttempts || null,
             completed: Array.isArray(row.completed) ? row.completed : [],
           },
           store.overlays[row.username]
@@ -235,6 +251,7 @@ export function studentToProgress(student) {
     unlockedBySkip: [],
     topicStats: cloneStats(student.topicStats),
     knowledgeChecks: cloneKnowledgeChecks(student.knowledgeChecks),
+    brainAttempts: cloneBrainAttempts(student.brainAttempts),
   };
 }
 

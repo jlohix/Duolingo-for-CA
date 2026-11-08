@@ -58,6 +58,7 @@ function emptyState() {
     avatarUrl: "",
     walkFeedback: {},
     knowledgeChecks: {},
+    brainAttempts: null,
   };
 }
 
@@ -312,6 +313,12 @@ function normalizeProgressData(data) {
         data.topicStats?.__kc ||
         data.topic_stats?.__kc
     ),
+    brainAttempts: parseBrainAttempts(
+      data.brainAttempts ||
+        data.brain_attempts ||
+        data.topicStats?.__brain ||
+        data.topic_stats?.__brain
+    ),
   };
 }
 
@@ -361,6 +368,10 @@ export function progressToRemotePayload(state) {
   if (Object.keys(knowledgeChecks).length) {
     topicStats.__kc = knowledgeChecks;
   }
+  const brainAttempts = parseBrainAttempts(state.brainAttempts);
+  if (brainAttempts) {
+    topicStats.__brain = brainAttempts;
+  }
   return {
     classId: normalizeClassId(state.classId),
     classChosen: Boolean(state.classChosen),
@@ -373,6 +384,7 @@ export function progressToRemotePayload(state) {
       : [],
     topicStats,
     knowledgeChecks,
+    brainAttempts,
     leagueIndex: Number.isFinite(Number(state.leagueIndex))
       ? Number(state.leagueIndex)
       : 0,
@@ -403,6 +415,11 @@ export function remotePayloadToProgress(data) {
       data.knowledge_checks ||
       data.topicStats?.__kc ||
       data.topic_stats?.__kc,
+    brainAttempts:
+      data.brainAttempts ||
+      data.brain_attempts ||
+      data.topicStats?.__brain ||
+      data.topic_stats?.__brain,
   });
 }
 
@@ -462,6 +479,96 @@ export function recordKnowledgeCheck(
   return next;
 }
 
+function parseBrainReport(raw) {
+  if (!Array.isArray(raw)) return [];
+  return raw
+    .map((row) => {
+      const name = String(row?.name || "").trim();
+      const total = Math.max(0, Number(row?.total) || 0);
+      if (!name || !total) return null;
+      const correct = Math.max(0, Number(row?.correct) || 0);
+      const pct = Number.isFinite(Number(row?.pct))
+        ? Math.max(0, Math.round(Number(row.pct)))
+        : Math.round((100 * correct) / total);
+      return { name, correct, total, pct };
+    })
+    .filter(Boolean);
+}
+
+function parseBrainAttempt(row) {
+  const total = Number(row?.total) || 0;
+  if (!total) return null;
+  return {
+    correct: Math.max(0, Number(row?.correct) || 0),
+    total,
+    at: String(row?.at || ""),
+    report: parseBrainReport(row?.report),
+  };
+}
+
+export function parseBrainAttempts(raw) {
+  if (!raw || typeof raw !== "object" || Array.isArray(raw)) return null;
+  const later = (Array.isArray(raw.later) ? raw.later : [])
+    .map(parseBrainAttempt)
+    .filter(Boolean)
+    .slice(-40);
+  const firstTotal = Number(raw.firstTotal) || 0;
+  if (!firstTotal && !later.length) return null;
+  return {
+    firstCorrect: Math.max(0, Number(raw.firstCorrect) || 0),
+    firstTotal,
+    firstAt: String(raw.firstAt || ""),
+    firstReport: parseBrainReport(raw.firstReport),
+    later,
+  };
+}
+
+export function recordBrainAttempt(state, correct, total, report = []) {
+  const scored = Math.max(0, Number(correct) || 0);
+  const outOf = Math.max(0, Number(total) || 0);
+  if (!outOf) return state;
+  const attempt = {
+    correct: scored,
+    total: outOf,
+    at: new Date().toISOString(),
+    report: parseBrainReport(report),
+  };
+  const prev = parseBrainAttempts(state.brainAttempts);
+  let brainAttempts;
+  if (!prev || !prev.firstTotal) {
+    brainAttempts = {
+      firstCorrect: attempt.correct,
+      firstTotal: attempt.total,
+      firstAt: attempt.at,
+      firstReport: attempt.report,
+      later: [],
+    };
+  } else {
+    brainAttempts = {
+      ...prev,
+      later: [...(prev.later || []), attempt].slice(-40),
+    };
+  }
+  const next = { ...state, brainAttempts };
+  saveProgress(next);
+  return next;
+}
+
+export function brainAttemptSummary(progress) {
+  const row = parseBrainAttempts(progress?.brainAttempts);
+  if (!row || !row.firstTotal) return null;
+  const later = Array.isArray(row.later) ? row.later : [];
+  return {
+    firstCorrect: row.firstCorrect,
+    firstTotal: row.firstTotal,
+    firstAt: row.firstAt,
+    firstReport: row.firstReport || [],
+    later,
+    laterCount: later.length,
+    laterBest: bestLaterAttempt(later),
+  };
+}
+
 export function recordFirstTry(state, topicId, ok) {
   if (!topicId) return state;
   const key = String(topicId);
@@ -503,19 +610,20 @@ export function topicInsight(progress, topicId) {
   }
   const pct = Math.round((correct / attempts) * 100);
   const score = { pct, correct, attempts };
+  const firstAttempt = `${correct}/${attempts} questions correct on first attempt`;
   if (attempts < LABEL_AFTER) {
     return {
       kind: "starting",
       label: "Getting started",
-      detail: `${correct}/${attempts} first try (${pct}%)`,
+      detail: firstAttempt,
       ...score,
     };
   }
   if (pct >= STRENGTH_PCT) {
     return {
       kind: "strength",
-      label: "Strength",
-      detail: `${correct}/${attempts} first try (${pct}%)`,
+      label: "Strong",
+      detail: firstAttempt,
       ...score,
     };
   }
@@ -523,7 +631,7 @@ export function topicInsight(progress, topicId) {
     return {
       kind: "solid",
       label: "Solid",
-      detail: `${correct}/${attempts} first try (${pct}%)`,
+      detail: firstAttempt,
       ...score,
     };
   }
@@ -531,14 +639,14 @@ export function topicInsight(progress, topicId) {
     return {
       kind: "developing",
       label: "Needs work",
-      detail: `${correct}/${attempts} first try (${pct}%)`,
+      detail: firstAttempt,
       ...score,
     };
   }
   return {
     kind: "weakness",
     label: "Weakness",
-    detail: `${correct}/${attempts} first try (${pct}%)`,
+    detail: firstAttempt,
     ...score,
   };
 }

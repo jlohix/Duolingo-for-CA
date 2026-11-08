@@ -241,6 +241,12 @@ button {
   border-radius: 14px;
   padding: 12px 14px;
   color: inherit;
+  cursor: pointer;
+}
+.inbox-item a {
+  color: var(--green-dark);
+  text-decoration: underline;
+  overflow-wrap: anywhere;
 }
 
 .inbox-item.unread {
@@ -1088,6 +1094,122 @@ html[data-theme="dark"] [data-tier="obsidian"] { color: #9aa3af; --tier: #9aa3af
   font-size: 1.1rem;
 }
 
+.profile-fold {
+  padding: 0;
+}
+
+.profile-fold > summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 16px;
+  cursor: pointer;
+  list-style: none;
+}
+
+.profile-fold > summary::-webkit-details-marker,
+.profile-fold > summary::marker {
+  display: none;
+  content: "";
+}
+
+.profile-fold-copy {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+
+.profile-fold-title {
+  font-size: 1.1rem;
+  font-weight: 800;
+  color: var(--ink);
+}
+
+.profile-fold > summary::after {
+  content: "Show";
+  flex: 0 0 auto;
+  font-size: 0.85rem;
+  font-weight: 800;
+  color: var(--green-dark);
+}
+
+.profile-fold[open] > summary::after {
+  content: "Hide";
+}
+
+.profile-fold[open] > summary {
+  border-bottom: 1px solid var(--line);
+  margin-bottom: 4px;
+}
+
+.profile-fold > summary:focus-visible {
+  outline: 2px solid var(--green);
+  outline-offset: -4px;
+  border-radius: 18px;
+}
+
+.profile-fold-body {
+  padding: 0 16px 16px;
+}
+
+.admin-fold {
+  margin: 16px 0;
+  background: var(--card);
+  border: 2px solid var(--line);
+  border-radius: 16px;
+}
+
+.admin-fold > summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 16px;
+  cursor: pointer;
+  list-style: none;
+}
+
+.admin-fold > summary::-webkit-details-marker,
+.admin-fold > summary::marker {
+  display: none;
+  content: "";
+}
+
+.admin-fold h2 {
+  margin: 0;
+}
+
+.admin-fold > summary::after {
+  content: "Show";
+  flex: 0 0 auto;
+  font-size: 0.85rem;
+  font-weight: 800;
+  color: var(--green-dark);
+}
+
+.admin-fold[open] > summary::after {
+  content: "Hide";
+}
+
+.admin-fold[open] > summary {
+  border-bottom: 1px solid var(--line);
+}
+
+.admin-fold > summary:focus-visible {
+  outline: 2px solid var(--green);
+  outline-offset: -4px;
+  border-radius: 14px;
+}
+
+.admin-fold-body {
+  padding: 4px 16px 16px;
+}
+
+.admin-fold-body .admin-table-wrap {
+  margin: 8px 0 0;
+}
+
 .hex-stats {
   margin: 0;
 }
@@ -1286,6 +1408,19 @@ html[data-theme="dark"] .hex-spoke {
 }
 .kcheck-improve-gain {
   background: var(--green);
+}
+
+.brain-dash {
+  display: grid;
+  gap: 12px;
+}
+
+.brain-dash .kcheck-score-pair {
+  margin-top: 4px;
+}
+
+.brain-dash .brain-card {
+  margin: 0;
 }
 
 .topbar,
@@ -2496,6 +2631,67 @@ h2 {
   margin-top: 10px;
 }
 
+.quiz-actions-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.quiz-actions-row .primary,
+.quiz-actions-row .staff-next {
+  margin-top: 0;
+  flex: 1;
+  min-width: 7.5rem;
+}
+
+.quiz-part-back {
+  font-weight: 800;
+  padding: 12px 16px;
+  border-radius: 14px;
+  flex: 0 0 auto;
+}
+
+.feedback-nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+  justify-content: flex-end;
+  width: 100%;
+  flex: 0 0 auto;
+  margin-top: 0;
+}
+
+.feedback-nav .quiz-part-back {
+  margin-right: auto;
+}
+
+.feedback-nav .primary {
+  width: auto;
+  margin: 0;
+  white-space: nowrap;
+  flex: 0 0 auto;
+}
+
+button.staff-next {
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  border-radius: 14px;
+  padding: 14px 16px;
+  border: 2px solid var(--line);
+  background: var(--card);
+  color: var(--ink);
+}
+
+.qc-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
 .hint-btn {
   border: 2px solid var(--line);
   border-radius: 14px;
@@ -2533,15 +2729,23 @@ h2 {
   border-radius: 16px;
   padding: 16px;
   display: flex;
-  flex-wrap: wrap;
+  flex-direction: column;
+  align-items: stretch;
   gap: 12px;
-  align-items: flex-start;
-  justify-content: space-between;
 }
 
-.feedback > div {
+.feedback-body {
   min-width: 0;
-  flex: 1 1 12rem;
+  width: 100%;
+}
+
+.feedback-why,
+.feedback .fit-katex,
+.feedback .math-text {
+  display: block;
+  max-width: 100%;
+  min-width: 0;
+  overflow-wrap: anywhere;
 }
 
 .feedback .katex,
@@ -2550,16 +2754,17 @@ h2 {
 }
 
 .feedback .katex-display {
-  overflow-x: auto;
+  overflow: hidden;
 }
 
 .quiz-mascot {
-  width: min(168px, 46vw);
-  aspect-ratio: 1;
+  width: min(220px, 56vw);
+  height: min(220px, 56vw);
+  min-width: 160px;
+  min-height: 160px;
   margin: 0 0 10px;
-  border-radius: 16px;
-  overflow: hidden;
-  background: #111;
+  background: transparent;
+  flex: 0 0 auto;
 }
 
 .quiz-mascot img {
@@ -2569,7 +2774,61 @@ h2 {
   display: block;
   user-select: none;
   pointer-events: none;
+  background: transparent;
 }
+
+.confetti-layer {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.confetti-piece {
+  position: absolute;
+  top: -16px;
+  display: block;
+  animation-name: confetti-fall;
+  animation-timing-function: cubic-bezier(0.22, 0.61, 0.36, 1);
+  animation-fill-mode: forwards;
+  will-change: transform, opacity;
+}
+
+.confetti-dot {
+  border-radius: 50%;
+}
+
+.confetti-strip {
+  border-radius: 2px;
+}
+
+.confetti-shard {
+  clip-path: polygon(50% 0, 100% 100%, 0 100%);
+}
+
+@keyframes confetti-fall {
+  0% {
+    transform: translate3d(0, var(--confetti-start, -8vh), 0) rotate(0deg);
+    opacity: 1;
+  }
+  88% {
+    opacity: 1;
+  }
+  100% {
+    transform: translate3d(var(--confetti-drift), 112vh, 0)
+      rotate(var(--confetti-spin));
+    opacity: 0.15;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .confetti-layer {
+    display: none;
+  }
+}
+
+
 
 .feedback.ok {
   background: var(--ok-bg);
@@ -2581,7 +2840,7 @@ h2 {
 
 .feedback .primary {
   width: auto;
-  margin: 0 0 0 auto;
+  margin: 0;
   white-space: nowrap;
   flex: 0 0 auto;
 }
@@ -2722,7 +2981,7 @@ h2 {
   height: auto;
   display: block;
   margin: 0 auto 6px;
-  border-radius: 18px;
+  background: transparent;
 }
 
 .brain-card.brain-sunwoo {
@@ -2900,6 +3159,55 @@ h2 {
 
 .kcheck-card.has-try {
   border-color: color-mix(in srgb, var(--green) 35%, var(--line));
+}
+
+.kcheck-card.kcheck-fold {
+  padding: 0;
+  gap: 0;
+}
+
+.kcheck-card.kcheck-fold > summary {
+  list-style: none;
+  cursor: pointer;
+  padding: 12px;
+  align-items: center;
+}
+
+.kcheck-card.kcheck-fold > summary::-webkit-details-marker,
+.kcheck-card.kcheck-fold > summary::marker {
+  display: none;
+  content: "";
+}
+
+.kcheck-card.kcheck-fold > summary::after {
+  content: "";
+  width: 0.45em;
+  height: 0.45em;
+  border-right: 2px solid var(--muted);
+  border-bottom: 2px solid var(--muted);
+  transform: rotate(45deg);
+  margin-left: 8px;
+  flex: 0 0 auto;
+  transition: transform 0.15s ease;
+}
+
+.kcheck-card.kcheck-fold[open] > summary::after {
+  transform: rotate(225deg);
+}
+
+.kcheck-card.kcheck-fold[open] > summary {
+  border-bottom: 1px solid var(--line);
+}
+
+.kcheck-card.kcheck-fold > .kcheck-score-pair,
+.kcheck-card.kcheck-fold > .login-hint {
+  padding: 12px;
+}
+
+.kcheck-card.kcheck-fold > summary:focus-visible {
+  outline: 2px solid var(--green);
+  outline-offset: -4px;
+  border-radius: 14px;
 }
 
 .kcheck-card.empty {
@@ -4309,6 +4617,20 @@ html[data-theme="dark"] .circuit-svg .board-step {
   margin: 0;
   display: grid;
   gap: 4px;
+  min-width: 0;
+}
+
+.qc-feedback .fit-katex,
+.qc-feedback .math-text {
+  display: block;
+  max-width: 100%;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.qc-feedback .katex-display {
+  max-width: 100%;
+  overflow: hidden;
 }
 
 .qc-result {
@@ -5545,6 +5867,11 @@ html[data-theme="dark"] .circuit-svg .board-step {
   border-radius: 10px;
   margin: 8px 0;
 }
+.announcement-desc a {
+  color: var(--green-dark);
+  text-decoration: underline;
+  overflow-wrap: anywhere;
+}
 .announcement-desc {
   margin: 0;
   font-size: 14px;
@@ -5634,15 +5961,108 @@ html[data-theme="dark"] .circuit-svg .board-step {
   vertical-align: middle;
   border: 1px solid var(--line);
 }
+/* Audience (class targeting) control */
+.announcement-audience-field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.announcement-audience-radios {
+  display: flex;
+  gap: 18px;
+  flex-wrap: wrap;
+}
+.announcement-class-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(104px, 1fr));
+  gap: 8px;
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  max-height: 220px;
+  overflow-y: auto;
+}
+/* Each class: name on the left, checkbox on the right, in a tidy chip that
+   highlights when selected. */
+.announcement-class-check {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  padding: 7px 10px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--card);
+  cursor: pointer;
+}
+.announcement-class-check:hover {
+  border-color: var(--green);
+}
+.announcement-class-check.on {
+  border-color: var(--green);
+  background: var(--ok-bg);
+}
+.announcement-class-name {
+  white-space: nowrap;
+}
+.announcement-class-check input {
+  width: auto;
+  margin: 0;
+  flex: none;
+}
+/* Auto layout: the nowrap columns (status/shows/frequency/actions) size to
+   their content and stay on one line, while the free-text columns wrap via
+   their max-widths below. */
+.announcements-table {
+  table-layout: auto;
+  width: 100%;
+}
+.announcements-table th,
+.announcements-table td {
+  vertical-align: top;
+}
+/* Wrapping columns: Title, Description, Audience, Shows. */
+.announcements-table td:nth-child(2),
+.announcements-table td:nth-child(3),
+.announcements-table td:nth-child(4),
+.announcements-table td:nth-child(5) {
+  white-space: normal;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+/* Status and Frequency are single words — never wrap them. */
+.announcements-table th:nth-child(1),
+.announcements-table td:nth-child(1),
+.announcements-table th:nth-child(6),
+.announcements-table td:nth-child(6) {
+  white-space: nowrap;
+}
+/* Cap the wrapping columns so none balloons and pushes the others around. */
+.announcements-table td:nth-child(2) { max-width: 180px; }  /* Title */
+.announcements-table td:nth-child(3) { max-width: 320px; }  /* Description */
+.announcements-table td:nth-child(4) { max-width: 90px; }   /* Audience (usually "All classes") */
+.announcements-table td:nth-child(5) { max-width: 120px; }  /* Shows (start / end on 2 lines) */
 .announcement-desc-cell {
-  max-width: 260px;
   white-space: normal;
   overflow-wrap: anywhere;
 }
+/* Shows window: start on one line, "-> end" on the next. */
+.announcement-shows-cell {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.35;
+}
 .announcement-actions {
   display: flex;
+  flex-direction: column;
+  align-items: stretch;
   gap: 6px;
-  flex-wrap: wrap;
+}
+.announcement-actions .admin-name-btn {
+  white-space: nowrap;
+  text-align: center;
 }
 .admin-name-btn.danger {
   color: var(--red, #ff4b4b);
@@ -5795,4 +6215,235 @@ html[data-theme="dark"] .circuit-svg .board-step {
   color: var(--ink);
   opacity: 0.65;
   pointer-events: none;
+}
+
+/* Dashboard of Shame — question change history */
+.dos-filters {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.dos-filters label {
+  display: grid;
+  gap: 4px;
+  font-size: 0.8rem;
+  color: var(--muted);
+}
+
+.dos-filters select {
+  border: 2px solid var(--line);
+  border-radius: 12px;
+  padding: 8px 10px;
+  background: var(--card);
+  color: var(--ink);
+  font: inherit;
+}
+
+.dos-count {
+  margin: 0 0 4px;
+  font-weight: 700;
+  color: var(--muted);
+}
+
+.dos-item {
+  display: grid;
+  gap: 10px;
+}
+
+.dos-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.dos-badge {
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 3px 9px;
+  border-radius: 999px;
+  border: 1.5px solid var(--line);
+  color: var(--ink);
+  background: var(--card);
+}
+
+.dos-badge-question {
+  background: var(--ok-bg);
+  border-color: var(--green);
+}
+
+.dos-badge-options {
+  background: var(--letter-bg);
+}
+
+.dos-badge-answer {
+  background: var(--bad-bg);
+  border-color: var(--red);
+}
+
+.dos-badge-image {
+  background: var(--done-bg);
+}
+
+.dos-question {
+  display: block;
+  margin: 0 0 8px;
+  font-weight: 650;
+}
+
+.dos-spoiler-overlay {
+  z-index: 80;
+  place-items: center;
+}
+
+.dos-change {
+  border-top: 1.5px dashed var(--line);
+  padding-top: 10px;
+}
+
+.dos-field {
+  margin: 0 0 6px;
+}
+
+.dos-ba {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+@media (max-width: 560px) {
+  .dos-ba {
+    grid-template-columns: 1fr;
+  }
+}
+
+.dos-col {
+  display: grid;
+  gap: 6px;
+  align-content: start;
+  border: 2px solid var(--line);
+  border-radius: 14px;
+  padding: 10px;
+  background: var(--bg);
+}
+
+.dos-before {
+  border-color: var(--red);
+  background: var(--bad-bg);
+}
+
+.dos-after {
+  border-color: var(--green);
+  background: var(--ok-bg);
+}
+
+.dos-tag {
+  font-size: 0.7rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--muted);
+}
+
+.dos-code {
+  display: block;
+  white-space: pre-wrap;
+  word-break: break-word;
+  font-size: 0.85rem;
+  color: var(--ink);
+  background: transparent;
+}
+
+.dos-empty {
+  color: var(--muted);
+  font-style: italic;
+}
+
+.dos-img {
+  max-width: 100%;
+  border-radius: 10px;
+  border: 1px solid var(--line);
+  background: #fff;
+}
+
+/* Question editor (admin) */
+.qed-pickers {
+  display: grid;
+  gap: 12px;
+}
+
+.qed-pickers label,
+.qed-form label {
+  display: grid;
+  gap: 4px;
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+
+.qed-pickers select,
+.qed-form input,
+.qed-form textarea,
+.qed-form select {
+  border: 2px solid var(--line);
+  border-radius: 12px;
+  padding: 8px 10px;
+  background: var(--card);
+  color: var(--ink);
+  font: inherit;
+}
+
+.qed-form {
+  display: grid;
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.qed-flag {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--red);
+}
+
+.qed-preview {
+  max-width: 100%;
+  border-radius: 10px;
+  border: 1px solid var(--line);
+  background: #fff;
+  justify-self: start;
+}
+
+.qed-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.qed-ok {
+  color: var(--green-dark, var(--green));
+  font-weight: 600;
+  margin: 0;
+}
+
+.qed-err {
+  color: var(--red);
+  font-weight: 600;
+  margin: 0;
+}
+
+/* Dashboard of Shame — admin hide/show */
+.dos-hide-btn {
+  font-size: 0.78rem;
+  padding: 4px 10px;
+  white-space: nowrap;
+}
+
+.dos-hidden {
+  opacity: 0.55;
+}
+
+.dos-hidden-tag {
+  color: var(--red);
+  font-weight: 600;
 }

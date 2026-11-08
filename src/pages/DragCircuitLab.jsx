@@ -7,6 +7,7 @@ import MaxPowerSchematic from "../components/MaxPowerSchematic";
 import DependentSchematic from "../components/DependentSchematic";
 import LabTeach from "../components/LabTeach";
 import MathText from "../components/MathText";
+import ConfettiBurst from "../components/ConfettiBurst";
 import ThemeSwitch from "../components/ThemeSwitch";
 import {
   XP_CORRECT,
@@ -209,6 +210,7 @@ export default function DragCircuitLab({
         onBack={onBack}
         showBack={showBack}
         onPractice={() => setStage("lab")}
+        preview={preview}
         onCheck={(outcome) =>
           payGuidedCheck(setProgress, {
             preview,
@@ -249,6 +251,7 @@ export default function DragCircuitLab({
       onPointerUp={endDrag}
       onPointerCancel={endDrag}
     >
+      {revealed && ok ? <ConfettiBurst burstKey={index} /> : null}
       {showBack ? (
         <div className="lesson-close-row">
           <button type="button" className="ghost" onClick={onExit}>

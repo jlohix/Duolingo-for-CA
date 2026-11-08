@@ -5,6 +5,7 @@ import {
   QUESTION_BANKS,
   questionBankForId,
 } from "./questionBanks";
+import { listQuestionOverridesRemote } from "../supabaseClient";
 
 const LETTERS = ["a", "b", "c", "d"];
 
@@ -232,6 +233,58 @@ async function loadQuestionBank(bank) {
   }));
 }
 
+// Normalise a stored override answer ('optionA'..'optionD' or 'a'..'d') to a
+// single lower-case letter matching the app's question.answer shape.
+function overrideAnswerLetter(value) {
+  const raw = clean(value).toLowerCase();
+  const m = raw.match(/^option([a-d])$/);
+  if (m) return m[1];
+  if (LETTERS.includes(raw)) return raw;
+  return "";
+}
+
+// Apply shared admin overrides on top of the loaded CSV questions. Each
+// override is keyed by the composite question id (e.g. 'opamp-202-2'). Only
+// the fields the admin actually set (non-null) replace the CSV values.
+function applyOverrides(questions, overrides) {
+  if (!overrides?.length) return questions;
+  const byId = new Map();
+  for (const o of overrides) {
+    if (o && o.question_id) byId.set(o.question_id, o);
+  }
+  if (!byId.size) return questions;
+
+  return questions.map((q) => {
+    const o = byId.get(q.id);
+    if (!o) return q;
+
+    const options = { ...q.options };
+    if (o.option_a != null) options.a = dressLatex(o.option_a);
+    if (o.option_b != null) options.b = dressLatex(o.option_b);
+    if (o.option_c != null) options.c = dressLatex(o.option_c);
+    if (o.option_d != null) options.d = dressLatex(o.option_d);
+
+    const answer = o.answer != null ? overrideAnswerLetter(o.answer) : "";
+    const bank = questionBankForId(q.bankId);
+
+    return {
+      ...q,
+      question: o.question != null ? dressLatex(o.question) : q.question,
+      options,
+      answer: answer || q.answer,
+      image:
+        o.image != null
+          ? bank
+            ? resolveBankImage(o.image, bank)
+            : normalizeImage(o.image)
+          : q.image,
+      explanation:
+        o.explanation != null ? dressLatex(o.explanation) : q.explanation,
+      overridden: true,
+    };
+  });
+}
+
 export async function loadQuestions() {
   const res = await fetch("/QuestionBank.csv");
   if (!res.ok) {
@@ -239,7 +292,17 @@ export async function loadQuestions() {
   }
   const text = await res.text();
   const banks = await Promise.all(QUESTION_BANKS.map(loadQuestionBank));
-  return [...parseQuestionRows(text), ...banks.flat()];
+  const all = [...parseQuestionRows(text), ...banks.flat()];
+
+  // Overlay shared admin edits. Failure here must not break question loading —
+  // if Supabase is unreachable, students simply see the original CSV content.
+  let overrides = [];
+  try {
+    overrides = await listQuestionOverridesRemote();
+  } catch {
+    overrides = [];
+  }
+  return applyOverrides(all, overrides);
 }
 
 export const PAST_YEAR_QUESTIONS = parseQuestionRows(pastYearCsv, {

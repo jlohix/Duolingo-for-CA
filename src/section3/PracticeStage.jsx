@@ -1,5 +1,6 @@
 import { useMemo, useRef, useState } from "react";
 import ThemeSwitch from "../components/ThemeSwitch";
+import StaffSkipNext from "../components/StaffSkipNext";
 import SchematicPractice from "./SchematicPractice";
 
 function groupOrder(questions) {
@@ -52,6 +53,18 @@ export default function PracticeStage({
   function retry() {
     setRevealed(false);
     setOk(false);
+  }
+
+  function skipAhead() {
+    if (!preview) return;
+    if (last) {
+      onDone(firstPass, questions.length);
+      return;
+    }
+    setSelected("");
+    setRevealed(false);
+    setOk(false);
+    setIndex((value) => value + 1);
   }
 
   function next() {
@@ -120,9 +133,14 @@ export default function PracticeStage({
           onCheck={check}
           onRetry={retry}
         />
+        {!revealed && preview ? (
+          <div className="practice-continue">
+            <StaffSkipNext onClick={skipAhead} />
+          </div>
+        ) : null}
         {revealed ? (
           <div className="practice-continue">
-            <button type="button" className="primary" onClick={next}>
+            <button type="button" className="primary" onClick={preview ? skipAhead : next}>
               {last
                 ? "Finish test"
                 : endsGroup

@@ -2,6 +2,8 @@ import { useRef, useState } from "react";
 import MathText from "./MathText";
 import ThemeSwitch from "./ThemeSwitch";
 import { InlineKnowledgeCheck } from "./QuickCheck";
+import StaffSkipNext from "./StaffSkipNext";
+import { isAdmin, loadSession } from "../state/auth";
 
 function asItems(value) {
   if (value == null || value === "") return [];
@@ -56,6 +58,7 @@ export default function LabTeach({
   onCheck,
   onBack,
   showBack = false,
+  preview = false,
 }) {
   const [index, setIndex] = useState(0);
   const [selected, setSelected] = useState("");
@@ -65,7 +68,8 @@ export default function LabTeach({
   const step = steps[index];
   const last = index >= steps.length - 1;
   const needsCheck = Boolean(step.check);
-  const canAdvance = !needsCheck || (revealed && ok);
+  const staffPreview = Boolean(preview) && isAdmin(loadSession());
+  const canAdvance = staffPreview || !needsCheck || (revealed && ok);
 
   function resetCheck() {
     setSelected("");
@@ -176,6 +180,11 @@ export default function LabTeach({
             onCheck={check}
             onRetry={resetCheck}
             progressLabel={checkTotal > 1 ? `${checkNumber} of ${checkTotal}` : undefined}
+            skipControl={
+              staffPreview ? (
+                <StaffSkipNext className="qc-next" onClick={next} />
+              ) : null
+            }
           />
         ) : null}
         <div className="opamp-nav">

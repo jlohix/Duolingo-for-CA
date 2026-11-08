@@ -1,4 +1,5 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
+import ConfettiBurst from "./ConfettiBurst";
 
 const PACKS = {
   happy: {
@@ -43,42 +44,42 @@ function preload(frames) {
 
 export default function QuizMascot({ mood, playKey }) {
   const pack = PACKS[mood];
-  const [src, setSrc] = useState(pack?.frames[0] || "");
-  const cancelRef = useRef(0);
+  const frames = pack?.frames || [];
+  const [src, setSrc] = useState(frames[0] || "");
+  const [burst, setBurst] = useState(0);
 
   useEffect(() => {
-    if (pack) preload(pack.frames);
-  }, [pack]);
+    if (frames.length) preload(frames);
+  }, [frames]);
 
   useEffect(() => {
-    if (!pack) return undefined;
-    const token = cancelRef.current + 1;
-    cancelRef.current = token;
-    setSrc(pack.frames[0]);
+    if (mood === "happy") setBurst((n) => n + 1);
+  }, [mood, playKey]);
 
-    let cancelled = false;
-    (async () => {
-      while (!cancelled && cancelRef.current === token) {
-        for (let i = 0; i < pack.frames.length; i += 1) {
-          if (cancelled || cancelRef.current !== token) return;
-          setSrc(pack.frames[i]);
-          await new Promise((resolve) => {
-            setTimeout(resolve, pack.times[i]);
-          });
-        }
-      }
-    })();
-
-    return () => {
-      cancelled = true;
+  useEffect(() => {
+    if (!frames.length) return undefined;
+    let i = 0;
+    let timer = 0;
+    const tick = () => {
+      setSrc(frames[i]);
+      const delay = pack.times[i] || 120;
+      i = (i + 1) % frames.length;
+      timer = window.setTimeout(tick, delay);
     };
-  }, [mood, playKey, pack]);
+    tick();
+    return () => window.clearTimeout(timer);
+  }, [mood, playKey, pack, frames]);
 
-  if (!pack) return null;
+  if (!pack || !src) return null;
 
   return (
-    <div className={`quiz-mascot quiz-mascot-${mood}`}>
-      <img src={src} alt={pack.alt} />
-    </div>
+    <>
+      {mood === "happy" && burst > 0 ? (
+        <ConfettiBurst burstKey={burst} />
+      ) : null}
+      <div className={`quiz-mascot quiz-mascot-${mood}`}>
+        <img src={src} alt={pack.alt} />
+      </div>
+    </>
   );
 }

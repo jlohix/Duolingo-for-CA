@@ -285,38 +285,31 @@ export function QrlSimpleBoard() {
 }
 
 export function QrlSwitchBoard() {
-  const top = 108;
+  const top = 112;
   const bot = 214;
   return (
-    <Frame label="Switch opens at t = 0, charged L dumps into R">
+    <Frame label="After switching, the source is removed and L discharges through R">
       <text x={280} y={28} textAnchor="middle" className="board-title">
-        t &gt; 0 · switch has opened
+        t &gt; 0 · source-free R-L discharge
+      </text>
+      <text x={280} y={66} textAnchor="middle" className="circuit-part">
+        source disconnected at t = 0
       </text>
       <Wires>
-        <path d={`M48 ${bot} V${top} H56`} />
-        <Battery x={56} y={top} />
-        <path d={`M128 ${top} H148`} />
-        <OpenGap x={148} y={top} />
-        <path d={`M222 ${top} H248`} />
-        <Inductor x={248} y={top} />
-        <path d={`M368 ${top} H500 V${bot} H360`} />
+        <path d={`M76 ${bot} V${top} H148`} />
+        <Inductor x={148} y={top} />
+        <path d={`M268 ${top} H484 V${bot} H360`} />
         <Resistor x={248} y={bot} />
-        <path d={`M248 ${bot} H48`} />
+        <path d={`M248 ${bot} H76`} />
       </Wires>
-      <text x={92} y={top + 48} textAnchor="middle" className="circuit-part">
-        24 V
+      <text x={208} y={top - 22} textAnchor="middle" className="circuit-part">
+        i_L(0⁻) = 6 A  →
       </text>
-      <text x={185} y={top - 22} textAnchor="middle" className="circuit-part">
-        t = 0
-      </text>
-      <text x={308} y={top + 48} textAnchor="middle" className="circuit-part">
-        4 H
-      </text>
-      <text x={308} y={top - 22} textAnchor="middle" className="circuit-part">
-        i(0⁻) = 6 A
+      <text x={208} y={top + 48} textAnchor="middle" className="circuit-part">
+        L
       </text>
       <text x={304} y={bot + 40} textAnchor="middle" className="circuit-part">
-        8 kΩ
+        R
       </text>
     </Frame>
   );

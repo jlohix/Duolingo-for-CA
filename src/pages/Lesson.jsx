@@ -8,21 +8,28 @@ import {
 import { brainSectionReport } from "../data/brainVerdict";
 import { DIFFICULTIES, TOPICS, lessonKey } from "../data/topics";
 import { bankLessonKey, questionBankForId } from "../data/questionBanks";
-import { addXp, completeLesson, visibleStreak, wouldExtendStreak, xpForCorrect, xpForLessonBonus, recordFirstTry } from "../state/progress";
+import { addXp, completeLesson, recordBrainAttempt, visibleStreak, wouldExtendStreak, xpForCorrect, xpForLessonBonus, recordFirstTry } from "../state/progress";
 import { useQuizQueue } from "../hooks/useQuizQueue";
 import QuestionCard from "../components/QuestionCard";
 import ReviewGate from "../components/ReviewGate";
 import { setCurrentQuestion } from "../data/currentQuestion";
 import StreakChip from "../components/StreakChip";
 import FeedbackBanner from "../components/FeedbackBanner";
+import QuizPartBack from "../components/QuizPartBack";
 import CloseWarning from "../components/CloseWarning";
 import ThemeSwitch from "../components/ThemeSwitch";
 import HintControl from "../components/HintControl";
 import LessonWarmup from "../components/LessonWarmup";
+import StaffSkipNext from "../components/StaffSkipNext";
 import {
   startModuleAttempt,
   finishModuleAttempt,
 } from "../state/moduleAttempts";
+import {
+  loadQuizResume,
+  clearQuizResume,
+  usePersistQuiz,
+} from "../state/quizResume";
 
 export default function Lesson({
   allQuestions,
@@ -50,32 +57,38 @@ export default function Lesson({
   const xpDiff = paperMode ? 2 : difficulty;
   const xpEach = preview || alreadyDone ? 0 : xpForCorrect(xpDiff);
   const xpBonus = preview || alreadyDone ? 0 : xpForLessonBonus(xpDiff);
+  const [saved] = useState(() => loadQuizResume(key));
+  const resumed = Boolean(saved?.queue?.length);
 
   const initial = useMemo(
     () =>
-      paperMode
+      saved?.queue?.length
+        ? saved.queue
+        : paperMode
         ? (pack.familyId || pack.questions?.[0]?.questionFamilyId
             ? pack.questions
             : shuffle(pack.questions))
         : bankMode
           ? questionsForBank(allQuestions, bankId, difficulty)
         : questionsForLesson(allQuestions, topicId, difficulty),
-    [allQuestions, topicId, difficulty, paperMode, bankMode, bankId, pack]
+    [allQuestions, topicId, difficulty, paperMode, bankMode, bankId, pack, saved]
   );
   const familyTotal = useMemo(() => {
+    if (Number(saved?.familyTotal) > 0) return Number(saved.familyTotal);
     if (!bankMode) return initial.length;
     return new Set(
       initial.map((q) => q.questionFamilyId || q.id).filter(Boolean)
     ).size;
-  }, [bankMode, initial]);
+  }, [bankMode, initial, saved]);
   const quiz = useQuizQueue(initial, xpEach, {
     requireCorrectWithinFamily: bankMode,
     familyTotal,
+    resume: saved,
   });
   const [leaveOpen, setLeaveOpen] = useState(false);
   const [leaveTo, setLeaveTo] = useState("exit");
   const [stage, setStage] = useState(
-    paperMode || bankMode ? "quiz" : "teach"
+    resumed || paperMode || bankMode ? "quiz" : "teach"
   );
 
   // ---- Module attempt analytics (question banks only) ----------------
@@ -84,17 +97,34 @@ export default function Lesson({
   // lessons, past papers, and staff previews are not tracked. Best-effort:
   // the helper swallows failures and never affects the quiz.
   const attemptRef = useRef(null);
+  const stoppedRef = useRef(false);
   useEffect(() => {
-    if (preview || !bankMode || !bankId || stage !== "quiz") return;
+    if (!bankMode || !bankId || stage !== "quiz") return;
+    if (attemptRef.current) return;
+    if (saved?.attemptHandle) {
+      attemptRef.current = saved.attemptHandle;
+      return;
+    }
+    if (preview) return;
     attemptRef.current = startModuleAttempt({
       moduleId: bankId,
       difficulty,
       classId: progress?.classId || "",
       questionCount: familyTotal,
     });
-    // A new attempt is intentionally created whenever the module (re)starts.
+    // A new attempt is intentionally created whenever the module (re)starts,
+    // unless this is a resume of an unfinished run.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [preview, bankMode, bankId, difficulty, stage]);
+
+  usePersistQuiz(
+    key,
+    () => ({
+      ...quiz.getResumeState(),
+      attemptHandle: attemptRef.current,
+    }),
+    stoppedRef
+  );
 
   // Publish the active question so the floating tutor can use it as context.
   // Only while actually answering (stage === "quiz"); cleared on unmount and
@@ -140,6 +170,8 @@ export default function Lesson({
     const report = bankMeta?.singleSet
       ? brainSectionReport(initial, quiz.firstPassIds)
       : undefined;
+    stoppedRef.current = true;
+    clearQuizResume(key);
     if (preview) {
       onFinished({
         status: "complete",
@@ -169,6 +201,14 @@ export default function Lesson({
     let next = progress;
     setProgress((p) => {
       next = completeLesson(p, key, xpBonus);
+      if (bankMeta?.singleSet) {
+        next = recordBrainAttempt(
+          next,
+          quiz.firstPassCorrect,
+          familyTotal,
+          report
+        );
+      }
       return next;
     });
     onFinished({
@@ -187,8 +227,14 @@ export default function Lesson({
     });
   }
 
+  function skipPart() {
+    if (!preview) return;
+    const { done } = quiz.skipAhead();
+    if (done) finish();
+  }
+
   function continueLesson() {
-    const { done } = quiz.goNext();
+    const { done } = preview ? quiz.skipAhead() : quiz.goNext();
     if (done) finish();
   }
 
@@ -270,6 +316,9 @@ export default function Lesson({
         {metaBits.join(" · ")}
         {preview ? " · staff preview · no XP" : xpEach ? ` · +${xpEach} XP` : " · practice"}
       </p>
+      {resumed ? (
+        <p className="login-hint">Picking up where you left off.</p>
+      ) : null}
       {bankMeta?.singleSet && topic?.tagline ? (
         <p className="lesson-slogan">{topic.tagline}</p>
       ) : null}
@@ -291,25 +340,40 @@ export default function Lesson({
           {!quiz.revealed ? (
             <div className="quiz-actions">
               <HintControl question={quiz.question} />
-              <button
-                type="button"
-                className="primary check"
-                disabled={!quiz.selected}
-                onClick={() =>
-                  quiz.check(({ ok, firstTry, awardXp, question }) => {
-                    if (preview) return;
-                    setProgress((p) => {
-                      let next = p;
-                      if (awardXp && xpEach) next = addXp(next, xpEach);
-                      if (firstTry && !paperMode && question.topicId)
-                        next = recordFirstTry(next, question.topicId, ok);
-                      return next;
-                    });
-                  })
-                }
-              >
-                Check
-              </button>
+              <div className="quiz-actions-row">
+                {quiz.canGoBack ? (
+                  <QuizPartBack onBack={quiz.goBack} label={quiz.backLabel} />
+                ) : null}
+                {quiz.canGoForward ? (
+                  <button
+                    type="button"
+                    className="primary"
+                    onClick={quiz.goForward}
+                  >
+                    {quiz.nextLabel}
+                  </button>
+                ) : null}
+                <button
+                  type="button"
+                  className="primary check"
+                  disabled={!quiz.selected}
+                  onClick={() =>
+                    quiz.check(({ ok, firstTry, awardXp, question }) => {
+                      if (preview) return;
+                      setProgress((p) => {
+                        let next = p;
+                        if (awardXp && xpEach) next = addXp(next, xpEach);
+                        if (firstTry && !paperMode && question.topicId)
+                          next = recordFirstTry(next, question.topicId, ok);
+                        return next;
+                      });
+                    })
+                  }
+                >
+                  Check
+                </button>
+                {preview ? <StaffSkipNext onClick={skipPart} /> : null}
+              </div>
             </div>
           ) : (
             <FeedbackBanner
@@ -321,6 +385,10 @@ export default function Lesson({
                 quiz.index < quiz.originalTotal
               }
               onContinue={continueLesson}
+              onBack={quiz.canGoBack ? quiz.goBack : undefined}
+              backLabel={quiz.backLabel}
+              onNext={quiz.canGoForward ? quiz.goForward : undefined}
+              nextLabel={quiz.nextLabel}
             />
           )}
         </>
