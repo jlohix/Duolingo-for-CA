@@ -871,6 +871,7 @@ function AppBody({ onGateChange }) {
         <LessonView
           key={`${secWalk.section}-${secWalk.id}`}
           labId={secWalk.id}
+          allQuestions={questions}
           progress={progress}
           setProgress={setProgress}
           preview={preview}
@@ -969,10 +970,12 @@ function AppBody({ onGateChange }) {
         preview={isAdmin(session)}
         onExit={() => {
           setKcheckTopic(null);
+          setHomeSection(null);
           setScreen("home");
         }}
         onFinished={(result) => {
           setKcheckTopic(null);
+          setHomeSection(null);
           setSummary(result);
           setScreen("results");
         }}
