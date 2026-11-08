@@ -1,0 +1,48 @@
+name: Regenerate question change history
+
+# Runs whenever a CSV question file is pushed to faizah.
+# Regenerates src/data/questionChanges.generated.js and commits
+# it back to the branch so the Dashboard of Shame stays current.
+
+on:
+  push:
+    branches:
+      - faizah
+    paths:
+      - "public/question-bank/csv/**"
+
+jobs:
+  regenerate:
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: write   # needed to push the updated generated file back
+
+    steps:
+      - name: Checkout (full history)
+        uses: actions/checkout@v4
+        with:
+          # The gen script walks git log, so it needs the full history,
+          # not just the latest commit (fetch-depth: 0).
+          fetch-depth: 0
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Regenerate question change history
+        run: npm run gen:changes
+
+      - name: Commit updated file (if changed)
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add src/data/questionChanges.generated.js
+          # Only commit if the file actually changed.
+          git diff --cached --quiet || git commit -m "chore: regenerate question change history [skip ci]"
+          git push
